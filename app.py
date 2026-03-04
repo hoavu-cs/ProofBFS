@@ -49,10 +49,12 @@ Try not to repeat statements that have already been approved in previous rounds.
 Do not add markdown formatting."""
 
 GOAL_CHECK_SYSTEM = """\
-You are a mathematical proof verifier. Given a set of established statements and a goal, determine whether the goal has been fully proven by the established statements.
+You are a goal checker. Your only job is to check whether the goal appears as one of the established statements (verbatim or clearly equivalent).
+Do NOT attempt to prove the goal yourself. Do NOT reason about whether it could be derived.
+Simply check: is the goal already an established statement?
 Respond with exactly one of:
-  PROVEN: <brief explanation of how the established statements prove the goal>
-  NOT YET: <what is still missing>
+  PROVEN: <which statement matches the goal>
+  NOT YET
 Do not add markdown formatting."""
 
 # System prompt for the Checker: instructs it to approve or flag issues
@@ -63,6 +65,11 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
 3. If the proof is unclear, just ask for clarification. Do not try to solve it yourself.
 Respond with exactly one of:
   APPROVED: <brief justification>
+  statement:
+  <restate the statement cleanly>
+  proof:
+  <restate the proof cleanly, improving clarity if possible>
+
   FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
   CLARIFICATION NEEDED: <what is unclear and where>
 Do not add markdown formatting."""
@@ -109,6 +116,17 @@ def parse_statement(text: str) -> str | None:
     return text[s_start + len("statement:"):p_start].strip()
 
 
+def parse_proof(text: str) -> str | None:
+    # Text is formatted as "statement:\n<stmt>\nproof:\n<proof>"
+    # Use rfind to pick the LAST statement/proof block in case the Proposer self-corrects mid-response
+    lower = text.lower()
+    s_start = lower.rfind("statement:")
+    p_start = lower.rfind("proof:")
+    if s_start == -1 or p_start == -1 or p_start < s_start:
+        return None
+    return text[p_start + len("proof:"):].strip()
+
+
 def load_statements(chat_id: str) -> tuple[list[str], str | None]:
     path = OUTPUTS_DIR / f"statements_{chat_id}.txt"
     if not path.exists():
@@ -122,41 +140,55 @@ def load_statements(chat_id: str) -> tuple[list[str], str | None]:
             continue
         if line.lower().startswith("goal:"):
             goal = line[len("goal:"):].strip()
+        elif line.lower().startswith("proof:"):
+            pass  # skip proof lines; they are stored for reference but not fed as facts
         else:
             facts.append(re.sub(r"^\d+\.\s*", "", line))
     return facts, goal
 
 
-def append_statements(chat_id: str, new_statements: list[str]) -> None:
+def append_statements(chat_id: str, new_statements: list[tuple[str, str]]) -> None:
     path = OUTPUTS_DIR / f"statements_{chat_id}.txt"
-    existing = [l for l in path.read_text().splitlines() if l.strip()]
-    next_num = len(existing) + 1
+    # Count only statement lines (not proof lines or blank lines) for numbering
+    existing_count = sum(
+        1 for l in path.read_text().splitlines()
+        if l.strip() and not l.strip().lower().startswith("proof:") and not l.strip().lower().startswith("goal:")
+    )
     with open(path, "a") as f:
-        for i, s in enumerate(new_statements, start=next_num):
-            f.write(f"\n{i}. {s}\n")
+        for i, (s, proof) in enumerate(new_statements, start=existing_count + 1):
+            f.write(f"\n{i}. {s}\nProof: {proof}\n")
 
 
 def append_log(chat_id: str, entries: list[str]) -> None:
     path = OUTPUTS_DIR / f"log_{chat_id}.txt"
     with open(path, "a") as f:
-        f.write(f"\n=== Run {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n\n")
         for entry in entries:
             f.write(entry + "\n")
 
 
-def log_print(msg: str, label: str = "") -> None:
-    """Print to console (with Rich markup) and append plain text to log."""
-    print(msg)
-    plain = re.sub(r"\[.*?\]", "", msg).strip()  # strip Rich tags for the log file
-    log.append((label + " " + plain).strip() if label else plain)
+def fact_print(facts: list[str]) -> None:
+    print("Current statements:")
+    for idx, f in enumerate(facts, start=1):
+        print(f"[bold cyan]{idx}. {f}[/bold cyan]")
+    print()
 
 
 def run(chat_id: str) -> None:
     facts, goal = load_statements(chat_id)  # all known facts, grows as statements are approved
-    initial_count = len(facts)              # baseline to identify newly derived statements this run
 
     log: list[str] = []                   # collects all agent exchanges for log_id.txt
+    log_offset = 0                         # index up to which log entries have been flushed
 
+    def log_print(msg: str, label: str = "") -> None:
+        """Print to console (with Rich markup) and append plain text to log."""
+        print(msg)
+        plain = re.sub(r"\[.*?\]", "", msg).strip()  # strip Rich tags for the log file
+        log.append((label + " " + plain).strip() if label else plain)
+
+    # Write run header to log file once
+    log_path = OUTPUTS_DIR / f"log_{chat_id}.txt"
+    with open(log_path, "a") as f:
+        f.write(f"\n=== Run {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n\n")
 
     print(f"\n[bold]=== Chat: {chat_id} | Round starting ===\n[/bold]")
     if goal:
@@ -174,7 +206,7 @@ def run(chat_id: str) -> None:
     def check_goal(facts: list[str]) -> bool:
         """Ask the Checker whether the accumulated facts are sufficient to prove the goal."""
         context = "Established statements:\n" + "\n".join(f"- {s}" for s in facts)
-        prompt = f"{context}\n\nGoal: {goal}\n\nHas the goal been proven by the established statements?"
+        prompt = f"{context}\n\nGoal: {goal}\n\nWas the goal reached?"
         result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": prompt}], deepseek_client, DEEPSEEK_REASONER)
         log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n", "[Goal check]")
         return result.upper().startswith("PROVEN")
@@ -197,14 +229,15 @@ def run(chat_id: str) -> None:
         log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n", "[Checker]")
 
         if verdict.upper().startswith("APPROVED"):
-            if s := parse_statement(claim):
-                facts.append(s)
-                new_statements.append(s)
+            statement = parse_statement(verdict)
+            proof = parse_proof(verdict)
+            if statement and proof:
+                facts.append(statement)
+                new_statements.append((statement, proof))
             stmt_history.append({"role": "user", "content": "Your statement was approved."})
             stmt_history.append({"role": "assistant", "content": "Understood."})
             if goal and check_goal(facts):
                 goal_proven = True
-                break
         else:
             # Proposer revises based on the Checker's feedback
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
@@ -219,34 +252,37 @@ def run(chat_id: str) -> None:
             log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n", "[Checker]")
 
             if verdict.upper().startswith("APPROVED"):
-                if s := parse_statement(claim):
-                    facts.append(s)
-                    new_statements.append(s)
+                statement = parse_statement(verdict)
+                proof = parse_proof(verdict)
+                if statement and proof:
+                    facts.append(statement)
+                    new_statements.append((statement, proof))
                 stmt_history.append({"role": "user", "content": "Your revised statement was approved."})
                 stmt_history.append({"role": "assistant", "content": "Understood."})
                 if goal and check_goal(facts):
                     goal_proven = True
-                    break
             else:
                 # Inform the proposer that even the revision was rejected, so it can do better next round
                 stmt_history.append({"role": "user", "content": f"Your revised statement was also rejected: {verdict}. Keep this in mind for the next round."})
                 stmt_history.append({"role": "assistant", "content": "Understood."})
 
+        # Flush new log entries and any newly approved statements after each round
+        if new_statements:
+            append_statements(chat_id, new_statements)
+            new_statements.clear()
+        append_log(chat_id, log[log_offset:])
+        log_offset = len(log)
+
+        # Print out current statements after each round
+        fact_print(facts)
+
+        if goal_proven:
+            break
 
     # Summary
     if goal_proven:
         print(f"\n[bold green]=== Goal proven! ===[/bold green]")
-    print(f"\n[bold red]=== Derived this run ({len(new_statements)} new) ===[/bold red]")
-    for s in new_statements:
-        print(f"[bold cyan]  {s}[/bold cyan]")
-
-    # Persist new statements and log
-    if new_statements:
-        append_statements(chat_id, new_statements)
-    append_log(chat_id, log)
-
-    print(f"\n[dim]Appended {len(new_statements)} statement(s) to outputs/statements_{chat_id}.txt[/dim]")
-    print(f"[dim]Log saved to outputs/log_{chat_id}.txt[/dim]")
+    print(f"\n[dim]Statements and log saved to outputs/{chat_id}[/dim]")
 
 
 if __name__ == "__main__":
