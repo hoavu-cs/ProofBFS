@@ -29,22 +29,23 @@ class Fact:
     statement: str
     type: str = "fact"      # "fact" | "assumption" | "goal"
     proof: str | None = None
+    comment: str | None = None
 
 
 STATEMENT_AGENT_SYSTEM = """\
 You are a mathematical reasoning agent. Given a set of established statements:
-1. Derive **one** new **interesting** mathematical statement or theorem, possibly using the established statements as premises or inspiration.
-2. **Do not try to derive statements that are too far** away from the existing ones.
-3. Also provide a concise proof.
-4. **Do not** think for too long.
-5. Format your response exactly as:
+0. First check if the ultimate goal can be derived from the established statements. 
+If it is possible, derive the statement and the proof. 
+1. Otherwise, derive **one** new **interesting** mathematical statement or theorem, possibly using the established statements as premises or inspiration.
+2. Also provide a concise proof.
+3. **Do not** think for too long.
+4. Format your response exactly as:
 statement:
 <statement>
 proof:
 <proof>
 If you receive feedback from the checker, revise your statement in the same format.
 Try not to repeat statements that have already been approved in previous rounds.
-Use LaTeX for all mathematical notation (e.g. $x \\geq 0$). Do not use Unicode symbols (≥, ∈, →, etc.).
 Do not add markdown formatting."""
 
 GOAL_CHECK_SYSTEM = """\
@@ -54,7 +55,7 @@ Simply check: is the goal already an established statement?
 Respond with exactly one of:
   PROVEN: <which statement matches the goal>
   NOT YET
-Use LaTeX for all mathematical notation. Do not add markdown formatting."""
+"""
 
 CHECKER_AGENT_SYSTEM = """\
 You are a mathematical proof checker. For each statement-proof pair, verify:
@@ -70,7 +71,6 @@ Respond with exactly one of:
 
   FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
   CLARIFICATION NEEDED: <what is unclear and where>
-Use LaTeX for all mathematical notation (e.g. $x \\geq 0$). Do not use Unicode symbols (≥, ∈, →, etc.).
 Do not add markdown formatting."""
 
 
@@ -125,7 +125,7 @@ def load_statements(chat_id: str) -> tuple[list[Fact], str | None]:
         if entry["type"] == "goal":
             goal = entry["statement"]
         else:
-            facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof")))
+            facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
     return facts, goal
 
 
@@ -133,7 +133,10 @@ def save_facts(chat_id: str, new_facts: list[Fact]) -> None:
     path = OUTPUTS_DIR / f"statements_{chat_id}.json"
     data: list[dict] = json.loads(path.read_text())
     for fact in new_facts:
-        data.append({"type": fact.type, "statement": fact.statement, "proof": fact.proof})
+        entry = {"type": fact.type, "statement": fact.statement, "proof": fact.proof}
+        if fact.comment:
+            entry["comment"] = fact.comment
+        data.append(entry)
     path.write_text(json.dumps(data, indent=2))
 
 
@@ -148,6 +151,8 @@ def print_facts(facts: list[Fact]) -> None:
     print("Current statements:")
     for idx, fact in enumerate(facts, start=1):
         print(f"[bold cyan]{idx}. {fact.statement}[/bold cyan]")
+        if fact.comment:
+            print(f"Comment: {fact.comment}")
     print()
 
 
@@ -191,6 +196,7 @@ def run(chat_id: str) -> None:
 
     def handle_approved(verdict: str, claim: str, approval_msg: str) -> bool:
         fact = parse_statement_proof(verdict) or parse_statement_proof(claim)
+        fact.comment = "Derived"
         if fact:
             facts.append(fact)
             new_facts.append(fact)
@@ -231,7 +237,6 @@ def run(chat_id: str) -> None:
             new_facts.clear()
         append_log(chat_id, log[log_offset:])
         log_offset = len(log)
-
         print_facts(facts)
 
         if goal_proven:
