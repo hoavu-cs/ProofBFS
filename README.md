@@ -22,22 +22,35 @@ DEEPSEEK_API_KEY=your_key_here
 Create a JSON file describing your problem. Each entry has a `type` of `"fact"`, `"definition"`, or `"goal"`:
 
 ```json
+
 [
   {
     "type": "definition",
-    "statement": "Let G be a finite group of order n",
-    "comment": "Optional annotation"
+    "statement": "a, b, c are positive real numbers",
+    "comment": "Domain"
   },
   {
     "type": "fact",
-    "statement": "Every element g in G satisfies g^n = e",
-    "comment": "Lagrange's theorem"
+    "statement": "Cauchy-Schwarz inequality (Engel/Titu form): for positive reals x_i, y_i, sum(x_i^2 / y_i) >= (sum x_i)^2 / (sum y_i)",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "AM-GM inequality: for positive reals x, y, x + y >= 2*sqrt(x*y), equivalently sqrt(x*y) <= (x+y)/2",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz in the form: (sum_i u_i * v_i)^2 <= (sum_i u_i^2)(sum_i v_i^2)",
+    "comment": "Standard Cauchy-Schwarz"
   },
   {
     "type": "goal",
-    "statement": "G is cyclic if and only if it has an element of order n"
+    "statement": "Prove that a^2/sqrt(3a^2 + 8b^2 + 14ab) + b^2/sqrt(3b^2 + 8c^2 + 14bc) + c^2/sqrt(3c^2 + 8a^2 + 14ca) >= (a+b+c)/5 for all positive reals a, b, c",
+    "comment": "VNU entrance exam 2009-2010"
   }
 ]
+
 ```
 
 ## Running
@@ -73,7 +86,7 @@ Each round:
 4. Approved statements are added to the fact pool for subsequent rounds
 5. After each approval, a goal checker verifies whether the goal has been reached
 
-Both agents can run Python code for numerical verification using: `numpy`, `scipy`, `sympy`, `mpmath`, `z3-solver`.
+Both agents can run Python code for arithmetic, symbolic algebra, and sat solvers: `numpy`, `scipy`, `sympy`, `mpmath`, `z3-solver`.
 
 ## Key parameters
 
