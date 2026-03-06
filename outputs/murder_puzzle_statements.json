@@ -1,0 +1,128 @@
+[
+  {
+    "type": "definition",
+    "statement": "S = {p, s, g, m}",
+    "comment": "Set of suspects"
+  },
+  {
+    "type": "definition",
+    "statement": "W = {k, r, c}",
+    "comment": "Set of weapons"
+  },
+  {
+    "type": "definition",
+    "statement": "L = {b, d, h}",
+    "comment": "Set of locations"
+  },
+  {
+    "type": "definition",
+    "statement": "M(x, y, z): suspect x did the murder in location y with weapon z",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "L(x, y): suspect x was in location y during the murder",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "T(x, y): suspect x testified they were in location y during the murder",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "O(x, z): suspect x owns weapon z",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "Q(x): suspect x told the truth",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y : [(\u2203x' \u2203z' : M(x', y, z')) \u2227 L(x, y)] \u2192 [\u2203z' : M(x, y, z')]",
+    "comment": "Assumption 1"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y \u2200y' : y = y' \u2228 \u00acL(x, y) \u2228 \u00acL(x, y')",
+    "comment": "Assumption 2"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y : Q(x) \u2192 [T(x, y) \u2192 L(x, y)]",
+    "comment": "Assumption 3"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200y : [\u2203x \u2203z : M(x, y, z)] \u2192 [\u2200x \u2200x' : x = x' \u2228 \u00acL(x, y) \u2228 \u00acL(x', y)]",
+    "comment": "Assumption 4"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y \u2200z : M(x, y, z) \u2192 \u00acO(x, z)",
+    "comment": "Assumption 5"
+  },
+  {
+    "type": "fact",
+    "statement": "Only one suspect did not tell the truth",
+    "comment": "Assumption 6"
+  },
+  {
+    "type": "fact",
+    "statement": "T(p, h)",
+    "comment": "Plum testified he was in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "T(s, h)",
+    "comment": "Scarlett testified she was in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "T(g, d)",
+    "comment": "Green testified he was in the Dining Room"
+  },
+  {
+    "type": "fact",
+    "statement": "O(m, k)",
+    "comment": "Mustard owns the Knife"
+  },
+  {
+    "type": "fact",
+    "statement": "O(s, r)",
+    "comment": "Scarlett owns the Rope"
+  },
+  {
+    "type": "fact",
+    "statement": "O(p, c)",
+    "comment": "Plum owns the Candlestick"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2203x \u2203z : M(x, h, z)",
+    "comment": "The murder was done in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x : \u00acM(x, h, k)",
+    "comment": "The murder was not done with the Knife"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200y : L(m, y) \u2194 L(p, y)",
+    "comment": "Mustard was in the same location as Plum during the murder"
+  },
+  {
+    "type": "goal",
+    "statement": "Determine x, y, z such that M(x, y, z)",
+    "comment": "Find the murderer, location, and weapon"
+  },
+  {
+    "type": "fact",
+    "statement": "M(s, h, c)",
+    "proof": "1. \u2203x \u2203z : M(x, h, z) (given).\n2. \u2200x : \u00acM(x, h, k) (given).\n3. Testimonies: T(p, h), T(s, h), T(g, d) (given).\n4. Exactly one suspect lied (given).\n5. \u2200x \u2200y : Q(x) \u2192 [T(x, y) \u2192 L(x, y)] (given).\n6. \u2200y : [\u2203x \u2203z : M(x, y, z)] \u2192 [\u2200x \u2200x' : x = x' \u2228 \u00acL(x, y) \u2228 \u00acL(x', y)] (if murder in y, at most one person in y).\n7. \u2200x \u2200y : [(\u2203x' \u2203z' : M(x', y, z')) \u2227 L(x, y)] \u2192 [\u2203z' : M(x, y, z')] (if murder in y and x is in y, then x committed murder in y).\n8. \u2200y : L(m, y) \u2194 L(p, y) (m and p are always in same location).\n9. Ownership: O(s, r), O(p, c) (given).\n10. \u2200x \u2200y \u2200z : M(x, y, z) \u2192 \u00acO(x, z) (murderer does not use own weapon).\n\nAssume both p and s told the truth. Then Q(p) and Q(s). By (5), L(p, h) and L(s, h). By (6) applied to y = h (using (1)), at most one person can be in h, contradiction. Hence at least one of p or s lied.\n\nBecause exactly one suspect lied (4), exactly one of p or s is the liar, and both g and m tell the truth.\n\nCase 1: p lied, s told the truth, g told the truth.\nCase 2: p told the truth, s lied, g told the truth.\n\nExamine Case 2: p told the truth \u21d2 Q(p). By (5) and T(p, h), we get L(p, h). By (8), L(m, h). Thus p and m are both in h, contradicting (6) (murder in h from (1)). Therefore Case 2 is impossible.\n\nThus Case 1 holds: p lied, s told the truth, g told the truth.\n\nFrom Q(s) and T(s, h) with (5): L(s, h).\nFrom Q(g) and T(g, d) with (5): L(g, d).\n\nSince p lied, \u00acL(p, h). By (8), \u00acL(m, h).\n\nApply (7) with murder in h (1) and L(s, h): \u2203z' : M(s, h, z').\nLet z be such a weapon. By (2), z \u2260 k. By (10), \u00acO(s, z). Since O(s, r), z \u2260 r. The only remaining weapon is c, so z = c.\n\nTherefore M(s, h, c). QED.",
+    "comment": "Derived"
+  }
+]

@@ -1,0 +1,70 @@
+
+=== Run 2026-03-06 01:41:17 ===
+
+--- Round 1 ---
+
+[Proposer] statement:
+M(s, h, c)
+proof:
+1. ∃x ∃z : M(x, h, z) (given)
+2. ∀x : ¬M(x, h, k) (given)
+3. T(p, h), T(s, h), T(g, d) (given)
+4. Only one suspect did not tell the truth (given)
+5. ∀x ∀y : Q(x) →  (given)
+6. ∀y :  →  (given)
+7. ∀x ∀y :  →  (given)
+8. ∀y : L(m, y) ↔ L(p, y) (given)
+9. O(s, r), O(p, c) (given)
+10. ∀x ∀y ∀z : M(x, y, z) → ¬O(x, z) (given)
+Assume both p and s told the truth. Then Q(p) and Q(s). By (5), L(p, h) and L(s, h). By (6) applied to y=h with (1), at most one suspect in h, contradiction. Therefore at least one of p or s lied.
+Since only one suspect lied, exactly one of p or s lied, and g told truth (otherwise g would be second liar), and m told truth.
+Case 1: p lied, s told truth, g told truth.
+Case 2: p told truth, s lied, g told truth.
+Case 2: p told truth ⇒ L(p, h) by (5). By (8), L(m, h). Thus two suspects (p and m) in h, contradicting (6) with murder in h (1). Therefore Case 2 impossible.
+Thus Case 1 holds: p lied, s told truth, g told truth.
+From Q(s) and T(s, h) by (5): L(s, h).
+From Q(g) and T(g, d) by (5): L(g, d).
+Since p lied, not L(p, h).
+By (8), not L(m, h).
+Now by (7) with murder in h (1) and L(s, h): ∃z' : M(s, h, z').
+Let z be such weapon. By (2), z ≠ k. By (10), ¬O(s, z). Since O(s, r), z ≠ r. Thus z = c.
+Therefore M(s, h, c). QED.
+
+[Checker] APPROVED: The proof is logically valid, each step follows from given premises, and the solver confirms M(s, h, c) is entailed.
+statement:
+M(s, h, c)
+proof:
+1. ∃x ∃z : M(x, h, z) (given).
+2. ∀x : ¬M(x, h, k) (given).
+3. Testimonies: T(p, h), T(s, h), T(g, d) (given).
+4. Exactly one suspect lied (given).
+5. ∀x ∀y : Q(x) →  (given).
+6. ∀y :  →  (if murder in y, at most one person in y).
+7. ∀x ∀y :  →  (if murder in y and x is in y, then x committed murder in y).
+8. ∀y : L(m, y) ↔ L(p, y) (m and p are always in same location).
+9. Ownership: O(s, r), O(p, c) (given).
+10. ∀x ∀y ∀z : M(x, y, z) → ¬O(x, z) (murderer does not use own weapon).
+
+Assume both p and s told the truth. Then Q(p) and Q(s). By (5), L(p, h) and L(s, h). By (6) applied to y = h (using (1)), at most one person can be in h, contradiction. Hence at least one of p or s lied.
+
+Because exactly one suspect lied (4), exactly one of p or s is the liar, and both g and m tell the truth.
+
+Case 1: p lied, s told the truth, g told the truth.
+Case 2: p told the truth, s lied, g told the truth.
+
+Examine Case 2: p told the truth ⇒ Q(p). By (5) and T(p, h), we get L(p, h). By (8), L(m, h). Thus p and m are both in h, contradicting (6) (murder in h from (1)). Therefore Case 2 is impossible.
+
+Thus Case 1 holds: p lied, s told the truth, g told the truth.
+
+From Q(s) and T(s, h) with (5): L(s, h).
+From Q(g) and T(g, d) with (5): L(g, d).
+
+Since p lied, ¬L(p, h). By (8), ¬L(m, h).
+
+Apply (7) with murder in h (1) and L(s, h): ∃z' : M(s, h, z').
+Let z be such a weapon. By (2), z ≠ k. By (10), ¬O(s, z). Since O(s, r), z ≠ r. The only remaining weapon is c, so z = c.
+
+Therefore M(s, h, c). QED.
+
+[Goal check] PROVEN: Determine x, y, z such that M(x, y, z)
+

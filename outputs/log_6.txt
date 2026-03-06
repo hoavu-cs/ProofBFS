@@ -1,0 +1,113 @@
+
+=== Run 2026-03-05 19:06:32 ===
+
+
+=== Run 2026-03-05 19:08:22 ===
+
+
+=== Run 2026-03-05 19:11:11 ===
+
+
+=== Run 2026-03-05 19:12:53 ===
+
+
+=== Run 2026-03-05 19:13:05 ===
+
+--- Round 1 ---
+
+[Proposer] statement:
+If 0 < x ≤ 1 and y ≥ 1, then y ≥ x ln(2y).
+
+proof:
+Since x ≤ 1 and ln(2y) ≥ 0 (because y ≥ 1 implies 2y ≥ 2), we have x ln(2y) ≤ ln(2y). Define h(y) = y - ln(2y) for y ≥ 1. Then h'(y) = 1 - 1/y ≥ 0, so h is non‑decreasing. Because h(1) = 1 - ln 2 > 0, it follows that h(y) ≥ 0 for all y ≥ 1, i.e., y ≥ ln(2y). Combining the inequalities gives y ≥ ln(2y) ≥ x ln(2y). Hence y ≥ x ln(2y).
+
+[Checker] APPROVED: The proof correctly establishes the inequality by showing y ≥ ln(2y) for y ≥ 1 via monotonicity of h(y)=y−ln(2y), and then uses 0<x≤1 to bound x ln(2y) ≤ ln(2y).
+statement:
+If 0 < x ≤ 1 and y ≥ 1, then y ≥ x ln(2y).
+proof:
+Since y ≥ 1, we have 2y ≥ 2, so ln(2y) ≥ ln 2 > 0. Because x ≤ 1 and ln(2y) ≥ 0, multiplying the inequality x ≤ 1 by the non‑negative number ln(2y) gives x ln(2y) ≤ ln(2y). Define h(y) = y − ln(2y) for y ≥ 1. Then h′(y) = 1 − 1/y ≥ 0 (since y ≥ 1), so h is non‑decreasing. Evaluating at y = 1 yields h(1) = 1 − ln 2 > 0. Hence for all y ≥ 1, h(y) ≥ h(1) > 0, which means y > ln(2y); in particular y ≥ ln(2y). Combining the two inequalities we obtain y ≥ ln(2y) ≥ x ln(2y). Therefore y ≥ x ln(2y).
+
+[Goal check] NOT YET
+
+--- Round 2 ---
+
+[Proposer] statement:
+For all x > 1 and all y ≥ 4x ln(x), we have y ≥ x ln(2y).
+
+proof:
+Fix x > 1 and define φ(y) = y − x ln(2y). Then φ′(y) = 1 − x/y. Since y ≥ 4x ln(x) ≥ x (because ln x ≥ 0 for x ≥ 1), we have φ′(y) ≥ 0, so φ is non‑decreasing on [4x ln(x), ∞). Hence it suffices to verify the inequality at the lower bound y₀ = 4x ln(x), i.e. to show 4x ln(x) ≥ x ln(8x ln(x)). Dividing by x (> 0) gives 4 ln x ≥ ln 8 + ln x + ln ln x, which simplifies to 3 ln x ≥ ln 8 + ln ln x.
+Define g(x) = 3 ln x − ln 8 − ln ln x. We need g(x) ≥ 0 for x > 1. Observe that g′(x) = (3 ln x − 1)/(x ln x). Hence g is decreasing on (1, e^{1/3}) and increasing on (e^{1/3}, ∞); its minimum occurs at x = e^{1/3}. Compute g(e^{1/3}) = 3·(1/3) − ln 8 − ln(1/3) = 1 − ln 8 + ln 3 = 1 − ln(8/3) > 0. Consequently g(x) > 0 for all x > 1, which proves 4x ln(x) ≥ x ln(8x ln(x)). By monotonicity of φ we obtain y ≥ x ln(2y) for every y ≥ 4x ln(x).
+
+[Checker] FIX NEEDED: The proof incorrectly asserts that 4x ln(x) ≥ x for all x > 1. This claim is used to deduce φ′(y) ≥ 0 on
+
+[Proposer revised] (revised) statement:
+For every x > 1, we have 4x ln x ≥ x ln(8x ln x).
+
+proof:
+Dividing by x > 0, it suffices to show 4 ln x ≥ ln 8 + ln x + ln ln x, i.e., 3 ln x ≥ ln 8 + ln ln x. Define h(x) = 3 ln x − ln 8 − ln ln x. Then h′(x) = 3/x − 1/(x ln x) = (3 ln x − 1)/(x ln x). The sign of h′ is determined by the numerator 3 ln x − 1. Hence h is decreasing on (1, e^{1/3}) and increasing on (e^{1/3}, ∞); its global minimum occurs at x = e^{1/3}. Compute h(e^{1/3}) = 3·(1/3) − ln 8 − ln(1/3) = 1 − ln 8 + ln 3 = 1 − ln(8/3). Since 8/3 < e, we have ln(8/3) < 1, thus h(e^{1/3}) > 0. Consequently h(x) > 0 for all x > 1, which is exactly 3 ln x > ln 8 + ln ln x. Therefore 4 ln x ≥ ln 8 + ln x + ln ln x, and multiplying by x yields 4x ln x ≥ x ln(8x ln x).
+
+[Checker] APPROVED: The inequality reduces to 3 ln x ≥ ln 8 + ln ln x for x > 1. The function h(x)=3 ln x−ln 8−ln ln x has a unique minimum at x=e^{1/3} where h(e^{1/3})=1−ln(8/3)>0, hence h(x)>0 for all x>1.
+statement:
+For every x > 1, we have 4x ln x ≥ x ln(8x ln x).
+proof:
+Divide both sides by x > 0 to obtain the equivalent inequality 4 ln x ≥ ln(8x ln x) = ln 8 + ln x + ln ln x, i.e., 3 ln x ≥ ln 8 + ln ln x. Define h(x) = 3 ln x − ln 8 − ln ln x for x > 1. Then h′(x) = 3/x − 1/(x ln x) = (3 ln x − 1)/(x ln x). Since the denominator is positive for x > 1, the sign of h′ is determined by the numerator. Thus h is decreasing on (1, e^{1/3}) and increasing on (e^{1/3}, ∞); its global minimum occurs at x = e^{1/3}. Compute h(e^{1/3}) = 3·(1/3) − ln 8 − ln(1/3) = 1 − ln 8 + ln 3 = 1 − ln(8/3). Because 8/3 < e, we have ln(8/3) < 1, therefore h(e^{1/3}) > 0. Consequently h(x) > 0 for all x > 1, which means 3 ln x > ln 8 + ln ln x. Multiplying by x yields 4x ln x > x ln(8x ln x); in particular, the non‑strict inequality 4x ln x ≥ x ln(8x ln x) holds.
+
+[Goal check] NOT YET
+
+
+=== Run 2026-03-05 19:38:05 ===
+
+--- Round 1 ---
+
+[Proposer] statement:
+For any real numbers x > 1 and y ≥ 1, if y ≥ 4x ln x, then y ≥ x ln(2y).
+
+proof:
+Define f(y) = y - x ln(2y). Its derivative is f'(y) = 1 - x/y. The assumption is y ≥ 4x ln x. We consider two cases.
+
+Case 1: 4x ln x ≥ x. This is equivalent to 4 ln x ≥ 1, i.e., x ≥ e^{1/4}. Then y ≥ x, so f'(y) ≥ 0, meaning f is non‑decreasing on [4x ln x, ∞). Hence f(y) ≥ f(4x ln x) = 4x ln x - x ln(8x ln x). By the second established statement (for every x > 1, 4x ln x ≥ x ln(8x ln x)), this quantity is non‑negative. Therefore f(y) ≥ 0, which is exactly y ≥ x ln(2y).
+
+Case 2: 4x ln x < x. This occurs when 1 < x < e^{1/4}. For such x we have x < e/2 because e^{1/4} ≈ 1.284 < e/2 ≈ 1.359. Consequently ln(2x) ≤ 1, and therefore f(x) = x - x ln(2x) = x(1 - ln(2x)) ≥ 0. On the interval  the derivative satisfies f'(y) = 1 - x/y ≤ 0, so f is non‑increasing there; for y ≥ x we have f'(y) ≥ 0, so f is non‑decreasing. Hence the minimum of f on [4x ln x, ∞) occurs at y = x. Since f(x) ≥ 0, we obtain f(y) ≥ 0 for every y ≥ 4x ln x, i.e., y ≥ x ln(2y).
+
+In both cases the implication holds, completing the proof.
+
+[Checker] APPROVED: The proof correctly uses monotonicity analysis of f(y)=y-x ln(2y) and splits into two cases based on comparing 4x ln x with x. Case 1 relies on the given inequality 4x ln x ≥ x ln(8x ln x). Case 2 uses the observation that for 1<x<e^{1/4} we have x<e/2, hence ln(2x)≤1, ensuring f(x)≥0; together with the derivative sign pattern this guarantees f(y)≥0 for all y ≥ 4x ln x. All steps are logically sound and the statement is precisely stated.
+
+statement:
+For any real numbers x > 1 and y ≥ 1, if y ≥ 4x ln x, then y ≥ x ln(2y).
+
+proof:
+Define f(y) = y − x ln(2y). Then f′(y) = 1 − x/y. Assume y ≥ 4x ln x.
+
+Case 1: 4x ln x ≥ x, i.e., x ≥ e^{1/4}. Then y ≥ x, so f′(y) ≥ 0; thus f is non‑decreasing on [4x ln x, ∞). Hence f(y) ≥ f(4x ln x) = 4x ln x − x ln(8x ln x). By the established inequality (for every x > 1, 4x ln x ≥ x ln(8x ln x)) this quantity is non‑negative, so f(y) ≥ 0, i.e., y ≥ x ln(2y).
+
+Case 2: 4x ln x < x, i.e., 1 < x < e^{1/4}. Then x < e/2 (since e^{1/4} < e/2), therefore ln(2x) ≤ 1 and f(x) = x − x ln(2x) = x(1 − ln(2x)) ≥ 0. On  we have y ≤ x, so f′(y) = 1 − x/y ≤ 0 and f is non‑increasing; for y ≥ x we have f′(y) ≥ 0 and f is non‑decreasing. Consequently the minimum of f on [4x ln x, ∞) occurs at y = x. Because f(x) ≥ 0, we obtain f(y) ≥ 0 for all y ≥ 4x ln x, which is exactly y ≥ x ln(2y).
+
+Both cases yield the desired implication, completing the proof.
+
+[Goal check] NOT YET
+
+--- Round 2 ---
+
+[Proposer] statement:
+For any real numbers x > 0 and y ≥ 1, if y ≥ 4x ln(x), then y ≥ x ln(2y).
+
+proof:
+We consider two cases.
+1. When 0 < x ≤ 1. By the first established statement, for any such x and any y ≥ 1 we have y ≥ x ln(2y). The hypothesis y ≥ 4x ln(x) is automatically satisfied because 4x ln(x) ≤ 0 ≤ y, but it is not needed for the conclusion.
+2. When x > 1. The third established statement asserts exactly that for x > 1 and y ≥ 1, the implication y ≥ 4x ln(x) ⇒ y ≥ x ln(2y) holds.
+Thus in both cases the implication is true, which proves the statement for all x > 0, y ≥ 1.
+
+[Checker] APPROVED: The proof correctly splits into two cases, using the first established statement for 0 < x ≤ 1 (where the conclusion holds unconditionally for y ≥ 1) and the third established statement for x > 1. In the first case the hypothesis y ≥ 4x ln(x) is automatically satisfied because 4x ln(x) ≤ 0 ≤ y, but the conclusion follows directly from the established fact.
+
+statement:
+For any real numbers x > 0 and y ≥ 1, if y ≥ 4x ln(x), then y ≥ x ln(2y).
+
+proof:
+We consider two cases.
+1. 0 < x ≤ 1. By the first established statement, for any such x and any y ≥ 1 we have y ≥ x ln(2y). The hypothesis y ≥ 4x ln(x) is automatically true because 4x ln(x) ≤ 0 ≤ y, but it is not needed; the conclusion holds regardless.
+2. x > 1. The third established statement directly asserts that for x > 1 and y ≥ 1, the implication y ≥ 4x ln(x) ⇒ y ≥ x ln(2y) holds.
+Thus the implication is valid for all x > 0, y ≥ 1.
+
+[Goal check] PROVEN: For any real numbers x > 0 and y ≥ 1, if y ≥ 4x ln(x), then y ≥ x ln(2y).
+

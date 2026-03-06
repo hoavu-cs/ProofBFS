@@ -1,0 +1,122 @@
+[
+  {
+    "type": "definition",
+    "statement": "S = {p, s, g, m}",
+    "comment": "Set of suspects"
+  },
+  {
+    "type": "definition",
+    "statement": "W = {k, r, c}",
+    "comment": "Set of weapons"
+  },
+  {
+    "type": "definition",
+    "statement": "L = {b, d, h}",
+    "comment": "Set of locations"
+  },
+  {
+    "type": "definition",
+    "statement": "M(x, y, z): suspect x did the murder in location y with weapon z",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "L(x, y): suspect x was in location y during the murder",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "T(x, y): suspect x testified they were in location y during the murder",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "O(x, z): suspect x owns weapon z",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "definition",
+    "statement": "Q(x): suspect x told the truth",
+    "comment": "Predicate definition"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y : [(\u2203x' \u2203z' : M(x', y, z')) \u2227 L(x, y)] \u2192 [\u2203z' : M(x, y, z')]",
+    "comment": "Assumption 1"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y \u2200y' : y = y' \u2228 \u00acL(x, y) \u2228 \u00acL(x, y')",
+    "comment": "Assumption 2"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y : Q(x) \u2192 [T(x, y) \u2192 L(x, y)]",
+    "comment": "Assumption 3"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200y : [\u2203x \u2203z : M(x, y, z)] \u2192 [\u2200x \u2200x' : x = x' \u2228 \u00acL(x, y) \u2228 \u00acL(x', y)]",
+    "comment": "Assumption 4"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x \u2200y \u2200z : M(x, y, z) \u2192 \u00acO(x, z)",
+    "comment": "Assumption 5"
+  },
+  {
+    "type": "fact",
+    "statement": "Only one suspect did not tell the truth",
+    "comment": "Assumption 6"
+  },
+  {
+    "type": "fact",
+    "statement": "T(p, h)",
+    "comment": "Plum testified he was in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "T(s, h)",
+    "comment": "Scarlett testified she was in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "T(g, d)",
+    "comment": "Green testified he was in the Dining Room"
+  },
+  {
+    "type": "fact",
+    "statement": "O(m, k)",
+    "comment": "Mustard owns the Knife"
+  },
+  {
+    "type": "fact",
+    "statement": "O(s, r)",
+    "comment": "Scarlett owns the Rope"
+  },
+  {
+    "type": "fact",
+    "statement": "O(p, c)",
+    "comment": "Plum owns the Candlestick"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2203x \u2203z : M(x, h, z)",
+    "comment": "The murder was done in the Hall"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200x : \u00acM(x, h, k)",
+    "comment": "The murder was not done with the Knife"
+  },
+  {
+    "type": "fact",
+    "statement": "\u2200y : L(m, y) \u2194 L(p, y)",
+    "comment": "Mustard was in the same location as Plum during the murder"
+  },
+  {
+    "type": "goal",
+    "statement": "Determine x, y, z such that M(x, y, z)",
+    "comment": "Find the murderer, location, and weapon"
+  }
+]
