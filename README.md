@@ -3,6 +3,8 @@
 A two-agent system for exploring mathematical facts using BFS-style search (actually, BFS makes 0 sense because the graph is infinite)
 . Starting from a set of seed statements, it iteratively proposes and verifies new statements, building toward a specified goal.
 
+[See a demo on YouTube](https://youtu.be/tmGZD796wOs)
+
 ## Setup
 
 ```bash
