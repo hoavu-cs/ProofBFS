@@ -180,7 +180,8 @@ def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], s
             facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
     if derived_path.exists():
         for entry in json.loads(derived_path.read_text()):
-            facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
+            if entry["type"] != "goal":
+                facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
     return facts, goal
 
 
