@@ -1,0 +1,27 @@
+[
+  {
+    "type": "definition",
+    "statement": "a, b, c are positive real numbers",
+    "comment": "Domain"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz inequality (Engel/Titu form): for positive reals x_i, y_i, sum(x_i^2 / y_i) >= (sum x_i)^2 / (sum y_i)",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "AM-GM inequality: for positive reals x, y, x + y >= 2*sqrt(x*y), equivalently sqrt(x*y) <= (x+y)/2",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz in the form: (sum_i u_i * v_i)^2 <= (sum_i u_i^2)(sum_i v_i^2)",
+    "comment": "Standard Cauchy-Schwarz"
+  },
+  {
+    "type": "goal",
+    "statement": "Prove that a^2/sqrt(3a^2 + 8b^2 + 14ab) + b^2/sqrt(3b^2 + 8c^2 + 14bc) + c^2/sqrt(3c^2 + 8a^2 + 14ca) >= (a+b+c)/5 for all positive reals a, b, c",
+    "comment": "VNU entrance exam 2009-2010"
+  }
+]

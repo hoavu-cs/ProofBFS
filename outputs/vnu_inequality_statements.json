@@ -1,0 +1,63 @@
+[
+  {
+    "type": "definition",
+    "statement": "a, b, c are positive real numbers",
+    "comment": "Domain"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz inequality (Engel/Titu form): for positive reals x_i, y_i, sum(x_i^2 / y_i) >= (sum x_i)^2 / (sum y_i)",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "AM-GM inequality: for positive reals x, y, x + y >= 2*sqrt(x*y), equivalently sqrt(x*y) <= (x+y)/2",
+    "comment": "Key tool"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz in the form: (sum_i u_i * v_i)^2 <= (sum_i u_i^2)(sum_i v_i^2)",
+    "comment": "Standard Cauchy-Schwarz"
+  },
+  {
+    "type": "goal",
+    "statement": "Prove that a^2/sqrt(3a^2 + 8b^2 + 14ab) + b^2/sqrt(3b^2 + 8c^2 + 14bc) + c^2/sqrt(3c^2 + 8a^2 + 14ca) >= (a+b+c)/5 for all positive reals a, b, c",
+    "comment": "VNU entrance exam 2009-2010"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, we have \u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2264 (5\u221a2)/4 (a + 2b), with equality when a = 6b.",
+    "proof": "Square both sides (valid since both sides are non\u2011negative) to obtain 3a\u00b2 + 8b\u00b2 + 14ab \u2264 (25/8)(a + 2b)\u00b2. Multiply by 8: 24a\u00b2 + 64b\u00b2 + 112ab \u2264 25a\u00b2 + 100ab + 100b\u00b2. Rearranging gives 0 \u2264 a\u00b2 - 12ab + 36b\u00b2 = (a - 6b)\u00b2, which is true for all real a, b. Equality holds precisely when a = 6b.",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, c, we have a\u00b2/(a+2b) + b\u00b2/(b+2c) + c\u00b2/(c+2a) \u2265 (a+b+c)/3.",
+    "proof": "By the Engel\u2011Titu form of Cauchy\u2011Schwarz: \u2211(a\u00b2/(a+2b)) \u2265 (\u2211 a)\u00b2 / \u2211(a+2b). The denominator \u2211(a+2b) = (a+2b)+(b+2c)+(c+2a) = 3(a+b+c). Hence the right\u2011hand side equals (a+b+c)\u00b2 / (3(a+b+c)) = (a+b+c)/3. Equality holds exactly when the sequences (a, b, c) and (a+2b, b+2c, c+2a) are proportional, which forces a = b = c.",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, c, we have \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (2\u221a2/15)(a + b + c).",
+    "proof": "From \u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2264 (5\u221a2)/4 (a + 2b) (proved earlier), taking reciprocals gives 1/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 4/(5\u221a2)(a + 2b). Multiplying by a\u00b2 yields a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (2\u221a2/5)\u00b7a\u00b2/(a + 2b). Summing cyclically over (a,b,c), (b,c,a), (c,a,b) we obtain \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (2\u221a2/5) \u2211_{cyc} a\u00b2/(a + 2b). Applying the previously proved inequality \u2211_{cyc} a\u00b2/(a + 2b) \u2265 (a + b + c)/3 gives \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (2\u221a2/5)\u00b7(a + b + c)/3 = (2\u221a2/15)(a + b + c).",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, we have \u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2264 2a + 3b, with equality when a = b.",
+    "proof": "Square both sides (both sides are non\u2011negative) to obtain 3a\u00b2 + 8b\u00b2 + 14ab \u2264 (2a + 3b)\u00b2 = 4a\u00b2 + 12ab + 9b\u00b2. Rearranging gives 0 \u2264 a\u00b2 - 2ab + b\u00b2 = (a - b)\u00b2, which is true for all real a, b. Equality holds precisely when a = b.",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, c, we have \u2211_{cyc} a\u00b2/(2a + 3b) \u2265 (a + b + c)/5.",
+    "proof": "By the Engel\u2011Titu form of Cauchy\u2011Schwarz, \u2211_{cyc} a\u00b2/(2a + 3b) \u2265 (a + b + c)\u00b2 / \u2211_{cyc} (2a + 3b). The denominator sums to (2a + 3b) + (2b + 3c) + (2c + 3a) = 5a + 5b + 5c = 5(a + b + c). Hence the right\u2011hand side equals (a + b + c)\u00b2 / (5(a + b + c)) = (a + b + c)/5. Equality holds when the sequences (a, b, c) and (2a + 3b, 2b + 3c, 2c + 3a) are proportional, which is satisfied when a = b = c.",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For all positive real numbers a, b, c, we have \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (a + b + c)/5.",
+    "proof": "From the inequality \u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2264 2a + 3b (proved earlier), take reciprocals to obtain 1/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 1/(2a + 3b). Multiplying by a\u00b2 gives a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 a\u00b2/(2a + 3b). Summing cyclically yields \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 \u2211_{cyc} a\u00b2/(2a + 3b). Applying the previously proved inequality \u2211_{cyc} a\u00b2/(2a + 3b) \u2265 (a + b + c)/5, we conclude \u2211_{cyc} a\u00b2/\u221a(3a\u00b2 + 8b\u00b2 + 14ab) \u2265 (a + b + c)/5. Equality holds when a = b = c.",
+    "comment": "Derived"
+  }
+]
