@@ -9,9 +9,9 @@ A two-agent system for exploring mathematical facts using BFS-style search (actu
 - P = {a, b, c} is a pool of facts that could be assumptions or relevant technical results that you know is true
 - A goal statement X
 - At each round:
--- An agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
--- Bob verifies z. He can either approve, ask for clarification or fix.
--- If there is a bug, Alice has one chance to fix it. If she still fails, move to the next round.
+An agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
+Bob verifies z. He can either approve, ask for clarification or fix.
+If there is a bug, Alice has one chance to fix it. If she still fails, move to the next round.
 - The program will stop when the goal or maximum number of rounds is reached.
 
 A few things to keep in mind:
@@ -84,7 +84,7 @@ JSON file path: examples/inequalities/3/inputs.json
 
 ## Generating a clean proof
 
-After running, generate a readable proof from the derived statements:
+After running, generate a readable proof (if the goal was reached) from the derived statements:
 
 ```bash
 python -m src.proof_cleanup examples/inequalities/3/inputs_statements.json
