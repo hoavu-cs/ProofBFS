@@ -8,19 +8,17 @@ A two-agent system for exploring mathematical facts using BFS-style search (actu
 ## High level ideas
 - P = {a, b, c} is a pool of facts that could be assumptions or relevant technical results that you know is true
 - A goal statement X
-- At each round:
-An agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
-Bob verifies z. He can either approve, ask for clarification or fix.
-If there is a bug, Alice has one chance to fix it. If she still fails, move to the next round.
-- The program will stop when the goal or maximum number of rounds is reached.
+- In each round, an agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
+Bob verifies z. He can either approve, ask for clarification or fix. If there is a bug, Alice has one chance to fix it.
+If she still fails, move to the next round. The program will stop when the goal or maximum number of rounds is reached.
 
-A few things to keep in mind:
-1. We want to make sure that each newly derived statement is short enough to be verified confidently.
-2. Each new statement must also be reasonably "interesting"; for example, "if a = b, and b = 2 then a = 2" is not interesting and will pollute the statement pool P.
-3. Even if the final goal isn't reached, we still hope that one can get interesting partial results; these can be interesting on their own!
-4. We don't want to be over-reliant on frontier models. The goal is to help local models have respectable performance.
-5. Be realistic. This won't solve a deep theorem on its own. I doubt the current generation of AI can reach that level any time soon.
-You can use it as a helper to prove some technical lemmas. Double check everything.
+A few things to keep in mind
+* Ensure each newly derived statement is short and easy to verify.
+* Even if the final goal isn’t reached, aim for interesting partial results or progress.
+* Avoid over-reliance on frontier models; the goal is to help local models achieve respectable performance.
+* Be realistic: this approach won’t solve a deep theorem on its own. Current AI likely isn’t at that level yet.
+* Use it as a helper for proving technical lemmas, and double-check everything carefully.
+
 
 ## Setup
 
