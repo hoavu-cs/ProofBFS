@@ -1,0 +1,99 @@
+
+=== Run 2026-03-06 23:43:50 ===
+
+--- Round 1 ---
+
+[Proposer] statement:
+For positive real numbers a, b, c, we have sqrt(a² + 1/b²) + sqrt(b² + 1/c²) + sqrt(c² + 1/a²) ≥ sqrt((a+b+c)² + (1/b + 1/c + 1/a)²).
+
+proof:
+Let S = sqrt(a² + 1/b²) + sqrt(b² + 1/c²) + sqrt(c² + 1/a²). Then S² = (a² + 1/b²) + (b² + 1/c²) + (c² + 1/a²) + 2∑_{i<j} sqrt((x_i² + y_i²)(x_j² + y_j²)), where (x₁, y₁) = (a, 1/b), (x₂, y₂) = (b, 1/c), (x₃, y₃) = (c, 1/a). By the Cauchy‑Schwarz inequality, for any i, j we have x_i x_j + y_i y_j ≤ sqrt((x_i² + y_i²)(x_j² + y_j²)). Hence sqrt((x_i² + y_i²)(x_j² + y_j²)) ≥ x_i x_j + y_i y_j. Substituting this lower bound gives
+S² ≥ ∑(x_i² + y_i²) + 2∑_{i<j} (x_i x_j + y_i y_j) = (∑ x_i)² + (∑ y_i)² = (a+b+c)² + (1/b + 1/c + 1/a)².
+Taking square roots yields the desired inequality.
+
+[Checker] APPROVED: The inequality is a direct consequence of the Cauchy-Schwarz inequality applied to the vectors (a,1/b), (b,1/c), (c,1/a); expanding the square of the sum of their norms yields the desired bound.
+
+statement:
+For any positive real numbers a, b, c,
+√(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √((a+b+c)² + (1/b + 1/c + 1/a)²).
+
+proof:
+Set v₁ = (a, 1/b), v₂ = (b, 1/c), v₃ = (c, 1/a) and let S = ||v₁|| + ||v₂|| + ||v₃||, where ||·|| is the Euclidean norm. Then
+S² = (||v₁|| + ||v₂|| + ||v₃||)² = ∑_{i=1}³ ||v_i||² + 2∑_{1≤i<j≤3} ||v_i||·||v_j||.
+For any i, j the Cauchy‑Schwarz inequality gives v_i·v_j ≤ ||v_i||·||v_j||, i.e. ||v_i||·||v_j|| ≥ v_i·v_j.
+Applying this to each pair,
+S² ≥ ∑||v_i||² + 2∑_{i<j} v_i·v_j = (∑ a_i)² + (∑ 1/b_i)² = (a+b+c)² + (1/b + 1/c + 1/a)².
+Since S ≥ 0, taking square roots yields S ≥ √((a+b+c)² + (1/b + 1/c + 1/a)²), which is the stated inequality.
+
+[Goal check] NOT YET
+
+--- Round 2 ---
+
+[Proposer] statement:
+For positive real numbers a, b, c satisfying a + b + c ≤ 2,
+(a+b+c)² + (1/a + 1/b + 1/c)² ≥ 97/4.
+
+proof:
+Let t = a+b+c, so 0 < t ≤ 2. By the Cauchy‑Schwarz inequality,
+(a+b+c)(1/a + 1/b + 1/c) ≥ (1+1+1)² = 9,
+hence 1/a + 1/b + 1/c ≥ 9/t.
+Therefore
+(a+b+c)² + (1/a + 1/b + 1/c)² ≥ t² + (9/t)² = t² + 81/t².
+Define f(t) = t² + 81/t². We show f(t) ≥ 97/4 for all t ∈ (0,2].
+Consider g(t) = 4t⁴ - 97t² + 324 = 4(t²)² - 97t² + 324.
+Set u = t², then 0 < u ≤ 4 and g(t) = 4u² - 97u + 324.
+The quadratic 4u² - 97u + 324 has discriminant Δ = 97² - 4·4·324 = 4225 = 65²,
+so its roots are u₁ = (97 - 65)/8 = 4 and u₂ = (97 + 65)/8 = 20.25.
+Since the coefficient of u² is positive, 4u² - 97u + 324 ≥ 0 for u ≤ 4 or u ≥ 20.25.
+In particular, for u ∈ (0,4] we have 4u² - 97u + 324 ≥ 0, i.e., 4t⁴ - 97t² + 324 ≥ 0,
+which is equivalent to t² + 81/t² ≥ 97/4.
+Thus f(t) ≥ 97/4, and the original inequality follows.
+
+[Checker] APPROVED: The inequality reduces to minimizing f(t)=t²+81/t² for 0<t≤2, which attains its minimum value 97/4 at t=2; the proof correctly applies Cauchy-Schwarz to bound the harmonic sum and then solves the resulting one-variable inequality.
+statement:
+For positive real numbers a, b, c satisfying a + b + c ≤ 2,
+(a+b+c)² + (1/a + 1/b + 1/c)² ≥ 97/4.
+proof:
+Set t = a+b+c, so 0 < t ≤ 2. By Cauchy‑Schwarz,
+(a+b+c)(1/a + 1/b + 1/c) ≥ (1+1+1)² = 9,
+hence 1/a + 1/b + 1/c ≥ 9/t.
+Therefore
+(a+b+c)² + (1/a + 1/b + 1/c)² ≥ t² + (9/t)² = t² + 81/t².
+Define f(t) = t² + 81/t². Multiply the desired inequality f(t) ≥ 97/4 by 4t² > 0:
+4t⁴ + 324 ≥ 97t² ⇔ 4t⁴ − 97t² + 324 ≥ 0.
+Put u = t² ∈ (0,4]; the inequality becomes 4u² − 97u + 324 ≥ 0.
+The quadratic 4u² − 97u + 324 has discriminant 4225 = 65² and roots u = 4, u = 20.25. Because the leading coefficient is positive, the quadratic is non‑negative for u ≤ 4 (and for u ≥ 20.25). Since u ≤ 4, we have 4u² − 97u + 324 ≥ 0, i.e., 4t⁴ − 97t² + 324 ≥ 0, which is equivalent to f(t) ≥ 97/4. Thus the original inequality holds.
+
+[Goal check] NOT YET
+
+--- Round 3 ---
+
+[Proposer] statement:
+For positive real numbers a, b, c satisfying a + b + c ≤ 2,
+√(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √(97)/2.
+
+proof:
+From the established statements we have:
+(i) √(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √((a+b+c)² + (1/b + 1/c + 1/a)²).
+(ii) (a+b+c)² + (1/a + 1/b + 1/c)² ≥ 97/4.
+Since (1/b + 1/c + 1/a) = (1/a + 1/b + 1/c), inequality (ii) implies
+√((a+b+c)² + (1/b + 1/c + 1/a)²) ≥ √(97/4) = √(97)/2.
+Combining (i) with this lower bound yields the desired inequality.
+
+[Checker] APPROVED: The inequality follows directly from chaining the two previously established inequalities: the first gives a lower bound in terms of √((a+b+c)²+(1/a+1/b+1/c)²), and the second (which requires a+b+c ≤ 2) shows that this quantity is at least √(97/4)=√(97)/2.
+statement:
+For positive real numbers a, b, c satisfying a + b + c ≤ 2,
+√(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √(97)/2.
+proof:
+From the previously verified results:
+1. For any positive a, b, c,
+√(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √((a+b+c)² + (1/a + 1/b + 1/c)²).
+2. Under the extra condition a + b + c ≤ 2,
+(a+b+c)² + (1/a + 1/b + 1/c)² ≥ 97/4.
+Taking square roots of the inequality in 2 (all terms are non‑negative) gives
+√((a+b+c)² + (1/a + 1/b + 1/c)²) ≥ √(97/4) = √(97)/2.
+Combining 1 and this bound yields the desired inequality.
+
+[Goal check] PROVEN: For positive real numbers a, b, c satisfying a + b + c ≤ 2,
+√(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √(97)/2.
+
