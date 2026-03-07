@@ -18,7 +18,7 @@ A few things to keep in mind:
 1. We want to make sure that each newly derived statement is short enough to be verified confidently
 2. Each new statement must also be reasonably "interesting"; for example, "if a = b, and b = 2 then a = 2" is not interesting and will pollute the statement pool P.
 3. Even if the final goal isn't reached, we still hope that one can get interesting partial results; these can be interesting on their own!
-4. We don't want to be over-reliant on frontier models. The final goal is to democratize this process by using any model of our choice including local models while still having respectable performance.
+4. We don't want to be over-reliant on frontier models. The goal is to help local models have respectable performance.
 5. Be realistic. This won't solve a deep theorem on its own. I doubt the current generation of AI can reach that level any time soon.
 You can use it as a helper to prove some technical lemmas. Double check everything.
 
@@ -73,14 +73,24 @@ Create a JSON file describing your problem. Each entry has a `type` of `"fact"`,
 ## Running
 
 ```bash
-python app.py
+python main.py
 ```
 
 Enter the path to your input JSON file when prompted. For example:
 
 ```
-JSON file path: outputs/my_problem.json
+JSON file path: examples/inequalities/3/inputs.json
 ```
+
+## Generating a clean proof
+
+After running, generate a readable proof from the derived statements:
+
+```bash
+python -m src.proof_cleanup examples/inequalities/3/inputs_statements.json
+```
+
+This produces `inputs_final_proof.txt` alongside the statements file, with irrelevant dead-end steps filtered out by an LLM.
 
 ## Output files
 
@@ -107,6 +117,6 @@ Both agents can run Python code for arithmetic, symbolic algebra, and sat solver
 
 ## Key parameters
 
-Tune these constants at the top of `app.py`:
+Tune these constants at the top of `src/app.py`:
 
 - `ROUNDS` — maximum number of derivation rounds
