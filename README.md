@@ -15,7 +15,7 @@ If there is a bug, Alice has one chance to fix it. If she still fails, move to t
 - The program will stop when the goal or maximum number of rounds is reached.
 
 A few things to keep in mind:
-1. We want to make sure that each newly derived statement is short enough to be verified confidently
+1. We want to make sure that each newly derived statement is short enough to be verified confidently.
 2. Each new statement must also be reasonably "interesting"; for example, "if a = b, and b = 2 then a = 2" is not interesting and will pollute the statement pool P.
 3. Even if the final goal isn't reached, we still hope that one can get interesting partial results; these can be interesting on their own!
 4. We don't want to be over-reliant on frontier models. The goal is to help local models have respectable performance.
