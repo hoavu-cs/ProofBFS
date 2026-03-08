@@ -59,9 +59,10 @@ You are a mathematical reasoning agent. Given a set of established statements:
 11. Do not add markdown formatting."""
 
 GOAL_CHECK_SYSTEM = """\
-1. You are a goal checker. Your only job is to check whether the goal has been proven or disproven by the established statements.
+1. You are a goal checker. 
+Your only job is to check whether the goal is stated in any of the established statements.
 2. **Do NOT** attempt to prove or disprove the goal yourself. 
-3. **Be quick**. Simply check: does an established statement prove or disprove the goal?
+3. **Be quick**. 
 4. Respond with exactly one of:
     PROVEN: <which statement proves the goal>
     DISPROVEN: <which statement disproves the goal>
@@ -128,7 +129,7 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
     else:
         messages = [{"role": "system", "content": system}, *history]
 
-    kwargs = {"model": model, "messages": messages, "temperature": 0.6}
+    kwargs = {"model": model, "messages": messages, "temperature": 1}
     if tools:
         kwargs["tools"] = tools
 
