@@ -20,8 +20,14 @@ deepseek_client = OpenAI(
     base_url="https://api.deepseek.com",
 )
 
+ollama_client = OpenAI(
+    api_key="ollama",
+    base_url="http://localhost:11434/v1",
+)
+
 DEEPSEEK_CHAT = "deepseek-chat"
 DEEPSEEK_REASONER = "deepseek-reasoner"
+OLLAMA_QWEN = "qwen3.5:35b-a3b"
 ROUNDS = 10
 
 
@@ -46,15 +52,16 @@ You are a mathematical reasoning agent. Given a set of established statements:
     <statement>
     proof:
     <proof>
-7.If you receive feedback from the checker, revise your statement in the same format.
-8.Try not to repeat statements that have already been approved in previous rounds.
-9.If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
-10.Do not add markdown formatting."""
+7. If you receive feedback from the checker, revise your statement in the same format.
+8. Try not to repeat statements that have already been approved in previous rounds.
+9. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
+10. Use latex for mathematical expressions.
+11. Do not add markdown formatting."""
 
 GOAL_CHECK_SYSTEM = """\
 1. You are a goal checker. Your only job is to check whether the goal has been proven or disproven by the established statements.
-2. Do NOT attempt to prove or disprove the goal yourself.
-3. Simply check: does an established statement prove or disprove the goal?
+2. **Do NOT** attempt to prove or disprove the goal yourself. 
+3. **Be quick**. Simply check: does an established statement prove or disprove the goal?
 4. Respond with exactly one of:
     PROVEN: <which statement proves the goal>
     DISPROVEN: <which statement disproves the goal>
@@ -76,7 +83,8 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
     FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
     CLARIFICATION NEEDED: <what is unclear and where>
 5. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
-6. Do not add markdown formatting."""
+6. Use latex for mathematical expressions.
+7. Do not add markdown formatting."""
 
 
 """-----------------------------------------------------------------------------------------------
@@ -128,7 +136,7 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
     while tools and tool_calls_map:
         assistant_msg: dict = {"role": "assistant", "content": content}
-        if reasoning:
+        if reasoning and model in ("deepseek-reasoner", "MiniMax-M2"):
             assistant_msg["reasoning_content"] = reasoning
         assistant_msg["tool_calls"] = [
             {"id": tc["id"], "type": "function", "function": {"name": tc["name"], "arguments": tc["arguments"]}}
