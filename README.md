@@ -85,10 +85,12 @@ JSON file path: examples/inequalities/3/inputs.json
 After running, generate a readable proof (if the goal was reached) from the derived statements:
 
 ```bash
-python -m src.proof_cleanup examples/inequalities/3/inputs_statements.json
+python -m src.proof_cleanup 
 ```
 
-This produces `inputs_final_proof.txt` alongside the statements file, with irrelevant dead-end steps filtered out by an LLM.
+and enter your output json file (e.g., `examples/inequalities/3/inputs_statements.json`).
+
+This produces `inputs_final_proof.txt` and `inputs_final_proof.tex`, with irrelevant dead-end steps filtered out by an LLM.
 
 ## Output files
 
