@@ -57,7 +57,7 @@ def _filter_statements(goal: str, derived: list[dict]) -> list[dict]:
 
 
 def generate_proof(statements_path: Path) -> None:
-    """Read a *_statements.json file and write a clean proof to *_final_proof.txt."""
+    """Read a *_statements.json file and write a LaTeX proof to *_final_proof.tex."""
     data = json.loads(statements_path.read_text(encoding="utf-8"))
 
     goal = None
@@ -82,44 +82,7 @@ def generate_proof(statements_path: Path) -> None:
         derived = _filter_statements(goal["statement"], derived)
         print(f"Kept {len(derived)} statements.")
 
-    lines: list[str] = []
-
-    # Header
-    if goal:
-        lines.append("THEOREM")
-        lines.append("=" * 70)
-        lines.append(goal["statement"])
-        if goal.get("comment"):
-            lines.append(f"({goal['comment']})")
-        lines.append("")
-
-    # Setup
-    if definitions or given_facts:
-        lines.append("SETUP")
-        lines.append("-" * 70)
-        for d in definitions:
-            lines.append(f"  {d['statement']}")
-        for f in given_facts:
-            lines.append(f"  [{f['type'].upper()}] {f['statement']}")
-        lines.append("")
-
-    # Proof steps
-    lines.append("PROOF")
-    lines.append("-" * 70)
-    for i, entry in enumerate(derived, start=1):
-        lines.append(f"Step {i}. {entry['statement']}")
-        if entry.get("proof"):
-            lines.append("")
-            lines.append(f"  Proof: {entry['proof']}")
-        lines.append("")
-
-    lines.append("QED")
-
     stem = statements_path.stem.removesuffix("_statements")
-    out_path = statements_path.parent / (stem + "_final_proof.txt")
-    out_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"Proof written to {out_path}")
-
     _write_latex(statements_path.parent / (stem + "_final_proof.tex"), goal, definitions, given_facts, derived)
 
 
