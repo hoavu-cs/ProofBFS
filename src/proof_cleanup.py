@@ -165,7 +165,12 @@ def _write_latex(out_path: Path, goal: dict | None, definitions: list[dict], giv
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 2:
-        print("Usage: python -m src.proof_cleanup <path_to_statements.json>")
-        sys.exit(1)
-    generate_proof(Path(sys.argv[1]))
+    if len(sys.argv) >= 2:
+        path = Path(sys.argv[1])
+    else:
+        raw = input("Please enter the generated _statements.json file's path: ").strip()
+        if not raw:
+            print("Path cannot be empty.")
+            sys.exit(1)
+        path = Path(raw)
+    generate_proof(path)
