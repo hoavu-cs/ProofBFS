@@ -35,29 +35,30 @@ class Fact:
 
 STATEMENT_AGENT_SYSTEM = """\
 You are a mathematical reasoning agent. Given a set of established statements:
-0. First check if the ultimate goal can be derived from the established statements. 
-If it is possible, derive the statement and the proof. 
-1. Otherwise, derive **one** new **interesting** mathematical statement or theorem, possibly using the established statements or definitions as premises or inspiration.
-2. **Do not** think for too long or make big leaps in reasoning. 
-3. Also provide a concise proof.
-4. Format your response exactly as:
-statement:
-<statement>
-proof:
-<proof>
-If you receive feedback from the checker, revise your statement in the same format.
-Try not to repeat statements that have already been approved in previous rounds.
-If you need to verify a numerical computation or check an example, use the run_python tool.
-Available packages: numpy, scipy, sympy, mpmath, z3-solver (import as z3).
-Do not add markdown formatting."""
+
+1. First check if the ultimate goal can be derived from the established statements. If it is possible, derive the statement and the proof. 
+2. If not, check if you can disprove the goal using the established statements. If it is possible, provide a proof to disprove the goal (i.e., a counterexample or a logical contradiction).
+3. Otherwise, derive **one** new **interesting** mathematical statement or theorem, possibly using the established statements or definitions as premises or inspiration.
+4. **Do not** think for too long or make big leaps in reasoning. 
+5. Also provide a concise proof.
+6. Format your response exactly as:
+    statement:
+    <statement>
+    proof:
+    <proof>
+7.If you receive feedback from the checker, revise your statement in the same format.
+8.Try not to repeat statements that have already been approved in previous rounds.
+9.If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
+10.Do not add markdown formatting."""
 
 GOAL_CHECK_SYSTEM = """\
-You are a goal checker. Your only job is to check whether the goal appears as one of the established statements (**verbatim or clearly equivalent**).
-Do NOT attempt to prove the goal yourself. Do NOT reason about whether it could be derived.
-Simply check: is the goal already an established statement?
-Respond with exactly one of:
-  PROVEN: <which statement matches the goal>
-  NOT YET
+1. You are a goal checker. Your only job is to check whether the goal has been proven or disproven by the established statements.
+2. Do NOT attempt to prove or disprove the goal yourself.
+3. Simply check: does an established statement prove or disprove the goal?
+4. Respond with exactly one of:
+    PROVEN: <which statement proves the goal>
+    DISPROVEN: <which statement disproves the goal>
+    NOT YET
 """
 
 CHECKER_AGENT_SYSTEM = """\
@@ -65,19 +66,17 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
 1. The statement is correct and precisely stated.
 2. The proof is valid: every step follows logically, no gaps or unjustified leaps.
 3. If the proof is unclear, just ask for clarification. Do not try to solve it yourself.
-4. If you think there is an easy fix, suggest the fix to the proposer.
-Respond with exactly one of:
-  APPROVED: <brief justification>
-  statement:
-  <restate the statement cleanly>
-  proof:
-  <restate the proof cleanly, improving clarity if possible>
+4. Respond with exactly one of:
+    APPROVED: <brief justification>
+    statement:
+    <restate the statement cleanly>
+    proof:
+    <restate the proof cleanly, improving clarity if possible>
 
-  FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
-  CLARIFICATION NEEDED: <what is unclear and where>
-If you need to verify a numerical computation or check an example, use the run_python tool.
-Available packages: numpy, scipy, sympy, mpmath, z3-solver (import as z3).
-Do not add markdown formatting."""
+    FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
+    CLARIFICATION NEEDED: <what is unclear and where>
+5. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
+6. Do not add markdown formatting."""
 
 
 """-----------------------------------------------------------------------------------------------
@@ -248,13 +247,16 @@ def run(json_path: Path) -> None:
     stmt_history: list[dict] = []
     check_history: list[dict] = []
     new_facts: list[Fact] = []
-    goal_proven = False
-
-    def check_goal() -> bool:
+    def check_goal() -> str:
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
-        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nWas the goal reached?"}], deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
+        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
         log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n", "[Goal check]")
-        return result.upper().startswith("PROVEN")
+        upper = result.upper()
+        if upper.startswith("PROVEN"):
+            return "PROVEN"
+        if upper.startswith("DISPROVEN"):
+            return "DISPROVEN"
+        return "NOT YET"
 
     def run_checker(prompt: str) -> str:
         check_history.append({"role": "user", "content": prompt})
@@ -263,7 +265,7 @@ def run(json_path: Path) -> None:
         log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n", "[Checker]")
         return verdict
 
-    def handle_approved(verdict: str, approval_msg: str) -> bool:
+    def handle_approved(verdict: str, approval_msg: str) -> str:
         fact = parse_statement_proof(verdict)
         if fact:
             fact.comment = "Derived"
@@ -271,8 +273,9 @@ def run(json_path: Path) -> None:
             new_facts.append(fact)
         stmt_history.append({"role": "user", "content": approval_msg})
         stmt_history.append({"role": "assistant", "content": "Understood."})
-        return bool(goal and check_goal())
+        return check_goal() if goal else "NOT YET"
 
+    goal_outcome = "NOT YET"
     for round_num in range(1, ROUNDS + 1):
         log_print(f"--- Round {round_num} ---")
         print_facts(facts)
@@ -287,7 +290,7 @@ def run(json_path: Path) -> None:
         verdict = run_checker(f"{context}\n\nReview this new statement and its proof:\n\n{claim}")
 
         if verdict.upper().startswith("APPROVED"):
-            goal_proven = handle_approved(verdict, "Your statement was approved.")
+            goal_outcome = handle_approved(verdict, "Your statement was approved.")
         else:
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
             claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
@@ -297,10 +300,11 @@ def run(json_path: Path) -> None:
             verdict = run_checker(f"{context}\n\nReview this revised statement and its proof:\n\n{claim}")
 
             if verdict.upper().startswith("APPROVED"):
-                goal_proven = handle_approved(verdict, "Your revised statement was approved.")
+                goal_outcome = handle_approved(verdict, "Your revised statement was approved.")
             else:
                 stmt_history.append({"role": "user", "content": f"Your revised statement was also rejected: {verdict}. Keep this in mind for the next round."})
                 stmt_history.append({"role": "assistant", "content": "Understood."})
+                goal_outcome = "NOT YET"
 
         if new_facts:
             save_facts(derived_path, new_facts)
@@ -312,10 +316,13 @@ def run(json_path: Path) -> None:
                 f.write(entry + "\n\n")
         _full_log.clear()
 
-        if goal_proven:
+        if goal_outcome == "PROVEN":
+            print("\n[bold green]=== Goal proven! ===[/bold green]")
             break
-    if goal_proven:
-        print("\n[bold green]=== Goal proven! ===[/bold green]")
+        if goal_outcome == "DISPROVEN":
+            print("\n[bold red]=== Goal disproven! ===[/bold red]")
+            break
+
     print(f"\n[dim]Statements and log saved to {json_path.parent}[/dim]")
 
 
