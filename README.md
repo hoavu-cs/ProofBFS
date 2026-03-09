@@ -90,39 +90,8 @@ python -m src.proof_cleanup
 
 and enter your output json file (e.g., `examples/inequalities/3/inputs_statements.json`).
 
-This produces `inputs_final_proof.txt` and `inputs_final_proof.tex`, with irrelevant dead-end steps filtered out by an LLM.
+This produces  `inputs_final_proof.tex`, with irrelevant dead-end steps filtered out by an LLM.
 
-Example
-
-```
-THEOREM
-======================================================================
-Prove that a^2/sqrt(3a^2 + 8b^2 + 14ab) + b^2/sqrt(3b^2 + 8c^2 + 14bc) + c^2/sqrt(3c^2 + 8a^2 + 14ca) >= (a+b+c)/5 for all positive reals a, b, c
-(VNU entrance exam 2009-2010)
-
-SETUP
-----------------------------------------------------------------------
-  a, b, c are positive real numbers
-  [FACT] Cauchy-Schwarz inequality (Engel/Titu form): for positive reals x_i, y_i, sum(x_i^2 / y_i) >= (sum x_i)^2 / (sum y_i)
-  [FACT] AM-GM inequality: for positive reals x, y, x + y >= 2*sqrt(x*y), equivalently sqrt(x*y) <= (x+y)/2
-  [FACT] Cauchy-Schwarz in the form: (sum_i u_i * v_i)^2 <= (sum_i u_i^2)(sum_i v_i^2)
-
-PROOF
-----------------------------------------------------------------------
-Step 1. For all positive real numbers a, b, we have √(3a² + 8b² + 14ab) ≤ 2a + 3b, with equality when a = b.
-
-  Proof: Square both sides (both sides are non‑negative) to obtain 3a² + 8b² + 14ab ≤ (2a + 3b)² = 4a² + 12ab + 9b². Rearranging gives 0 ≤ a² - 2ab + b² = (a - b)², which is true for all real a, b. Equality holds precisely when a = b.
-
-Step 2. For all positive real numbers a, b, c, we have ∑_{cyc} a²/(2a + 3b) ≥ (a + b + c)/5.
-
-  Proof: By the Engel‑Titu form of Cauchy‑Schwarz, ∑_{cyc} a²/(2a + 3b) ≥ (a + b + c)² / ∑_{cyc} (2a + 3b). The denominator sums to (2a + 3b) + (2b + 3c) + (2c + 3a) = 5a + 5b + 5c = 5(a + b + c). Hence the right‑hand side equals (a + b + c)² / (5(a + b + c)) = (a + b + c)/5. Equality holds when the sequences (a, b, c) and (2a + 3b, 2b + 3c, 2c + 3a) are proportional, which is satisfied when a = b = c.
-
-Step 3. For all positive real numbers a, b, c, we have ∑_{cyc} a²/√(3a² + 8b² + 14ab) ≥ (a + b + c)/5.
-
-  Proof: From the inequality √(3a² + 8b² + 14ab) ≤ 2a + 3b (proved earlier), take reciprocals to obtain 1/√(3a² + 8b² + 14ab) ≥ 1/(2a + 3b). Multiplying by a² gives a²/√(3a² + 8b² + 14ab) ≥ a²/(2a + 3b). Summing cyclically yields ∑_{cyc} a²/√(3a² + 8b² + 14ab) ≥ ∑_{cyc} a²/(2a + 3b). Applying the previously proved inequality ∑_{cyc} a²/(2a + 3b) ≥ (a + b + c)/5, we conclude ∑_{cyc} a²/√(3a² + 8b² + 14ab) ≥ (a + b + c)/5. Equality holds when a = b = c.
-
-QED
-```
 
 ## Output files
 
