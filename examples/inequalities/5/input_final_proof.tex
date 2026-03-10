@@ -1,0 +1,91 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{claim}{Claim}
+
+\begin{document}
+
+\begin{theorem}
+Let $a, b, c > 0$ satisfy $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$. Then
+\[
+(a^4 + b^4 - c^4)\left(\frac{1}{a^4} + \frac{1}{b^4} - \frac{1}{c^4}\right) \ge 361 + 208\sqrt{3},
+\]
+with equality if and only if $\displaystyle \frac{a}{b} + \frac{b}{a} = 2 + 2\sqrt{3}$ and $\displaystyle c = \frac{a^2 + b^2}{2(a+b)}$.
+\end{theorem}
+
+\begin{claim}
+For positive real numbers $a,b,c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
+\[
+\frac{a}{b} + \frac{b}{a} \ge 2 + 2\sqrt{3}.
+\]
+Equality holds if and only if $(a+b)^2 = (4+2\sqrt{3})\,ab$ and $\displaystyle c = \frac{a^2 + b^2}{2(a+b)}$.
+\end{claim}
+
+\begin{proof}
+Rewrite the given condition as
+\[
+(a+b-c)\left(\frac{a+b}{ab} - \frac{1}{c}\right) = 3.
+\]
+Multiplying out and clearing denominators gives a quadratic equation in $c$:
+\[
+(a+b)c^2 - \bigl((a+b)^2 - 2ab\bigr)c + (a+b)ab = 0. \tag{1}
+\]
+Since a positive real solution $c$ exists, the discriminant of (1) must be non-negative:
+\[
+\Delta := \bigl((a+b)^2 - 2ab\bigr)^2 - 4(a+b) \cdot (a+b)ab \ge 0.
+\]
+Simplifying,
+\[
+\Delta = (a+b)^4 - 8(a+b)^2 ab + 4(ab)^2 \ge 0.
+\]
+Dividing by $(ab)^2 > 0$ and setting $u := \frac{(a+b)^2}{ab}$ (note $u = \frac{a}{b} + \frac{b}{a} + 2$) yields
+\[
+u^2 - 8u + 4 \ge 0.
+\]
+The quadratic $u^2 - 8u + 4$ has roots $4 \pm 2\sqrt{3}$; hence $u \le 4 - 2\sqrt{3}$ or $u \ge 4 + 2\sqrt{3}$. Since $\frac{a}{b} + \frac{b}{a} > 4$, we have $u > 4$, so the first alternative is impossible. Thus $u \ge 4 + 2\sqrt{3}$. Consequently,
+\[
+\frac{a}{b} + \frac{b}{a} = u - 2 \ge 2 + 2\sqrt{3}.
+\]
+
+Equality occurs exactly when $\Delta = 0$, i.e. when $u = 4 + 2\sqrt{3}$ (which is $(a+b)^2 = (4+2\sqrt{3})ab$) and the double root of (1) is
+\[
+c = \frac{(a+b)^2 - 2ab}{2(a+b)} = \frac{a^2 + b^2}{2(a+b)}.
+\]
+\end{proof}
+
+\begin{claim}
+For positive real numbers $a,b,c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$,
+\[
+(a^4 + b^4 - c^4)\left(\frac{1}{a^4} + \frac{1}{b^4} - \frac{1}{c^4}\right) \ge 361 + 208\sqrt{3}.
+\]
+Equality holds if and only if $\displaystyle \frac{a}{b} + \frac{b}{a} = 2 + 2\sqrt{3}$ and $\displaystyle c = \frac{a^2 + b^2}{2(a+b)}$.
+\end{claim}
+
+\begin{proof}
+Set $t = \frac{a}{b} > 0$ and $z = \frac{c}{b} > 0$. Substituting $a = tb$, $c = zb$ into the given condition gives the quadratic relation
+\[
+(t+1)z^2 - (t^2 + 1)z + t(t+1) = 0. \tag{2}
+\]
+Define
+\[
+F(t,z) = \bigl(t^4 + 1 - z^4\bigr)\left(\frac{1}{t^4} + 1 - \frac{1}{z^4}\right).
+\]
+Because $F(t,z) = F(1/t, z)$, $F$ depends only on $s := t + \frac{1}{t}$. Eliminating $z$ with the help of (2) yields the rational expression
+\[
+F(s) = \frac{8s^5 + 8s^4 - 32s^3 - 31s^2 + 36s + 36}{(s+2)^2} \qquad (s > 0). \tag{3}
+\]
+Its derivative is
+\[
+F'(s) = \frac{8s\bigl(3s^4 + 12s^3 + 4s^2 - 24s - 20\bigr)}{(s+2)^3}.
+\]
+For $s \ge 2 + 2\sqrt{3}$ the numerator is positive (the polynomial $3s^4 + 12s^3 + 4s^2 - 24s - 20$ has a single positive root $s = \sqrt{2} < 2 + 2\sqrt{3}$ and is positive thereafter) and the denominator is positive; hence $F(s)$ is strictly increasing for $s \ge 2 + 2\sqrt{3}$.
+
+From Claim 1 we have $\frac{a}{b} + \frac{b}{a} = s \ge 2 + 2\sqrt{3}$. Consequently,
+\[
+F(s) \ge F(2 + 2\sqrt{3}) = 361 + 208\sqrt{3}.
+\]
+
+Equality occurs exactly when $s = 2 + 2\sqrt{3}$ and the discriminant of (2) vanishes, i.e. when $t$ satisfies $t + \frac{1}{t} = 2 + 2\sqrt{3}$ and $z$ is the double root $z = \frac{t^2 + 1}{2(t+1)}$. Returning to $a,b,c$, these conditions are $\frac{a}{b} + \frac{b}{a} = 2 + 2\sqrt{3}$ and $c = \frac{a^2 + b^2}{2(a+b)}$.
+\end{proof}
+
+\end{document}

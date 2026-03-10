@@ -12,6 +12,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 from .tools import PYTHON_TOOL, run_python
+from .html_view import generate_html
 
 load_dotenv()
 
@@ -84,7 +85,7 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
     FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
     CLARIFICATION NEEDED: <what is unclear and where>
 5. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
-6. Use latex for mathematical expressions.
+6. Use latex for mathematical expressions. 
 7. Do not add markdown formatting."""
 
 
@@ -124,7 +125,7 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
 
 
 def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: list | None = None) -> str:
-    if model in ("deepseek-chat", "deepseek-reasoner", "MiniMax-M2"):
+    if model in (DEEPSEEK_CHAT, DEEPSEEK_REASONER):
         messages = [{"role": "user", "content": system}, {"role": "assistant", "content": "Understood."}, *history]
     else:
         messages = [{"role": "system", "content": system}, *history]
@@ -137,7 +138,7 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
     while tools and tool_calls_map:
         assistant_msg: dict = {"role": "assistant", "content": content}
-        if reasoning and model in ("deepseek-reasoner", "MiniMax-M2"):
+        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN):
             assistant_msg["reasoning_content"] = reasoning
         assistant_msg["tool_calls"] = [
             {"id": tc["id"], "type": "function", "function": {"name": tc["name"], "arguments": tc["arguments"]}}
@@ -225,10 +226,23 @@ def print_facts(facts: list[Fact]) -> None:
 """-----------------------------------------------------------------------------------------------
 Main loop of the proof assistant.
 -----------------------------------------------------------------------------------------------"""
-def run(json_path: Path) -> None:
+def run(
+    json_path: Path,
+    proposer_model: str = DEEPSEEK_REASONER,
+    checker_model: str = DEEPSEEK_REASONER,
+    open_html: bool = False,
+    prompt_each_round: bool = True,
+) -> None:
+    def _client(model: str) -> OpenAI:
+        return ollama_client if model == OLLAMA_QWEN else deepseek_client
+
+    p_client = _client(proposer_model)
+    c_client = _client(checker_model)
+
     derived_path = json_path.parent / (json_path.stem + "_statements.json")
     log_path = json_path.parent / (json_path.stem + "_log.txt")
     full_log_path = json_path.parent / (json_path.stem + "_full_log.txt")
+    html_path = str(json_path.parent / (json_path.stem + "_view.html"))
     if not derived_path.exists():
         derived_path.write_text(json_path.read_text(), encoding="utf-8")
     facts, goal = load_statements(json_path, derived_path)
@@ -253,12 +267,17 @@ def run(json_path: Path) -> None:
         print(f"[bold yellow]Goal: {goal}[/bold yellow]\n")
     print_facts(facts)
 
+    generate_html(derived_path)
+    if open_html:
+        import webbrowser
+        webbrowser.open(html_path)
+
     stmt_history: list[dict] = []
     check_history: list[dict] = []
     new_facts: list[Fact] = []
     def check_goal() -> str:
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
-        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
+        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], c_client, checker_model, tools=[PYTHON_TOOL])
         log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n", "[Goal check]")
         upper = result.upper()
         if upper.startswith("PROVEN"):
@@ -269,7 +288,7 @@ def run(json_path: Path) -> None:
 
     def run_checker(prompt: str) -> str:
         check_history.append({"role": "user", "content": prompt})
-        verdict = chat(CHECKER_AGENT_SYSTEM, check_history, deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
+        verdict = chat(CHECKER_AGENT_SYSTEM, check_history, c_client, checker_model, tools=[PYTHON_TOOL])
         check_history.append({"role": "assistant", "content": verdict})
         log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n", "[Checker]")
         return verdict
@@ -289,13 +308,13 @@ def run(json_path: Path) -> None:
         log_print(f"--- Round {round_num} ---")
         print_facts(facts)
 
-        user_hint = input("Hint (or Enter to skip): ").strip()
+        user_hint = input("Hint (or Enter to skip): ").strip() if prompt_each_round else ""
 
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
         goal_hint = f"\n\nUltimate goal to work towards: {goal}" if goal else ""
         hint_str = f"\n\nHint from user: {user_hint}" if user_hint else ""
         stmt_history.append({"role": "user", "content": context + goal_hint + hint_str + "\n\nDerive one new mathematical statement."})
-        claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
+        claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
         stmt_history.append({"role": "assistant", "content": claim})
         log_print(f"[bold green][Proposer] {claim}[/bold green]\n", "[Proposer]")
 
@@ -305,7 +324,7 @@ def run(json_path: Path) -> None:
             goal_outcome = handle_approved(verdict, "Your statement was approved.")
         else:
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
-            claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
+            claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
             stmt_history.append({"role": "assistant", "content": claim})
             log_print(f"[bold yellow][Proposer] (revised) {claim}[/bold yellow]\n", "[Proposer revised]")
 
@@ -321,6 +340,10 @@ def run(json_path: Path) -> None:
         if new_facts:
             save_facts(derived_path, new_facts)
             new_facts.clear()
+        generate_html(derived_path)
+        if open_html:
+            import webbrowser
+            webbrowser.open(html_path)
         append_log(log_path, log[log_offset:])
         log_offset = len(log)
         with open(full_log_path, "a", encoding="utf-8") as f:
@@ -335,6 +358,6 @@ def run(json_path: Path) -> None:
             print("\n[bold red]=== Goal disproven! ===[/bold red]")
             break
 
-    print(f"\n[dim]Statements and log saved to {json_path.parent}[/dim]")
+    print(f"\n[bold]Statements and log saved to {json_path.parent}[/bold]")
 
 
