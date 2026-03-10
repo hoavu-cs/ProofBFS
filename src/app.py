@@ -85,7 +85,7 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
     FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
     CLARIFICATION NEEDED: <what is unclear and where>
 5. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
-6. Use latex for mathematical expressions.
+6. Use latex for mathematical expressions. 
 7. Do not add markdown formatting."""
 
 
