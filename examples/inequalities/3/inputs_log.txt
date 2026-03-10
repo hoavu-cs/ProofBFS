@@ -97,3 +97,6 @@ Combining 1 and this bound yields the desired inequality.
 [Goal check] PROVEN: For positive real numbers a, b, c satisfying a + b + c ≤ 2,
 √(a² + 1/b²) + √(b² + 1/c²) + √(c² + 1/a²) ≥ √(97)/2.
 
+
+=== Run 2026-03-10 13:58:34 ===
+

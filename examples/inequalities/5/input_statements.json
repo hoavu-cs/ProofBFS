@@ -1,0 +1,51 @@
+[
+  {
+    "type": "fact",
+    "statement": "AM-GM inequality: for positive reals $x, y, x + y \\geq 2\\sqrt{x y}$, equivalently $\\sqrt{x y} \\leq (x+y)/2$",
+    "comment": "useful inequality"
+  },
+  {
+    "type": "fact",
+    "statement": "Cauchy-Schwarz in the form: $(\\sum_i u_i v_i)^2 \\leq (\\sum_i u_i^2)(\\sum_i v_i^2)$",
+    "comment": "useful inequality"
+  },
+  {
+    "type": "fact",
+    "statement": "$a,b,c > 0$",
+    "comment": "Assumption"
+  },
+  {
+    "type": "fact",
+    "statement": "$(a+b-c)(1/a+1/b-1/c)=3$",
+    "comment": "Assumption"
+  },
+  {
+    "type": "goal",
+    "statement": "Minimize $(a^4 + b^4 - c^4)(1/a^4 + 1/b^4 - 1/c^4)$",
+    "comment": "https://math.stackexchange.com/questions/5125736/minimize-a4b4-c4-frac1a4-frac1b4-frac1c4-subject-to-p"
+  },
+  {
+    "type": "fact",
+    "statement": "For positive real numbers $a,b,c$ satisfying $(a+b-c)\\bigl(\\frac1a+\\frac1b-\\frac1c\\bigr)=3$, we have $\\frac{a}{b}+\\frac{b}{a}>4$.",
+    "proof": "Expand the given relation:\n$$\n(a+b-c)\\Bigl(\\frac1a+\\frac1b-\\frac1c\\Bigr)=\\frac{a+b-c}{a}+\\frac{a+b-c}{b}-\\frac{a+b-c}{c}\n=3+\\Bigl(\\frac{a}{b}+\\frac{b}{a}\\Bigr)-\\Bigl(\\frac{a}{c}+\\frac{c}{a}\\Bigr)-\\Bigl(\\frac{b}{c}+\\frac{c}{b}\\Bigr).\n$$\nSetting this equal to $3$ gives\n$$\n\\frac{a}{b}+\\frac{b}{a}= \\Bigl(\\frac{a}{c}+\\frac{c}{a}\\Bigr)+\\Bigl(\\frac{b}{c}+\\frac{c}{b}\\Bigr).\n$$\nFor any positive $x,y$, AM\u2013GM yields $\\frac{x}{y}+\\frac{y}{x}\\ge 2$, with equality iff $x=y$. Applying this to the two terms on the right-hand side,\n$$\n\\frac{a}{c}+\\frac{c}{a}\\ge 2,\\qquad \\frac{b}{c}+\\frac{c}{b}\\ge 2.\n$$\nHence\n$$\n\\frac{a}{b}+\\frac{b}{a}\\ge 2+2=4.\n$$\nIf equality held, we would need $\\frac{a}{c}+\\frac{c}{a}=2$ and $\\frac{b}{c}+\\frac{c}{b}=2$, which forces $a=c$ and $b=c$, i.e. $a=b=c$. Substituting $a=b=c$ into the original condition gives $(a+a-a)\\bigl(\\frac1a+\\frac1a-\\frac1a\\bigr)=1$, contradicting the hypothesis that the product equals $3$. Therefore the inequality is strict:\n$$\n\\frac{a}{b}+\\frac{b}{a}>4.\n$$",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For positive real numbers $a,b,c$ satisfying $(a+b-c)\\bigl(\\frac1a+\\frac1b-\\frac1c\\bigr)=3$, we have\n$$\n\\frac{a}{b}+\\frac{b}{a}\\ge 2+2\\sqrt3 .\n$$\nEquality holds if and only if $(a+b)^{2}=(4+2\\sqrt3)\\,ab$ and $c=\\dfrac{a^{2}+b^{2}}{2(a+b)}$.",
+    "proof": "Rewrite the given condition as\n$$\n(a+b-c)\\Bigl(\\frac{a+b}{ab}-\\frac1c\\Bigr)=3 .\n$$\nMultiplying out and clearing denominators gives the quadratic equation in $c$:\n$$\n(a+b)c^{2}-\\bigl((a+b)^{2}-2ab\\bigr)c+(a+b)ab=0.\\tag{1}\n$$\nBecause a positive real solution $c$ exists, the discriminant of (1) must be non\u2011negative:\n$$\n\\Delta:=\\bigl((a+b)^{2}-2ab\\bigr)^{2}-4(a+b)\\cdot(a+b)ab\\ge0 .\n$$\nSimplifying,\n$$\n\\Delta=(a+b)^{4}-8(a+b)^{2}ab+4(ab)^{2}\\ge0 .\n$$\nDividing by $(ab)^{2}>0$ and setting $u:=\\dfrac{(a+b)^{2}}{ab}$ (note $u=\\frac{a}{b}+\\frac{b}{a}+2$) yields\n$$\nu^{2}-8u+4\\ge0 .\n$$\nThe quadratic $u^{2}-8u+4$ has roots $4\\pm2\\sqrt3$; hence $u\\le4-2\\sqrt3$ or $u\\ge4+2\\sqrt3$. From the previously established fact $\\frac{a}{b}+\\frac{b}{a}>4$ we have $u>4$, therefore the first alternative is impossible and we must have $u\\ge4+2\\sqrt3$. Consequently\n$$\n\\frac{a}{b}+\\frac{b}{a}=u-2\\ge2+2\\sqrt3 .\n$$\n\nEquality occurs exactly when $\\Delta=0$, i.e. when $u=4+2\\sqrt3$ (which is $(a+b)^{2}=(4+2\\sqrt3)ab$) and the double root of (1) is\n$$\nc=\\frac{(a+b)^{2}-2ab}{2(a+b)}=\\frac{a^{2}+b^{2}}{2(a+b)} .\n$$",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For positive real numbers $a,b,c$ satisfying $(a+b-c)\\bigl(\\frac1a+\\frac1b-\\frac1c\\bigr)=3$, we have\n$$\n(a^2+b^2-c^2)\\Bigl(\\frac1{a^2}+\\frac1{b^2}-\\frac1{c^2}\\Bigr)\\ge 13+4\\sqrt3 .\n$$\nEquality holds if and only if $\\displaystyle\\frac{a}{b}+\\frac{b}{a}=2+2\\sqrt3$ and $\\displaystyle c=\\frac{a^2+b^2}{2(a+b)}$.",
+    "proof": "Set $t=\\frac ab>0$ and $z=\\frac cb>0$. Substituting $a=tb$, $c=zb$ into the given condition yields the quadratic relation\n$$\n(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \\tag{1}\n$$\nNow compute\n$$\nX=(a^{2}+b^{2}-c^{2})\\Bigl(\\frac1{a^{2}}+\\frac1{b^{2}}-\\frac1{c^2}\\Bigr)\n   =\\frac{(t^{2}+1-z^{2})\\bigl(z^{2}(t^{2}+1)-t^{2}\\bigr)}{t^{2}z^{2}}.\n$$\nEliminating $z$ using (1) (or solving (1) for $z$ and substituting) gives, after simplification,\n$$\nX=\\frac{4t^{4}+5t^{3}+10t^{2}+5t+4}{t(t+1)^{2}}.\n$$\nWrite $s=t+\\frac1t$. Dividing numerator and denominator of $X$ by $t^{2}$ yields\n$$\nX=\\frac{4s^{2}+5s+2}{s+2}. \\tag{2}\n$$\nFor $s>0$, the derivative is $X'(s)=4-\\frac{8}{(s+2)^{2}}>0$ because $(s+2)^{2}>4$; hence $X$ is strictly increasing in $s$.\n\nFrom a previously established statement we have $\\frac{a}{b}+\\frac{b}{a}=s\\ge2+2\\sqrt3$. Consequently,\n$$\nX\\ge X(2+2\\sqrt3)=\\frac{4(2+2\\sqrt3)^{2}+5(2+2\\sqrt3)+2}{(2+2\\sqrt3)+2}=13+4\\sqrt3.\n$$\n\nEquality occurs exactly when $s=2+2\\sqrt3$ and the discriminant of (1) vanishes, i.e. when $t$ satisfies $t+\\frac1t=2+2\\sqrt3$ and $z$ is the double root of (1), $z=\\frac{t^{2}+1}{2(t+1)}$. Returning to $a,b,c$, this means $\\frac{a}{b}+\\frac{b}{a}=2+2\\sqrt3$ and $c=\\frac{a^{2}+b^{2}}{2(a+b)}$.",
+    "comment": "Derived"
+  },
+  {
+    "type": "fact",
+    "statement": "For positive real numbers $a,b,c$ satisfying $(a+b-c)\\bigl(\\frac1a+\\frac1b-\\frac1c\\bigr)=3$,\n$$\n(a^4+b^4-c^4)\\Bigl(\\frac1{a^4}+\\frac1{b^4}-\\frac1{c^4}\\Bigr)\\ge 361+208\\sqrt3 .\n$$\nEquality holds if and only if $\\displaystyle\\frac{a}{b}+\\frac{b}{a}=2+2\\sqrt3$ and $\\displaystyle c=\\frac{a^{2}+b^{2}}{2(a+b)}$.",
+    "proof": "Set $t=\\frac ab>0$ and $z=\\frac cb>0$. Substituting $a=tb$, $c=zb$ into the given condition gives the quadratic relation\n$$\n(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \\tag{1}\n$$\nDefine\n$$\nF(t,z)=\\bigl(t^{4}+1-z^{4}\\bigr)\\Bigl(\\frac1{t^{4}}+1-\\frac1{z^{4}}\\Bigr).\n$$\nBecause $F(t,z)=F(1/t,z)$, $F$ depends only on $s:=t+\\frac1t$. Eliminating $z$ with the help of (1) yields the rational expression\n$$\nF(s)=\\frac{8s^{5}+8s^{4}-32s^{3}-31s^{2}+36s+36}{(s+2)^{2}}\\qquad(s>0). \\tag{2}\n$$\nIts derivative is\n$$\nF'(s)=\\frac{8s\\bigl(3s^{4}+12s^{3}+4s^{2}-24s-20\\bigr)}{(s+2)^{3}}.\n$$\nFor $s\\ge2+2\\sqrt3$ the numerator is positive (the polynomial $3s^{4}+12s^{3}+4s^{2}-24s-20$ has a single positive root $s=\\sqrt2<2+2\\sqrt3$ and is positive thereafter) and the denominator is positive; hence $F(s)$ is strictly increasing for $s\\ge2+2\\sqrt3$.\n\nFrom a previous result we have $\\frac ab+\\frac ba=s\\ge2+2\\sqrt3$. Consequently\n$$\nF(s)\\ge F(2+2\\sqrt3)=361+208\\sqrt3 .\n$$\n\nEquality occurs exactly when $s=2+2\\sqrt3$ and the discriminant of (1) vanishes, i.e. when $t$ satisfies $t+\\frac1t=2+2\\sqrt3$ and $z$ is the double root $z=\\frac{t^{2}+1}{2(t+1)}$. Returning to $a,b,c$, these conditions are $\\frac{a}{b}+\\frac{b}{a}=2+2\\sqrt3$ and $c=\\frac{a^{2}+b^{2}}{2(a+b)}$.",
+    "comment": "Derived"
+  }
+]
