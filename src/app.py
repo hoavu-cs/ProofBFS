@@ -289,9 +289,12 @@ def run(json_path: Path) -> None:
         log_print(f"--- Round {round_num} ---")
         print_facts(facts)
 
+        user_hint = input("Hint (or Enter to skip): ").strip()
+
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
         goal_hint = f"\n\nUltimate goal to work towards: {goal}" if goal else ""
-        stmt_history.append({"role": "user", "content": context + goal_hint + "\n\nDerive one new mathematical statement."})
+        hint_str = f"\n\nHint from user: {user_hint}" if user_hint else ""
+        stmt_history.append({"role": "user", "content": context + goal_hint + hint_str + "\n\nDerive one new mathematical statement."})
         claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, deepseek_client, DEEPSEEK_REASONER, tools=[PYTHON_TOOL])
         stmt_history.append({"role": "assistant", "content": claim})
         log_print(f"[bold green][Proposer] {claim}[/bold green]\n", "[Proposer]")
