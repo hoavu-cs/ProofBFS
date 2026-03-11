@@ -6,11 +6,14 @@ VENV_PYTHON = str(Path(__file__).parent.parent / "venv" / "bin" / "python")
 
 
 def run_python(code: str) -> str:
-    result = subprocess.run(
-        [VENV_PYTHON, "-c", code],
-        capture_output=True, text=True, timeout=5
-    )
-    return result.stdout.strip() or result.stderr.strip()
+    try:
+        result = subprocess.run(
+            [VENV_PYTHON, "-c", code],
+            capture_output=True, text=True, timeout=20
+        )
+        return result.stdout.strip() or result.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return "TimeoutError: code execution exceeded 20 seconds"
 
 
 PYTHON_TOOL = {
