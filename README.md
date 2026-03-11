@@ -1,6 +1,20 @@
 # proof-bfs
 
-proof-bfs is a two-agent proof exploration system: one agent proposes new statements, another checks them, and a goal checker decides when the target is proven or disproven.
+Proof-BFS is a two-agent proof exploration system: one agent proposes new statements, another checks them, and a goal checker decides when the target is proven or disproven.
+
+## High level ideas
+- P = {a, b, c} is a pool of facts that could be assumptions or relevant technical results that you know is true
+- A goal statement X
+- In each round, an agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
+- Bob verifies z. He can either approve, ask for clarification or fix. If there is a bug, Alice has one chance to fix it. If she still fails, move to the next round. The program will stop when the goal or maximum number of rounds is reached.
+
+A few things to keep in mind
+* Ensure each newly derived statement is short and easy to verify.
+* Even if the final goal isn’t reached, aim for interesting partial results or progress.
+* Avoid over-reliance on frontier models; the goal is to help local models achieve respectable performance.
+* Be realistic: this approach won’t solve a deep theorem on its own. Current AI likely isn’t at that level yet.
+* Use it as a helper for proving technical lemmas, and double-check everything carefully.
+
 
 [See a demo on YouTube](https://youtu.be/tmGZD796wOs)
 
@@ -10,27 +24,28 @@ proof-bfs is a two-agent proof exploration system: one agent proposes new statem
 pip install -r requirements.txt
 ```
 
-Requires a `.env` file with `DEEPSEEK_API_KEY=your_key_here`.
-You can use any model of your choice by modifying this part of `src\app.py`:
+Add API keys for the providers you use to a `.env` file:
 
-```python
-load_dotenv()
-
-deepseek_client = OpenAI(
-    api_key=os.environ["DEEPSEEK_API_KEY"],
-    base_url="https://api.deepseek.com",
-)
-
-ollama_client = OpenAI(
-    api_key="ollama",
-    base_url="http://localhost:11434/v1",
-)
-
-DEEPSEEK_CHAT = "deepseek-chat"
-DEEPSEEK_REASONER = "deepseek-reasoner"
-OLLAMA_QWEN = "qwen3.5:35b-a3b"
-ROUNDS = 10
 ```
+DEEPSEEK_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+```
+
+Supported providers and models (configured in `src/app.py`):
+
+| Constant | Model | Provider |
+|----------|-------|----------|
+| `DEEPSEEK_REASONER` | `deepseek-reasoner` | DeepSeek |
+| `DEEPSEEK_CHAT` | `deepseek-chat` | DeepSeek |
+| `GEMINI_PRO` | `gemini-2.5-pro` | Google Gemini |
+| `GEMINI_FLASH` | `gemini-2.5-flash` | Google Gemini |
+| `OLLAMA_QWEN` | `qwen3.5:35b` | Ollama (local) |
+
+All providers use an OpenAI-compatible client. To add another model, create a new client and constant in `src/app.py` and add the model to `MODELS` in `main.py`.
+
+This work is mainly tested using DeepSeek's `deepseek-reasoner` since its API exposes chain-of-thought, tool calls, and it is overall a good and inexpensive model to experiment with. I also tested with Gemini-Flash which is weaker while not exposing reasoning traces. Gemini-Pro is probably better but I have not tested on it yet. It is also not clear if it exposes reasoning traces which is important for round-by-round feedback prompt. 
+
+You can in principle add any model to the corresponding code blocks in `src/app.py` and `main.py`.
 
 ## Input format
 
@@ -59,6 +74,8 @@ Example:
   }
 ]
 ```
+
+Every statement other than the `goal` is assumed to be true. 
 
 ## Running
 
@@ -118,10 +135,3 @@ Both proposer and checker can use a Python tool (`numpy`, `scipy`, `sympy`, `mpm
 - `src/proof_cleanup.py`: filters proof chain and exports LaTeX.
 - `main.py`: interactive CLI entrypoint.
 
-## Tunable constants
-
-At top of `src/app.py`:
-
-- `ROUNDS`
-- `DEEPSEEK_CHAT`, `DEEPSEEK_REASONER`, `OLLAMA_QWEN`
-- `deepseek_client`, `ollama_client`
