@@ -1,6 +1,7 @@
 """Generates a MathJax-rendered HTML view from a *_statements.json file."""
 import html
 import json
+import re
 from pathlib import Path
 
 _TEMPLATE = """\
@@ -58,8 +59,13 @@ def generate_html(derived_path: Path) -> None:
 
     def _render_text(text: str) -> str:
         text = _normalize_math_delimiters(text)
-        # Escape raw HTML-sensitive characters but keep plain line breaks readable.
-        return html.escape(text).replace("\n", "<br>")
+        # Escape HTML only outside math delimiters so MathJax receives raw LaTeX.
+        parts = re.split(r'(\$\$[\s\S]*?\$\$|\$[^$\n]*?\$)', text)
+        result = "".join(
+            p if p.startswith("$") else html.escape(p).replace("\n", "<br>")
+            for p in parts
+        )
+        return result
 
     def _card(entry: dict, derived: bool = False) -> str:
         badge = f'<span class="badge">{entry.get("type", "fact")}</span>'

@@ -17,7 +17,7 @@ from .html_view import generate_html
 load_dotenv()
 
 deepseek_client = OpenAI(
-    api_key=os.environ["DEEPSEEK_API_KEY"],
+    api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
     base_url="https://api.deepseek.com",
 )
 
@@ -26,9 +26,16 @@ ollama_client = OpenAI(
     base_url="http://localhost:11434/v1",
 )
 
+gemini_client = OpenAI(
+    api_key=os.environ.get("GEMINI_API_KEY", ""),
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+)
+
 DEEPSEEK_CHAT = "deepseek-chat"
 DEEPSEEK_REASONER = "deepseek-reasoner"
-OLLAMA_QWEN = "qwen3.5:35b-a3b"
+OLLAMA_QWEN = "qwen3.5:35b"
+GEMINI_FLASH = "gemini-2.5-flash"
+GEMINI_PRO = "gemini-2.5-pro"
 ROUNDS = 10
 
 
@@ -100,6 +107,7 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
     reasoning, content = "", ""
     tool_calls_map: dict[int, dict] = {}
     reasoning_started = False
+    in_think_tag = False  # for models that embed <think> in content
     for chunk in client.chat.completions.create(**kwargs, stream=True):
         delta = chunk.choices[0].delta
         if getattr(delta, "reasoning_content", None):
@@ -109,7 +117,18 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
             sys.stdout.flush()
             reasoning += delta.reasoning_content
         if getattr(delta, "content", None):
-            content += delta.content
+            text = delta.content
+            content += text
+            # Print <think>...</think> blocks as they stream (e.g. Ollama/qwen)
+            if not reasoning_started:
+                if not in_think_tag and "<think>" in text:
+                    in_think_tag = True
+                    reasoning_started = True
+                if in_think_tag:
+                    sys.stdout.write(text)
+                    sys.stdout.flush()
+                    if "</think>" in text:
+                        in_think_tag = False
         if delta.tool_calls:
             for tc in delta.tool_calls:
                 idx = tc.index
@@ -117,6 +136,11 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
                     tool_calls_map[idx] = {"id": tc.id, "name": tc.function.name, "arguments": ""}
                 if tc.function.arguments:
                     tool_calls_map[idx]["arguments"] += tc.function.arguments
+    # Extract reasoning from <think> tags if not already captured separately
+    if not reasoning:
+        m = re.search(r"<think>(.*?)</think>", content, re.DOTALL)
+        if m:
+            reasoning = m.group(1).strip()
     if reasoning_started:
         sys.stdout.write("\n")
         sys.stdout.flush()
@@ -234,7 +258,11 @@ def run(
     prompt_each_round: bool = True,
 ) -> None:
     def _client(model: str) -> OpenAI:
-        return ollama_client if model == OLLAMA_QWEN else deepseek_client
+        if model == OLLAMA_QWEN:
+            return ollama_client
+        if model in (GEMINI_FLASH, GEMINI_PRO):
+            return gemini_client
+        return deepseek_client
 
     p_client = _client(proposer_model)
     c_client = _client(checker_model)

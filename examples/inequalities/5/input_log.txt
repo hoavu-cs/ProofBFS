@@ -1,289 +1,266 @@
 
-=== Run 2026-03-10 16:01:28 ===
+=== Run 2026-03-10 18:48:49 ===
 
 --- Round 1 ---
 
 [Proposer] statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)(1/a+1/b-1/c)=3$, we have $a/b + b/a > 4$.
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
+\[
+\frac{a+b}{c}+c\left(\frac{1}{a}+\frac{1}{b}\right)\ge 2+2\sqrt{3}.
+\]
+Equality holds if and only if $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 proof:
-Expand the given equation:
-\begin{align*}
-(a+b-c)\left(\frac1a+\frac1b-\frac1c\right) &= \frac{a+b-c}{a} + \frac{a+b-c}{b} - \frac{a+b-c}{c} \\
-&= \left(1+\frac{b}{a}-\frac{c}{a}\right) + \left(\frac{a}{b}+1-\frac{c}{b}\right) - \left(\frac{a}{c}+\frac{b}{c}-1\right) \\
-&= 3 + \left(\frac{a}{b}+\frac{b}{a}\right) - \left(\frac{a}{c}+\frac{c}{a}\right) - \left(\frac{b}{c}+\frac{c}{b}\right).
-\end{align*}
-Setting this equal to $3$ gives
+Define $p=\frac{a+b}{c}$ and $q=c\left(\frac{1}{a}+\frac{1}{b}\right)$.  The given equation can be rewritten as
 \[
-\frac{a}{b}+\frac{b}{a} = \left(\frac{a}{c}+\frac{c}{a}\right) + \left(\frac{b}{c}+\frac{c}{b}\right).
+(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=c(p-1)\cdot\frac{q-1}{c}=(p-1)(q-1)=3.
 \]
-For any positive $x,y$, the AM–GM inequality yields $x/y + y/x \ge 2$, with equality iff $x=y$. Applying this to the two terms on the right‑hand side we obtain
+Since the left‑hand side is positive, both factors $p-1$ and $q-1$ are positive; hence $p>1$ and $q>1$.
+Applying the AM–GM inequality to the positive numbers $p-1$ and $q-1$ yields
 \[
-\frac{a}{c}+\frac{c}{a} \ge 2, \qquad \frac{b}{c}+\frac{c}{b} \ge 2.
+(p-1)+(q-1)\ge 2\sqrt{(p-1)(q-1)}=2\sqrt{3},
 \]
-Hence
-\[
-\frac{a}{b}+\frac{b}{a} \ge 2+2 = 4.
-\]
-If equality held, we would have $a/c = c/a = 1$ and $b/c = c/b = 1$, implying $a=c$ and $b=c$, so $a=b=c$. Substituting $a=b=c$ into the original condition gives $(a+a-a)(1/a+1/a-1/a)=1$, contradicting the hypothesis that the product equals $3$. Therefore the inequality is strict:
-\[
-\frac{a}{b}+\frac{b}{a} > 4.
-\]
+so that $p+q\ge 2+2\sqrt{3}$, which is exactly the desired inequality.
+Equality in AM–GM occurs when $p-1=q-1$, i.e. $p=q$, and then $(p-1)^2=3$ gives $p=q=1+\sqrt{3}$.
+The condition $p=q$ is equivalent to $\frac{a+b}{c}=c\left(\frac{1}{a}+\frac{1}{b}\right)$, which simplifies to $ab=c^2$.  Thus equality holds precisely when $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
-[Checker] APPROVED: The expansion is algebraically correct, the inequality $\frac{x}{y}+\frac{y}{x}\ge 2$ follows from AM–GM, and the equality case leads to $a=b=c$, which contradicts the given condition.
+[Checker] CLARIFICATION NEEDED: The proof states "Since the left‑hand side is positive, both factors $p-1$ and $q-1$ are positive". However, from $(p-1)(q-1)=3>0$ we can only conclude that $p-1$ and $q-1$ have the same sign; they could both be negative. Please justify why $p-1$ and $q-1$ cannot both be negative under the given conditions $a,b,c>0$ and $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$.
+
+[Proposer revised] (revised) statement:
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
+\[
+\frac{a+b}{c}+c\left(\frac{1}{a}+\frac{1}{b}\right)\ge 2+2\sqrt{3}.
+\]
+Equality holds if and only if $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
+
+proof:
+Set $p=\frac{a+b}{c}$ and $q=c\left(\frac{1}{a}+\frac{1}{b}\right)$.  Then
+\[
+(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=c(p-1)\cdot\frac{q-1}{c}=(p-1)(q-1)=3.
+\]
+We show that $p>1$ and $q>1$.  Indeed, if $p-1$ and $q-1$ were both negative, then $a+b<c$ and $\frac{1}{a}+\frac{1}{b}<\frac{1}{c}$.  Multiplying these inequalities (all quantities are positive) gives
+\[
+(a+b)\left(\frac{1}{a}+\frac{1}{b}\right)<c\cdot\frac{1}{c}=1.
+\]
+But by the AM–GM inequality,
+\[
+(a+b)\left(\frac{1}{a}+\frac{1}{b}\right)=2+\frac{a}{b}+\frac{b}{a}\ge 2+2\sqrt{\frac{a}{b}\cdot\frac{b}{a}}=4,
+\]
+a contradiction.  Hence $p-1$ and $q-1$ must both be positive, so $p>1$ and $q>1$.
+
+Now apply the AM–GM inequality to the positive numbers $p-1$ and $q-1$:
+\[
+(p-1)+(q-1)\ge 2\sqrt{(p-1)(q-1)}=2\sqrt{3},
+\]
+which yields $p+q\ge 2+2\sqrt{3}$, the desired inequality.
+
+Equality in AM–GM occurs when $p-1=q-1$, i.e. $p=q$, and then $(p-1)^2=3$ gives $p=q=1+\sqrt{3}$.  The condition $p=q$ is equivalent to $\frac{a+b}{c}=c\left(\frac{1}{a}+\frac{1}{b}\right)$, which simplifies to $ab=c^2$.  Thus equality holds precisely when $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
+
+[Checker] APPROVED: The proof correctly transforms the given condition, shows $p>1$ and $q>1$ via contradiction using AM-GM, then applies AM-GM to $p-1$ and $q-1$ to obtain the inequality, and identifies the equality conditions.
 
 statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, we have $\frac{a}{b}+\frac{b}{a}>4$.
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
+\[
+\frac{a+b}{c}+c\left(\frac{1}{a}+\frac{1}{b}\right)\ge 2+2\sqrt{3}.
+\]
+Equality holds if and only if $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 proof:
-Expand the given relation:
+Define $p=\frac{a+b}{c}$ and $q=c\left(\frac{1}{a}+\frac{1}{b}\right)$. Then
 \[
-(a+b-c)\Bigl(\frac1a+\frac1b-\frac1c\Bigr)=\frac{a+b-c}{a}+\frac{a+b-c}{b}-\frac{a+b-c}{c}
-=3+\Bigl(\frac{a}{b}+\frac{b}{a}\Bigr)-\Bigl(\frac{a}{c}+\frac{c}{a}\Bigr)-\Bigl(\frac{b}{c}+\frac{c}{b}\Bigr).
+(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=c(p-1)\cdot\frac{q-1}{c}=(p-1)(q-1)=3.
 \]
-Setting this equal to $3$ gives
+Assume for contradiction that $p-1$ and $q-1$ are both negative. Then $a+b<c$ and $\frac{1}{a}+\frac{1}{b}<\frac{1}{c}$; multiplying gives $(a+b)\left(\frac{1}{a}+\frac{1}{b}\right)<1$. But by AM–GM,
 \[
-\frac{a}{b}+\frac{b}{a}= \Bigl(\frac{a}{c}+\frac{c}{a}\Bigr)+\Bigl(\frac{b}{c}+\frac{c}{b}\Bigr).
+(a+b)\left(\frac{1}{a}+\frac{1}{b}\right)=2+\frac{a}{b}+\frac{b}{a}\ge 2+2\sqrt{\frac{a}{b}\cdot\frac{b}{a}}=4,
 \]
-For any positive $x,y$, AM–GM yields $\frac{x}{y}+\frac{y}{x}\ge 2$, with equality iff $x=y$. Applying this to the two terms on the right-hand side,
+a contradiction. Hence $p-1$ and $q-1$ are both positive, i.e. $p>1$, $q>1$.
+
+Apply AM–GM to the positive numbers $p-1$ and $q-1$:
 \[
-\frac{a}{c}+\frac{c}{a}\ge 2,\qquad \frac{b}{c}+\frac{c}{b}\ge 2.
+(p-1)+(q-1)\ge 2\sqrt{(p-1)(q-1)}=2\sqrt{3},
 \]
-Hence
-\[
-\frac{a}{b}+\frac{b}{a}\ge 2+2=4.
-\]
-If equality held, we would need $\frac{a}{c}+\frac{c}{a}=2$ and $\frac{b}{c}+\frac{c}{b}=2$, which forces $a=c$ and $b=c$, i.e. $a=b=c$. Substituting $a=b=c$ into the original condition gives $(a+a-a)\bigl(\frac1a+\frac1a-\frac1a\bigr)=1$, contradicting the hypothesis that the product equals $3$. Therefore the inequality is strict:
-\[
-\frac{a}{b}+\frac{b}{a}>4.
-\]
+so $p+q\ge 2+2\sqrt{3}$, which is the desired inequality.
+
+Equality in AM–GM occurs iff $p-1=q-1$, i.e. $p=q$, and then $(p-1)^2=3$ gives $p=q=1+\sqrt{3}$. The condition $p=q$ simplifies to $\frac{a+b}{c}=c\left(\frac{1}{a}+\frac{1}{b}\right)$, which is equivalent to $ab=c^2$. Therefore equality holds iff $ab=c^2$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 [Goal check] NOT YET
 
 --- Round 2 ---
 
 [Proposer] statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, we have
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
 \[
-\frac{a}{b}+\frac{b}{a}\ge 2+2\sqrt3 .
+(a^{2}+b^{2}-c^{2})\left(\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}\right)\ge 13+4\sqrt{3},
 \]
-Equality holds if and only if $(a+b)^2=(4+2\sqrt3)\,ab$ and $c=\dfrac{a^2+b^2}{2(a+b)}$.
+with equality if and only if $ab=c^{2}$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 proof:
-Rewrite the condition as
+Set $p=\frac{a+b}{c}$ and $q=c\left(\frac{1}{a}+\frac{1}{b}\right)$.  Then
 \[
-(a+b-c)\Bigl(\frac{a+b}{ab}-\frac1c\Bigr)=3.
+(p-1)(q-1)=3,\qquad p>1,\; q>1.
 \]
-Multiplying out and clearing denominators yields the quadratic in $c$:
+Using $ab=c^{2}\,\frac{p}{q}$ (obtained from $p$ and $q$) we compute
+\begin{align*}
+a^{2}+b^{2}-c^{2}&=c^{2}\!\left(p^{2}-\frac{2p}{q}-1\right),\\
+\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}&=\frac{1}{c^{2}}\!\left(q^{2}-\frac{2q}{p}-1\right).
+\end{align*}
+Hence
 \[
-(a+b)c^{2}-\bigl((a+b)^{2}-2ab\bigr)c+(a+b)ab=0\tag{1}
+R:=(a^{2}+b^{2}-c^{2})\left(\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}\right)
+   =\left(p^{2}-\frac{2p}{q}-1\right)\!\left(q^{2}-\frac{2q}{p}-1\right).
 \]
-For a positive real solution $c$ to exist, the discriminant of (1) must be non‑negative:
-\[
-\Delta:=\bigl((a+b)^{2}-2ab\bigr)^{2}-4(a+b)\cdot(a+b)ab\ge0.
-\]
-Simplifying,
-\[
-\Delta=(a+b)^{4}-8(a+b)^{2}ab+4(ab)^{2}\ge0.
-\]
-Divide by $(ab)^{2}>0$ and set $u:=\dfrac{(a+b)^{2}}{ab}$. Since $\dfrac{(a+b)^{2}}{ab}= \dfrac{a}{b}+\dfrac{b}{a}+2$, we obtain
-\[
-u^{2}-8u+4\ge0.
-\]
-The quadratic $u^{2}-8u+4$ has roots $4\pm2\sqrt3$; hence the inequality forces $u\le4-2\sqrt3$ or $u\ge4+2\sqrt3$. From the previously established statement $\frac{a}{b}+\frac{b}{a}>4$ we know $u>4$, therefore $u\ge4+2\sqrt3$. Consequently
-\[
-\frac{a}{b}+\frac{b}{a}=u-2\ge2+2\sqrt3 .
-\]
-Equality $\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ occurs exactly when $\Delta=0$, i.e. when $u=4+2\sqrt3$ and, by (1), the double root is $c=\dfrac{(a+b)^{2}-2ab}{2(a+b)}=\dfrac{a^{2}+b^{2}}{2(a+b)}$.
 
-[Checker] APPROVED: The derivation of the quadratic in $c$ and the discriminant condition are algebraically correct; using $u=\frac{(a+b)^{2}}{ab}$ transforms the discriminant inequality to $u^{2}-8u+4\ge0$, which together with the previously known $a/b+b/a>4$ (hence $u>4$) forces $u\ge4+2\sqrt3$, yielding the claimed bound. Equality is precisely the case $u=4+2\sqrt3$ with $\Delta=0$.
+Using the relation $pq=p+q+2$ (which follows from $(p-1)(q-1)=3$) to eliminate $q$, elementary algebra simplifies $R$ to a rational function of $p$ alone:
+\[
+R(p)=\frac{4p^{4}+5p^{3}+13p^{2}+6p+8}{p\,(p^{2}+p-2)},\qquad p>1.
+\]
+
+Differentiating $R(p)$ and solving $R'(p)=0$ yields a unique critical point in $p>1$, namely $p=1+\sqrt{3}$.  Checking the second derivative (or monotonicity on either side) confirms that this point gives a global minimum.  Substituting $p=1+\sqrt{3}$ gives
+\[
+R_{\min}=13+4\sqrt{3}.
+\]
+
+The condition $p=1+\sqrt{3}$ together with $(p-1)(q-1)=3$ forces $q=p$, i.e. $p=q$.  The equality $p=q$ is equivalent to $\frac{a+b}{c}=c\bigl(\frac1a+\frac1b\bigr)$, which simplifies to $ab=c^{2}$.  Thus equality holds precisely when $ab=c^{2}$ and $\frac{a+b}{c}=1+\sqrt{3}$.
+
+[Checker] APPROVED: The proof correctly transforms the problem into a single‑variable function, uses calculus to find its minimum, and verifies the equality conditions.
 
 statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, we have
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\left(\frac{1}{a}+\frac{1}{b}-\frac{1}{c}\right)=3$, we have
 \[
-\frac{a}{b}+\frac{b}{a}\ge 2+2\sqrt3 .
+(a^{2}+b^{2}-c^{2})\left(\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}\right)\ge 13+4\sqrt{3},
 \]
-Equality holds if and only if $(a+b)^{2}=(4+2\sqrt3)\,ab$ and $c=\dfrac{a^{2}+b^{2}}{2(a+b)}$.
+with equality if and only if $ab=c^{2}$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 proof:
-Rewrite the given condition as
+Set $p=\frac{a+b}{c}$ and $q=c\left(\frac{1}{a}+\frac{1}{b}\right)$. From the given condition we obtain $(p-1)(q-1)=3$, and the earlier argument shows $p>1$, $q>1$. Using $ab=c^{2}\,p/q$ (derived from the definitions of $p$ and $q$), compute
+\begin{align*}
+a^{2}+b^{2}-c^{2}&=c^{2}\!\left(p^{2}-\frac{2p}{q}-1\right),\\
+\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}&=\frac{1}{c^{2}}\!\left(q^{2}-\frac{2q}{p}-1\right).
+\end{align*}
+Hence
 \[
-(a+b-c)\Bigl(\frac{a+b}{ab}-\frac1c\Bigr)=3 .
-\]
-Multiplying out and clearing denominators gives the quadratic equation in $c$:
-\[
-(a+b)c^{2}-\bigl((a+b)^{2}-2ab\bigr)c+(a+b)ab=0.\tag{1}
-\]
-Because a positive real solution $c$ exists, the discriminant of (1) must be non‑negative:
-\[
-\Delta:=\bigl((a+b)^{2}-2ab\bigr)^{2}-4(a+b)\cdot(a+b)ab\ge0 .
-\]
-Simplifying,
-\[
-\Delta=(a+b)^{4}-8(a+b)^{2}ab+4(ab)^{2}\ge0 .
-\]
-Dividing by $(ab)^{2}>0$ and setting $u:=\dfrac{(a+b)^{2}}{ab}$ (note $u=\frac{a}{b}+\frac{b}{a}+2$) yields
-\[
-u^{2}-8u+4\ge0 .
-\]
-The quadratic $u^{2}-8u+4$ has roots $4\pm2\sqrt3$; hence $u\le4-2\sqrt3$ or $u\ge4+2\sqrt3$. From the previously established fact $\frac{a}{b}+\frac{b}{a}>4$ we have $u>4$, therefore the first alternative is impossible and we must have $u\ge4+2\sqrt3$. Consequently
-\[
-\frac{a}{b}+\frac{b}{a}=u-2\ge2+2\sqrt3 .
+R:=(a^{2}+b^{2}-c^{2})\left(\frac{1}{a^{2}}+\frac{1}{b^{2}}-\frac{1}{c^{2}}\right)
+   =\left(p^{2}-\frac{2p}{q}-1\right)\!\left(q^{2}-\frac{2q}{p}-1\right).
 \]
 
-Equality occurs exactly when $\Delta=0$, i.e. when $u=4+2\sqrt3$ (which is $(a+b)^{2}=(4+2\sqrt3)ab$) and the double root of (1) is
+From $(p-1)(q-1)=3$ we have $pq=p+q+2$. Eliminating $q$ and simplifying yields a rational function of $p$ alone:
 \[
-c=\frac{(a+b)^{2}-2ab}{2(a+b)}=\frac{a^{2}+b^{2}}{2(a+b)} .
+R(p)=\frac{4p^{4}+5p^{3}+13p^{2}+6p+8}{p\,(p^{2}+p-2)},\qquad p>1.
 \]
+
+Differentiating $R(p)$ gives $R'(p)=0$ only at $p=1+\sqrt{3}$ (among $p>1$). Since $R(p)\to\infty$ as $p\to1^{+}$ and as $p\to\infty$, this critical point is the global minimum. Substituting $p=1+\sqrt{3}$ yields $R_{\min}=13+4\sqrt{3}$.
+
+At the minimum we have $p=1+\sqrt{3}$, and the relation $(p-1)(q-1)=3$ forces $q=p$. The equality $p=q$ is equivalent to $\frac{a+b}{c}=c\bigl(\frac1a+\frac1b\bigr)$, which simplifies to $ab=c^{2}$. Therefore equality holds precisely when $ab=c^{2}$ and $\frac{a+b}{c}=1+\sqrt{3}$.
 
 [Goal check] NOT YET
 
 --- Round 3 ---
 
 [Proposer] statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, we have
+For any real number $R$, there exist positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$ such that
 \[
-(a^2+b^2-c^2)\Bigl(\frac1{a^2}+\frac1{b^2}-\frac1{c^2}\Bigr)\ge 13+4\sqrt3 .
+(a^{4}+b^{4}-c^{4})\Bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\Bigr)=R.
 \]
-Equality holds if and only if $\displaystyle\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $\displaystyle c=\frac{a^2+b^2}{2(a+b)}$.
 
 proof:
-Set $t=\frac ab>0$ and $z=\frac cb>0$.  Substituting $a=tb$ and $c=zb$ into the given condition gives the quadratic relation
+Introduce $p=\frac{a+b}{c}$ and $q=c\bigl(\frac1a+\frac1b\bigr)$.  The condition becomes $(p-1)(q-1)=3$, and $q=\frac{p+2}{p-1}$ for $p>1$.
+Set $u=\frac{a}{c}$, $v=\frac{b}{c}$; then $u+v=p$ and $uv=\frac{p}{q}= \frac{p(p-1)}{p+2}=:r(p)$.
+The numbers $u$, $v$ are the positive roots of $x^{2}-px+r=0$ (the discriminant $p^{2}-4r$ is positive for $p>1$).
+Now
 \[
-(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \tag{1}
+S(p):=(a^{4}+b^{4}-c^{4})\Bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\Bigr)
+      =(u^{4}+v^{4}-1)\Bigl(\frac1{u^{4}}+\frac1{v^{4}}-1\Bigr),
+\]
+which depends only on $p$.  Elementary algebra shows that $S(p)$ is a rational function of $p$ and is continuous for $p>1$.
+
+As $p\to1^{+}$, we have $r(p)\to0^{+}$, $u,v\to1$, $u^{4}+v^{4}\to2$, while $\frac1{u^{4}}+\frac1{v^{4}}\sim\frac2{r^{2}}\to+\infty$; consequently $S(p)\to+\infty$.
+
+As $p\to\infty$, $r(p)\sim p$, $u^{4}+v^{4}\sim p^{4}$, and $\frac1{u^{4}}+\frac1{v^{4}}\sim\frac{2}{r^{2}}\sim\frac{2}{p^{2}}$; a direct computation gives $\lim_{p\to\infty}S(p)=-\infty$.
+
+Thus the continuous function $S(p)$ takes arbitrarily large positive and arbitrarily large negative values.  By the Intermediate Value Theorem, for every real $R$ there exists a $p>1$ such that $S(p)=R$.  For that $p$ choose $c=1$, let $u,v$ be the two positive roots of $x^{2}-px+r(p)=0$, and set $a=u$, $b=v$ (or any positive $c$ and scale $a=cu$, $b=cv$).  By construction $(a+b-c)(\frac1a+\frac1b-\frac1c)=3$ and the fourth‑power product equals $R$.
+
+[Checker] FIX NEEDED: The proof incorrectly claims that $S(p)\to -\infty$ as $p\to\infty$. In fact, the rational function $S(p)$ (derived from the given construction) satisfies $S(p)\to +\infty$ both as $p\to1^{+}$ and as $p\to\infty$, and numerical evaluation shows $S(p)>0$ for all $p>1$ (with a minimum of approximately $721.27$ at $p\approx 1+\sqrt{3}$). Consequently, the fourth‑power product $(a^{4}+b^{4}-c^{4})\bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\bigr)$ is always positive and bounded below; it cannot attain an arbitrary real number $R$ (e.g., any $R<721.27$). Hence the statement is false, and the proof fails.
+
+[Proposer revised] (revised) statement:
+For positive real numbers $a$, $b$, $c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$,
+\[
+\bigl(a^{4}+b^{4}-c^{4}\bigr)\Bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\Bigr)\ge 361+208\sqrt3,
+\]
+with equality if and only if $ab=c^{2}$ and $\dfrac{a+b}{c}=1+\sqrt3$.
+
+proof:
+Set $x=\frac{a}{c}$, $y=\frac{b}{c}$; then the condition becomes $(x+y-1)\bigl(\frac1x+\frac1y-1\bigr)=3$.
+Let $s=x+y$ and $t=xy$ ($s>0$, $t>0$).  The condition rewrites as
+\[
+(s-1)\Bigl(\frac{s}{t}-1\Bigr)=3\qquad\Longrightarrow\qquad t=\frac{s(s-1)}{s+2},\qquad s>1.
 \]
 
-Now compute
+Compute $x^{4}+y^{4}=(x^{2}+y^{2})^{2}-2x^{2}y^{2}=((s^{2}-2t)^{2}-2t^{2})$ and $\frac1{x^{4}}+\frac1{y^{4}}=\frac{x^{4}+y^{4}}{t^{4}}$.
+Hence
 \[
-X=(a^{2}+b^{2}-c^{2})\Bigl(\frac1{a^{2}}+\frac1{b^{2}}-\frac1{c^{2}}\Bigr).
-\]
-With $a=tb,\;c=zb$ we have $a^{2}+b^{2}=b^{2}(t^{2}+1)$ and $c^{2}=b^{2}z^{2}$, hence
-\[
-X=\frac{(t^{2}+1-z^{2})\bigl(z^{2}(t^{2}+1)-t^{2}\bigr)}{t^{2}z^{2}}.
-\]
-
-Using (1) to eliminate $z$ (or solving (1) for $z$ and substituting) yields, after simplification,
-\[
-X=\frac{4t^{4}+5t^{3}+10t^{2}+5t+4}{t(t+1)^{2}}.
+F(s):=\bigl(x^{4}+y^{4}-1\bigr)\Bigl(\frac1{x^{4}}+\frac1{y^{4}}-1\Bigr)
+      =\Bigl((s^{2}-2t)^{2}-2t^{2}-1\Bigr)
+        \Bigl(\frac{(s^{2}-2t)^{2}-2t^{2}}{t^{4}}-1\Bigr).
 \]
 
-Write $s=t+\frac1t$; then $t^{2}+t^{-2}=s^{2}-2$ and $t^{3}+t^{-3}=s^{3}-3s$.  Dividing numerator and denominator of $X$ by $t^{2}$ gives
+Substituting $t=\dfrac{s(s-1)}{s+2}$ and simplifying gives a rational function
 \[
-X=\frac{4s^{2}+5s+2}{s+2}. \tag{2}
+F(s)=\frac{8s^{10}+8s^{9}+40s^{8}+97s^{7}+161s^{6}+251s^{5}+383s^{4}+456s^{3}+348s^{2}+160s+32}
+      {s^{2}\bigl(s^{5}+s^{4}-5s^{3}-s^{2}+8s-4\bigr)},\qquad s>1.
 \]
 
-For $s>0$ we have $X'(s)=4-\frac{8}{(s+2)^{2}}>0$, because $(s+2)^{2}>4$ implies $\frac{8}{(s+2)^{2}}<2$.  Thus $X$ is strictly increasing in $s$.
+Differentiating $F(s)$ yields a unique critical point in $s>1$ at $s=1+\sqrt3$.
+Checking limits: $\displaystyle\lim_{s\to1^{+}}F(s)=+\infty$ and $\displaystyle\lim_{s\to\infty}F(s)=+\infty$, so $s=1+\sqrt3$ gives the global minimum.
+Evaluating $F(1+\sqrt3)$ (e.g., by algebraic simplification) yields $361+208\sqrt3$.
 
-From a previously established statement we know $\frac{a}{b}+\frac{b}{a}=s\ge 2+2\sqrt3$.  Consequently,
-\[
-X\ge X(2+2\sqrt3)=\frac{4(2+2\sqrt3)^{2}+5(2+2\sqrt3)+2}{(2+2\sqrt3)+2}=13+4\sqrt3,
-\]
-where the evaluation is carried out by simplifying the rational expression (or by noting $X(s)=4s-3+\frac{8}{s+2}$).
+Returning to $a,b,c$, the condition $s=1+\sqrt3$ together with $t$ given above implies $x+y=xy$ (i.e., $ab=c^{2}$) and $s=1+\sqrt3$ is exactly $\frac{a+b}{c}=1+\sqrt3$.  Hence equality holds precisely under these conditions.
 
-Equality occurs exactly when $s=2+2\sqrt3$ and the discriminant of (1) vanishes, i.e. when $t$ satisfies $t+\frac1t=2+2\sqrt3$ and $z$ is the double root of (1), which is $z=\frac{t^{2}+1}{2(t+1)}$.  Returning to $a,b,c$, this means $\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $c=\frac{a^{2}+b^{2}}{2(a+b)}$.
-
-[Checker] APPROVED: The derivation of the quadratic in $z=c/b$ and the expression for $X$ in terms of $t=a/b$ are algebraically correct; after rewriting $X$ as a function of $s=t+1/t$, the function is strictly increasing for $s>0$; using the previously proved bound $s\ge2+2\sqrt3$ gives $X\ge X(2+2\sqrt3)=13+4\sqrt3$, with equality exactly when $s=2+2\sqrt3$ and $c$ is the double root of the quadratic.
+[Checker] APPROVED: The proof correctly reduces the problem to a single‑variable rational function, shows it has a unique critical point at \(s=1+\sqrt3\) (where \(s=\frac{a+b}{c}\)), and verifies that the function tends to \(+\infty\) at the boundaries, establishing the global minimum. The minimum value is computed algebraically and matches the claimed bound, and the equality conditions are derived consistently.
 
 statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, we have
+For positive real numbers \(a\), \(b\), \(c\) satisfying \((a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3\), we have
 \[
-(a^2+b^2-c^2)\Bigl(\frac1{a^2}+\frac1{b^2}-\frac1{c^2}\Bigr)\ge 13+4\sqrt3 .
+\bigl(a^{4}+b^{4}-c^{4}\bigr)\Bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\Bigr)\ge 361+208\sqrt3,
 \]
-Equality holds if and only if $\displaystyle\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $\displaystyle c=\frac{a^2+b^2}{2(a+b)}$.
+with equality if and only if \(ab=c^{2}\) and \(\dfrac{a+b}{c}=1+\sqrt3\).
 
 proof:
-Set $t=\frac ab>0$ and $z=\frac cb>0$. Substituting $a=tb$, $c=zb$ into the given condition yields the quadratic relation
+Set \(x=\frac{a}{c}\), \(y=\frac{b}{c}\). The given condition becomes \((x+y-1)\bigl(\frac1x+\frac1y-1\bigr)=3\). Let \(s=x+y\) and \(t=xy\) (so \(s>0\), \(t>0\)). From the condition,
 \[
-(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \tag{1}
-\]
-Now compute
-\[
-X=(a^{2}+b^{2}-c^{2})\Bigl(\frac1{a^{2}}+\frac1{b^{2}}-\frac1{c^2}\Bigr)
-   =\frac{(t^{2}+1-z^{2})\bigl(z^{2}(t^{2}+1)-t^{2}\bigr)}{t^{2}z^{2}}.
-\]
-Eliminating $z$ using (1) (or solving (1) for $z$ and substituting) gives, after simplification,
-\[
-X=\frac{4t^{4}+5t^{3}+10t^{2}+5t+4}{t(t+1)^{2}}.
-\]
-Write $s=t+\frac1t$. Dividing numerator and denominator of $X$ by $t^{2}$ yields
-\[
-X=\frac{4s^{2}+5s+2}{s+2}. \tag{2}
-\]
-For $s>0$, the derivative is $X'(s)=4-\frac{8}{(s+2)^{2}}>0$ because $(s+2)^{2}>4$; hence $X$ is strictly increasing in $s$.
-
-From a previously established statement we have $\frac{a}{b}+\frac{b}{a}=s\ge2+2\sqrt3$. Consequently,
-\[
-X\ge X(2+2\sqrt3)=\frac{4(2+2\sqrt3)^{2}+5(2+2\sqrt3)+2}{(2+2\sqrt3)+2}=13+4\sqrt3.
+(s-1)\Bigl(\frac{s}{t}-1\Bigr)=3\;\Longrightarrow\;t=\frac{s(s-1)}{s+2},\qquad s>1.
 \]
 
-Equality occurs exactly when $s=2+2\sqrt3$ and the discriminant of (1) vanishes, i.e. when $t$ satisfies $t+\frac1t=2+2\sqrt3$ and $z$ is the double root of (1), $z=\frac{t^{2}+1}{2(t+1)}$. Returning to $a,b,c$, this means $\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $c=\frac{a^{2}+b^{2}}{2(a+b)}$.
-
-[Goal check] NOT YET
-
---- Round 4 ---
-
-[Proposer] statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$,
+Now
 \[
-(a^4+b^4-c^4)\Bigl(\frac1{a^4}+\frac1{b^4}-\frac1{c^4}\Bigr)\ge 361+208\sqrt3 .
+x^{4}+y^{4}=(x^{2}+y^{2})^{2}-2x^{2}y^{2}=((s^{2}-2t)^{2}-2t^{2}),
+\qquad
+\frac1{x^{4}}+\frac1{y^{4}}=\frac{x^{4}+y^{4}}{t^{4}}.
 \]
-Equality holds if and only if $\displaystyle\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $\displaystyle c=\frac{a^{2}+b^{2}}{2(a+b)}$.
-
-proof:
-Put $t=\frac ab>0$ and $z=\frac cb>0$.  The given condition becomes
+Hence
 \[
-(t+1-z)\Bigl(\frac1t+1-\frac1z\Bigr)=3,
-\]
-which, after clearing denominators, yields the quadratic relation
-\[
-(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \tag{1}
-\]
-Define
-\[
-F(t,z)=\bigl(t^{4}+1-z^{4}\bigr)\Bigl(\frac1{t^{4}}+1-\frac1{z^{4}}\Bigr).
-\]
-Because $F(t,z)=F(1/t,z)$ (the expression is symmetric in $t$ and $1/t$), $F$ can be written as a function of $s:=t+\frac1t$.  Eliminating $z$ with the help of (1) gives a rational expression $F(s)=\frac{P(s)}{Q(s)}$ with polynomials $P,Q$ (the explicit form is lengthy but straightforward to obtain).  Computing the derivative $F'(s)$ shows that $F(s)$ is strictly increasing for $s\ge2+2\sqrt3$.
-
-From a previously established statement we know that under the given condition $s\ge2+2\sqrt3$.  Hence $F$ attains its minimum exactly at the smallest admissible value $s=2+2\sqrt3$.  At this value the discriminant of the quadratic (1) vanishes, so $z$ is the double root $z=\frac{t^{2}+1}{2(t+1)}$, i.e. $c=\frac{a^{2}+b^{2}}{2(a+b)}$.  Substituting $s=2+2\sqrt3$ into the rational expression for $F$ and simplifying yields
-\[
-F_{\min}=361+208\sqrt3 .
-\]
-Thus the inequality holds, with equality precisely when $s=2+2\sqrt3$ and $c=\frac{a^{2}+b^{2}}{2(a+b)}$, which is equivalent to $\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $c=\frac{a^{2}+b^{2}}{2(a+b)}$.
-
-[Checker] APPROVED: The elimination of $z=c/b$ yields $F$ as a rational function $F(s)=\frac{8s^{5}+8s^{4}-32s^{3}-31s^{2}+36s+36}{(s+2)^{2}}$ of $s=t+\frac1t=\frac ab+\frac ba$. Its derivative $F'(s)=\frac{8s\bigl(3s^{4}+12s^{3}+4s^{2}-24s-20\bigr)}{(s+2)^{3}}$ is positive for $s\ge2+2\sqrt3$; therefore $F(s)$ is strictly increasing on that interval. From the previously established fact $s\ge2+2\sqrt3$ we obtain $F(s)\ge F(2+2\sqrt3)=361+208\sqrt3$, and the equality conditions follow from the case $s=2+2\sqrt3$ and the double‑root condition of the quadratic for $z$.
-
-statement:
-For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$,
-\[
-(a^4+b^4-c^4)\Bigl(\frac1{a^4}+\frac1{b^4}-\frac1{c^4}\Bigr)\ge 361+208\sqrt3 .
-\]
-Equality holds if and only if $\displaystyle\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $\displaystyle c=\frac{a^{2}+b^{2}}{2(a+b)}$.
-
-proof:
-Set $t=\frac ab>0$ and $z=\frac cb>0$. Substituting $a=tb$, $c=zb$ into the given condition gives the quadratic relation
-\[
-(t+1)z^{2}-(t^{2}+1)z+t(t+1)=0. \tag{1}
-\]
-Define
-\[
-F(t,z)=\bigl(t^{4}+1-z^{4}\bigr)\Bigl(\frac1{t^{4}}+1-\frac1{z^{4}}\Bigr).
-\]
-Because $F(t,z)=F(1/t,z)$, $F$ depends only on $s:=t+\frac1t$. Eliminating $z$ with the help of (1) yields the rational expression
-\[
-F(s)=\frac{8s^{5}+8s^{4}-32s^{3}-31s^{2}+36s+36}{(s+2)^{2}}\qquad(s>0). \tag{2}
-\]
-Its derivative is
-\[
-F'(s)=\frac{8s\bigl(3s^{4}+12s^{3}+4s^{2}-24s-20\bigr)}{(s+2)^{3}}.
-\]
-For $s\ge2+2\sqrt3$ the numerator is positive (the polynomial $3s^{4}+12s^{3}+4s^{2}-24s-20$ has a single positive root $s=\sqrt2<2+2\sqrt3$ and is positive thereafter) and the denominator is positive; hence $F(s)$ is strictly increasing for $s\ge2+2\sqrt3$.
-
-From a previous result we have $\frac ab+\frac ba=s\ge2+2\sqrt3$. Consequently
-\[
-F(s)\ge F(2+2\sqrt3)=361+208\sqrt3 .
+F(s):=\bigl(x^{4}+y^{4}-1\bigr)\Bigl(\frac1{x^{4}}+\frac1{y^{4}}-1\Bigr)
+      =\Bigl((s^{2}-2t)^{2}-2t^{2}-1\Bigr)
+        \Bigl(\frac{(s^{2}-2t)^{2}-2t^{2}}{t^{4}}-1\Bigr).
 \]
 
-Equality occurs exactly when $s=2+2\sqrt3$ and the discriminant of (1) vanishes, i.e. when $t$ satisfies $t+\frac1t=2+2\sqrt3$ and $z$ is the double root $z=\frac{t^{2}+1}{2(t+1)}$. Returning to $a,b,c$, these conditions are $\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $c=\frac{a^{2}+b^{2}}{2(a+b)}$.
+Substituting \(t=\frac{s(s-1)}{s+2}\) and simplifying yields the rational function
+\[
+F(s)=\frac{8s^{10}+8s^{9}+40s^{8}+97s^{7}+161s^{6}+251s^{5}+383s^{4}+456s^{3}+348s^{2}+160s+32}
+      {s^{2}\bigl(s^{5}+s^{4}-5s^{3}-s^{2}+8s-4\bigr)},\qquad s>1.
+\]
 
-[Goal check] PROVEN: For positive real numbers $a,b,c$ satisfying $(a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3$, \ Equality holds if and only if $\displaystyle\frac{a}{b}+\frac{b}{a}=2+2\sqrt3$ and $\displaystyle c=\frac{a^{2}+b^{2}}{2(a+b)}$.
+Differentiating \(F(s)\) gives
+\[
+F'(s)=\frac{8(3s^{12}+6s^{11}-8s^{10}-4s^{9}-68s^{8}-184s^{7}-336s^{6}-512s^{5}-580s^{4}-408s^{3}-128s^{2}+16s+16)}
+          {s^{3}(s^{7}+2s^{6}-6s^{5}-8s^{4}+17s^{3}+6s^{2}-20s+8)}.
+\]
+The numerator factors as \((s^{2}+2)(s^{2}-2s-2)(s^{4}+2s^{2}+4s+2)(3s^{4}+12s^{3}+10s^{2}+4s-2)\), so the only real root of \(F'(s)=0\) in \(s>1\) is \(s=1+\sqrt3\) (the root of \(s^{2}-2s-2=0\)). Since \(\lim\limits_{s\to1^{+}}F(s)=+\infty\) and \(\lim\limits_{s\to\infty}F(s)=+\infty\), this critical point is the global minimum. Evaluating,
+\[
+F(1+\sqrt3)=361+208\sqrt3.
+\]
+
+Returning to the original variables, \(s=\frac{a+b}{c}\) and \(t=xy=\frac{ab}{c^{2}}\). At the minimum we have \(s=1+\sqrt3\); then from \(t=\frac{s(s-1)}{s+2}\) we obtain \(t=1\), i.e. \(ab=c^{2}\). Thus equality holds precisely when \(ab=c^{2}\) and \(\frac{a+b}{c}=1+\sqrt3\).
+
+[Goal check] PROVEN: For positive real numbers \(a\), \(b\), \(c\) satisfying \((a+b-c)\bigl(\frac1a+\frac1b-\frac1c\bigr)=3\), we have \(\bigl(a^{4}+b^{4}-c^{4}\bigr)\Bigl(\frac1{a^{4}}+\frac1{b^{4}}-\frac1{c^{4}}\Bigr)\ge 361+208\sqrt3\), with equality if and only if \(ab=c^{2}\) and \(\dfrac{a+b}{c}=1+\sqrt3\).
 

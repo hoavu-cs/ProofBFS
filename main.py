@@ -7,9 +7,9 @@ from rich import print
 from rich.console import Console
 from rich.rule import Rule
 
-from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, OLLAMA_QWEN, run
+from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, run
 
-MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, OLLAMA_QWEN]
+MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN]
 console = Console()
 
 # ANSI helpers (used inside raw-terminal mode where Rich can't write)
