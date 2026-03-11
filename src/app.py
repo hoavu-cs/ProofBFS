@@ -36,7 +36,7 @@ DEEPSEEK_REASONER = "deepseek-reasoner"
 OLLAMA_QWEN = "qwen3.5:35b"
 GEMINI_FLASH = "gemini-2.5-flash"
 GEMINI_PRO = "gemini-2.5-pro"
-ROUNDS = 10
+ROUNDS = 25
 
 
 @dataclass
@@ -62,7 +62,8 @@ You are a mathematical reasoning agent. Given a set of established statements:
     <proof>
 7. If you receive feedback from the checker, revise your statement in the same format.
 8. Try not to repeat statements that have already been approved in previous rounds.
-9. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
+9. If you need to verify a numerical computation or check an example, use the run_python tool. 
+Available packages: numpy, scipy, sympy, mpmath, z3-solver. Make sure you **import any packages you use** in the code you run and **print the result out clearly**. 
 10. Use latex for mathematical expressions.
 11. Do not add markdown formatting."""
 
@@ -91,7 +92,8 @@ You are a mathematical proof checker. For each statement-proof pair, verify:
 
     FIX NEEDED: <specific issue — state whether it is in the statement or the proof>
     CLARIFICATION NEEDED: <what is unclear and where>
-5. If you need to verify a numerical computation or check an example, use the run_python tool. Available packages: numpy, scipy, sympy, mpmath, z3-solver.
+5. If you need to verify a numerical computation or check an example, use the run_python tool. 
+Available packages: numpy, scipy, sympy, mpmath, z3-solver. Make sure you **import any packages you use** in the code you run and **print the result out clearly**. 
 6. Use latex for mathematical expressions. 
 7. Do not add markdown formatting."""
 
