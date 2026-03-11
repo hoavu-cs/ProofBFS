@@ -127,6 +127,18 @@ Then enter a `{stem}_statements.json` path. The script filters derived statement
 
 Both proposer and checker can use a Python tool (`numpy`, `scipy`, `sympy`, `mpmath`, `z3-solver`) for computations.
 
+### Sandboxing
+
+LLM-generated Python code is executed inside a [bubblewrap](https://github.com/containers/bubblewrap) sandbox when available (Linux only). This blocks network access, prevents filesystem writes outside `/tmp`, and isolates the process using Linux namespaces.
+
+To enable it:
+
+```bash
+sudo apt install bubblewrap
+```
+
+If `bwrap` is not found, execution falls back to running directly in the venv (no sandboxing). On Windows, the fallback is always used.
+
 ## Key files
 
 - `src/app.py`: core loop, prompts, model calls, parsing, logging, save/load helpers.
