@@ -7,7 +7,7 @@ from rich import print
 from rich.console import Console
 from rich.rule import Rule
 
-from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, run
+from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, ROUNDS, run
 from src.goal_latex import generate_proof
 from src.txt_to_json import convert
 from src.statements_latex import generate_statements
@@ -89,6 +89,17 @@ def _optional_name(prompt: str, default: str) -> str | None:
     return val or None
 
 
+def _ask_rounds(default: int) -> int:
+    val = console.input(f"[bold]Number of rounds:[/bold] [dim](Enter for {default})[/dim]: ").strip()
+    if not val:
+        return default
+    try:
+        return int(val)
+    except ValueError:
+        print(f"[yellow]Invalid number, using default ({default}).[/yellow]")
+        return default
+
+
 if __name__ == "__main__":
     console.print(Rule("[bold cyan]∴ ProofBFS[/bold cyan]"))
     print()
@@ -110,6 +121,7 @@ if __name__ == "__main__":
         proposer_model = _pick("Proposer model:", MODELS)
         checker_model  = _pick("Checker model: ", MODELS)
         prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
+        rounds         = _ask_rounds(ROUNDS)
         derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.json")
         full_log_name  = _optional_name("Output full log filename:",  path.stem + "_full_log.txt")
         latex_name     = _optional_name("Output LaTeX filename:",     path.stem + "_statements.tex")
@@ -119,6 +131,7 @@ if __name__ == "__main__":
             proposer_model=proposer_model,
             checker_model=checker_model,
             prompt_each_round=prompt_rounds,
+            rounds=rounds,
             derived_name=derived_name,
             full_log_name=full_log_name,
             latex_name=latex_name,

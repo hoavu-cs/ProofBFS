@@ -256,6 +256,7 @@ def run(
     derived_name: str | None = None,
     full_log_name: str | None = None,
     latex_name: str | None = None,
+    rounds: int = ROUNDS,
 ) -> None:
     def _client(model: str) -> OpenAI:
         if model == OLLAMA_QWEN:
@@ -321,7 +322,7 @@ def run(
         return check_goal() if goal else "NOT YET"
 
     goal_outcome = "NOT YET"
-    for round_num in range(1, ROUNDS + 1):
+    for round_num in range(1, rounds + 1):
         log_print(f"--- Round {round_num} ---")
         print_facts(facts)
 
