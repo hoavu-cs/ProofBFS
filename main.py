@@ -111,7 +111,6 @@ if __name__ == "__main__":
         checker_model  = _pick("Checker model: ", MODELS)
         prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
         derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.json")
-        log_name       = _optional_name("Output log filename:",       path.stem + "_log.txt")
         full_log_name  = _optional_name("Output full log filename:",  path.stem + "_full_log.txt")
         latex_name     = _optional_name("Output LaTeX filename:",     path.stem + "_statements.tex")
         print()
@@ -121,7 +120,6 @@ if __name__ == "__main__":
             checker_model=checker_model,
             prompt_each_round=prompt_rounds,
             derived_name=derived_name,
-            log_name=log_name,
             full_log_name=full_log_name,
             latex_name=latex_name,
         )

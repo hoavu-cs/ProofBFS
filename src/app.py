@@ -234,11 +234,6 @@ def save_facts(derived_path: Path, new_facts: list[Fact]) -> None:
     derived_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def append_log(log_path: Path, entries: list[str]) -> None:
-    with open(log_path, "a") as f:
-        for entry in entries:
-            f.write(entry + "\n\n")
-
 
 def print_facts(facts: list[Fact]) -> None:
     print("Current statements:")
@@ -259,7 +254,6 @@ def run(
     checker_model: str = DEEPSEEK_REASONER,
     prompt_each_round: bool = True,
     derived_name: str | None = None,
-    log_name: str | None = None,
     full_log_name: str | None = None,
     latex_name: str | None = None,
 ) -> None:
@@ -275,26 +269,19 @@ def run(
 
     base = json_path.parent
     derived_path   = base / (derived_name  or (json_path.stem + "_statements.json"))
-    log_path       = base / (log_name      or (json_path.stem + "_log.txt"))
     full_log_path  = base / (full_log_name or (json_path.stem + "_full_log.txt"))
     statement_tex  = base / (latex_name or (json_path.stem + "_statements.tex"))
     if not derived_path.exists():
         derived_path.write_text(json_path.read_text(), encoding="utf-8")
     facts, goal = load_statements(json_path, derived_path)
 
-    log: list[str] = []
-    log_offset = 0
-
     timestamp = f"\n=== Run {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n\n"
-    with open(log_path, "a") as f:
-        f.write(timestamp)
     with open(full_log_path, "a", encoding="utf-8") as f:
         f.write(timestamp)
 
-    def log_print(msg: str, label: str = "") -> None:
+    def log_print(msg: str) -> None:
         print(msg)
         plain = re.sub(r"\[.*?\]", "", msg).strip()
-        log.append((label + " " + plain).strip() if label else plain)
         _full_log.append(plain)
 
     print(f"\n[bold]=== {json_path} | Round starting ===\n[/bold]")
@@ -308,7 +295,7 @@ def run(
     def check_goal() -> str:
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
         result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], c_client, checker_model, tools=[PYTHON_TOOL])
-        log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n", "[Goal check]")
+        log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n")
         upper = result.upper()
         if upper.startswith("PROVEN"):
             return "PROVEN"
@@ -320,7 +307,7 @@ def run(
         check_history.append({"role": "user", "content": prompt})
         verdict = chat(CHECKER_AGENT_SYSTEM, check_history, c_client, checker_model, tools=[PYTHON_TOOL])
         check_history.append({"role": "assistant", "content": verdict})
-        log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n", "[Checker]")
+        log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n")
         return verdict
 
     def handle_approved(verdict: str, approval_msg: str) -> str:
@@ -346,7 +333,7 @@ def run(
         stmt_history.append({"role": "user", "content": context + goal_hint + hint_str + "\n\nDerive one new mathematical statement."})
         claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
         stmt_history.append({"role": "assistant", "content": claim})
-        log_print(f"[bold green][Proposer] {claim}[/bold green]\n", "[Proposer]")
+        log_print(f"[bold green][Proposer] {claim}[/bold green]\n")
 
         verdict = run_checker(f"{context}\n\nReview this new statement and its proof:\n\n{claim}")
 
@@ -356,7 +343,7 @@ def run(
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
             claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
             stmt_history.append({"role": "assistant", "content": claim})
-            log_print(f"[bold yellow][Proposer] (revised) {claim}[/bold yellow]\n", "[Proposer revised]")
+            log_print(f"[bold yellow][Proposer] (revised) {claim}[/bold yellow]\n")
 
             verdict = run_checker(f"{context}\n\nReview this revised statement and its proof:\n\n{claim}")
 
@@ -370,8 +357,6 @@ def run(
         if new_facts:
             save_facts(derived_path, new_facts)
             new_facts.clear()
-        append_log(log_path, log[log_offset:])
-        log_offset = len(log)
         with open(full_log_path, "a", encoding="utf-8") as f:
             for entry in _full_log:
                 f.write(entry + "\n\n")
