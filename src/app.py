@@ -211,14 +211,14 @@ def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], s
     facts: list[Fact] = []
     seen: set[str] = set()
     for entry in json.loads(input_path.read_text()):
-        if entry["type"] == "goal":
+        if entry["type"].lower() == "goal":
             goal = entry["statement"]
         else:
             facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
             seen.add(entry["statement"])
     if derived_path.exists():
         for entry in json.loads(derived_path.read_text()):
-            if entry["type"] != "goal" and entry["statement"] not in seen:
+            if entry["type"].lower() != "goal" and entry["statement"] not in seen:
                 facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
                 seen.add(entry["statement"])
     return facts, goal

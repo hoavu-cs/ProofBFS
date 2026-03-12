@@ -14,7 +14,7 @@ def generate_statements(statements_path: Path, out_name: str | None = None) -> N
     derived: list[dict] = []
 
     for entry in data:
-        t = entry.get("type", "fact")
+        t = entry.get("type", "fact").lower()
         is_derived = entry.get("comment") == "Derived"
         if t == "goal":
             goal = entry

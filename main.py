@@ -10,13 +10,15 @@ from rich.rule import Rule
 from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, run
 from src.goal_latex import generate_proof
 from src.txt_to_json import convert
+from src.statements_latex import generate_statements
 
 MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN]
-TOOLS         = ["run", "txt_to_json", "goal_latex"]
+TOOLS         = ["run", "txt_to_json", "goal_latex", "statements_latex"]
 TOOLS_DISPLAY = [
     "run",
-    "txt_to_json  (convert input.txt → input.json)",
-    "goal_latex   (export filtered LaTeX proof from derived statements)",
+    "txt_to_json       (convert input.txt → input.json)",
+    "goal_latex        (export filtered LaTeX proof from derived statements)",
+    "statements_latex  (export all statements to LaTeX)",
 ]
 console = Console()
 
@@ -99,6 +101,9 @@ if __name__ == "__main__":
 
     elif tool == "goal_latex":
         generate_proof(_require_path("Statements JSON path"))
+
+    elif tool == "statements_latex":
+        generate_statements(_require_path("Statements JSON path"))
 
     elif tool == "run":
         path           = _require_path("Input JSON path")
