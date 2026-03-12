@@ -7,12 +7,13 @@ Proof-BFS is a two-agent proof exploration system: one agent proposes new statem
 - A goal statement X
 - In each round, an agent called Alice will generate an interesting statement z that she thinks is interesting toward proving X
 - Bob verifies z. He can either approve, ask for clarification or fix. If there is a bug, Alice has one chance to fix it. If she still fails, move to the next round. The program will stop when the goal or maximum number of rounds is reached.
+- The agents are allowed to use Python scripts (with libraries like sympy, scipy, mpmath, z3-solver) to verify computations or generate examples/counterexamples. On Linux, these scripts are executed inside a bubblewrap sandbox for security. 
 
 A few things to keep in mind
 * Ensure each newly derived statement is short and easy to verify.
-* Even if the final goal isn’t reached, aim for interesting partial results or progress.
+* Even if the final goal isn't reached, aim for interesting partial results or progress.
 * Avoid over-reliance on frontier models; the goal is to help local models achieve respectable performance.
-* Be realistic: this approach won’t solve a deep theorem on its own. Current AI likely isn’t at that level yet.
+* Be realistic: this approach won't solve a deep theorem on its own. Current AI likely isn't at that level yet.
 * Use it as a helper for proving technical lemmas, and double-check everything carefully.
 
 
@@ -43,39 +44,25 @@ Supported providers and models (configured in `src/app.py`):
 
 All providers use an OpenAI-compatible client. To add another model, create a new client and constant in `src/app.py` and add the model to `MODELS` in `main.py`.
 
-This work is mainly tested using DeepSeek's `deepseek-reasoner` since its API exposes chain-of-thought, tool calls, and it is overall a good and inexpensive model to experiment with. I also tested with Gemini-Flash which is weaker while not exposing reasoning traces. Gemini-Pro is probably better but I have not tested on it yet. It is also not clear if it exposes reasoning traces which is important for round-by-round feedback prompt. 
-
-You can in principle add any model to the corresponding code blocks in `src/app.py` and `main.py`.
-
 ## Input format
 
-Input is a JSON array of objects with:
+Seed files are plain `.txt` files with one entry per line in the format `type: statement`. Lines starting with `#` are treated as comments and attached to the next entry.
 
-- `type`: one of `"definition"`, `"fact"`, `"assumption"`, `"goal"`
-- `statement`: required string
-- `proof`: optional string
-- `comment`: optional string
+Valid types: `definition`, `fact`, `assumption`, `goal`.
 
-Example:
+Example (`input.txt`):
 
-```json
-[
-  {
-    "type": "definition",
-    "statement": "a, b, c are positive real numbers"
-  },
-  {
-    "type": "fact",
-    "statement": "AM-GM inequality: for positive reals x, y, x + y >= 2*sqrt(x*y)"
-  },
-  {
-    "type": "goal",
-    "statement": "Prove a target inequality"
-  }
-]
+```
+definition: Let $a, b, c$ be positive real numbers such that $a + b + c \leq 2$
+# useful inequality
+fact: AM-GM: for positive reals $x, y$, $x + y \geq 2\sqrt{xy}$
+# target
+goal: Prove $\sqrt{a^2 + 1/b^2} + \sqrt{b^2 + 1/c^2} + \sqrt{c^2 + 1/a^2} \geq \frac{\sqrt{97}}{2}$
 ```
 
-Every statement other than the `goal` is assumed to be true. 
+Use LaTeX for all mathematical notation (`\geq`, `\sqrt{}`, etc.). Every entry other than `goal` is treated as given and assumed true.
+
+To convert a `.txt` seed file to the `.json` format used internally, use the `txt_to_json` tool in `main.py`.
 
 ## Running
 
@@ -83,39 +70,48 @@ Every statement other than the `goal` is assumed to be true.
 python main.py
 ```
 
-CLI flow:
+An interactive menu lets you select a tool:
 
-1. Enter JSON path.
-2. Choose proposer model.
-3. Choose checker model.
-4. Choose whether to open HTML view each round.
-5. Choose whether to be prompted for a hint each round.
+| Tool | Description |
+|------|-------------|
+| `run` | Run the proof loop |
+| `txt_to_json` | Convert a `.txt` seed file to `.json` |
+| `goal_latex` | Export a filtered LaTeX proof from derived statements |
 
-If hint prompting is enabled, each round asks for optional user guidance. If disabled, the loop runs autonomously until goal reached/disproved or `ROUNDS` is exhausted.
+### `run` options
+
+1. Enter input JSON path.
+2. Choose proposer and checker models.
+3. Choose whether to be prompted for a hint each round.
+4. Optionally specify output filenames (press Enter to accept defaults).
+
+If hint prompting is enabled, each round asks for optional user guidance. If disabled, the loop runs autonomously until the goal is reached/disproved or `ROUNDS` is exhausted.
 
 ## Output files
 
-All outputs are written next to the input file using the same stem:
+All outputs are written next to the input file. Default names use the input stem:
 
 | File | Description |
 |------|-------------|
-| `{stem}_statements.json` | Seed + derived statements (`comment: "Derived"` for new facts) |
+| `{stem}_statements.json` | Seed + all derived statements (`comment: "Derived"` for new facts) |
 | `{stem}_log.txt` | Concise per-round log |
 | `{stem}_full_log.txt` | Extended log including reasoning/tool traces |
-| `{stem}_view.html` | MathJax HTML view of given facts, derived facts, and goal |
+| `{stem}_statements.tex` | LaTeX document of all statements and proofs, updated after every round |
 
 Notes:
 
 - The original input JSON is never modified.
-- To continue from previous progress, run again using `{stem}_statements.json` as input.
+- To continue from previous progress, run again using the same input JSON — derived facts are loaded from `{stem}_statements.json`.
 
-## Generate LaTeX proof
+## Generate filtered LaTeX proof
+
+Use the `goal_latex` tool in `main.py`, or run directly:
 
 ```bash
 python -m src.goal_latex
 ```
 
-Then enter a `{stem}_statements.json` path. The script filters derived statements to those used in the proof chain and writes:
+Enter a `{stem}_statements.json` path. The script uses an LLM to filter derived statements to those relevant to the proof chain and writes:
 
 - `{stem}_final_proof.tex`
 
@@ -143,7 +139,7 @@ If `bwrap` is not found, execution falls back to running directly in the venv (n
 
 - `src/app.py`: core loop, prompts, model calls, parsing, logging, save/load helpers.
 - `src/tools.py`: `run_python()` and tool schema.
-- `src/html_view.py`: generates `{stem}_view.html` with MathJax rendering. This is used to read the math more easily than the JSON.
 - `src/goal_latex.py`: filters proof chain and exports LaTeX.
+- `src/statements_latex.py`: exports all statements and proofs to a `.tex` file.
+- `src/txt_to_json.py`: converts `.txt` seed files to `.json`.
 - `main.py`: interactive CLI entrypoint.
-
