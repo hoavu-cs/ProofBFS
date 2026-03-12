@@ -101,13 +101,13 @@ If hint prompting is enabled, each round asks for optional user guidance. If dis
 
 ## Output files
 
-All outputs are written next to the input file. Default names use the input stem:
+All outputs are written next to the input file. During `run`, you are prompted for each output filename — press Enter to accept the default:
 
-| File | Description |
-|------|-------------|
-| `{stem}_statements.json` | Seed + all derived statements (`comment: "Derived"` for new facts) |
-| `{stem}_full_log.txt` | Extended log including reasoning/tool traces |
-| `{stem}_statements.tex` | LaTeX document of all statements and proofs, updated after every round |
+| File | Default name | Description |
+|------|--------------|-------------|
+| Statements JSON | `{stem}_statements.json` | Seed + all derived statements (`comment: "Derived"` for new facts) |
+| Full log | `{stem}_full_log.txt` | Extended log including reasoning/tool traces |
+| LaTeX | `{stem}_statements.tex` | All statements and proofs, updated after every round |
 
 After a run, derived statements are appended to `{stem}_statements.json`. Example entry from `examples/inequalities/7/statements1.json`:
 
@@ -123,7 +123,7 @@ After a run, derived statements are appended to `{stem}_statements.json`. Exampl
 Notes:
 
 - The original input JSON is never modified.
-- To continue from previous progress, run again using the same input JSON — derived facts are loaded from `{stem}_statements.json`.
+- To continue from previous progress, run again using the newly generated JSON. This new JSON contains all original and derived facts.
 
 ## Generate filtered LaTeX proof
 
