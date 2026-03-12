@@ -12,7 +12,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 from .tools import PYTHON_TOOL, run_python
-from .html_view import generate_html
+from .statements_latex import generate_statements
 
 load_dotenv()
 
@@ -252,12 +252,16 @@ def print_facts(facts: list[Fact]) -> None:
 """-----------------------------------------------------------------------------------------------
 Main loop of the proof assistant.
 -----------------------------------------------------------------------------------------------"""
+
 def run(
     json_path: Path,
     proposer_model: str = DEEPSEEK_REASONER,
     checker_model: str = DEEPSEEK_REASONER,
-    open_html: bool = False,
     prompt_each_round: bool = True,
+    derived_name: str | None = None,
+    log_name: str | None = None,
+    full_log_name: str | None = None,
+    latex_name: str | None = None,
 ) -> None:
     def _client(model: str) -> OpenAI:
         if model == OLLAMA_QWEN:
@@ -269,10 +273,11 @@ def run(
     p_client = _client(proposer_model)
     c_client = _client(checker_model)
 
-    derived_path = json_path.parent / (json_path.stem + "_statements.json")
-    log_path = json_path.parent / (json_path.stem + "_log.txt")
-    full_log_path = json_path.parent / (json_path.stem + "_full_log.txt")
-    html_path = str(json_path.parent / (json_path.stem + "_view.html"))
+    base = json_path.parent
+    derived_path   = base / (derived_name  or (json_path.stem + "_statements.json"))
+    log_path       = base / (log_name      or (json_path.stem + "_log.txt"))
+    full_log_path  = base / (full_log_name or (json_path.stem + "_full_log.txt"))
+    statement_tex  = base / (latex_name or (json_path.stem + "_statements.tex"))
     if not derived_path.exists():
         derived_path.write_text(json_path.read_text(), encoding="utf-8")
     facts, goal = load_statements(json_path, derived_path)
@@ -296,11 +301,6 @@ def run(
     if goal:
         print(f"[bold yellow]Goal: {goal}[/bold yellow]\n")
     print_facts(facts)
-
-    generate_html(derived_path)
-    if open_html:
-        import webbrowser
-        webbrowser.open(html_path)
 
     stmt_history: list[dict] = []
     check_history: list[dict] = []
@@ -370,16 +370,13 @@ def run(
         if new_facts:
             save_facts(derived_path, new_facts)
             new_facts.clear()
-        generate_html(derived_path)
-        if open_html:
-            import webbrowser
-            webbrowser.open(html_path)
         append_log(log_path, log[log_offset:])
         log_offset = len(log)
         with open(full_log_path, "a", encoding="utf-8") as f:
             for entry in _full_log:
                 f.write(entry + "\n\n")
         _full_log.clear()
+        generate_statements(derived_path, statement_tex.name)
 
         if goal_outcome == "PROVEN":
             print("\n[bold green]=== Goal proven! ===[/bold green]")

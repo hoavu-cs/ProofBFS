@@ -112,7 +112,7 @@ Notes:
 ## Generate LaTeX proof
 
 ```bash
-python -m src.proof_cleanup
+python -m src.goal_latex
 ```
 
 Then enter a `{stem}_statements.json` path. The script filters derived statements to those used in the proof chain and writes:
@@ -144,6 +144,6 @@ If `bwrap` is not found, execution falls back to running directly in the venv (n
 - `src/app.py`: core loop, prompts, model calls, parsing, logging, save/load helpers.
 - `src/tools.py`: `run_python()` and tool schema.
 - `src/html_view.py`: generates `{stem}_view.html` with MathJax rendering. This is used to read the math more easily than the JSON.
-- `src/proof_cleanup.py`: filters proof chain and exports LaTeX.
+- `src/goal_latex.py`: filters proof chain and exports LaTeX.
 - `main.py`: interactive CLI entrypoint.
 

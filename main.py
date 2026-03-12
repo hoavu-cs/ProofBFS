@@ -8,8 +8,16 @@ from rich.console import Console
 from rich.rule import Rule
 
 from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, run
+from src.goal_latex import generate_proof
+from src.txt_to_json import convert
 
 MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN]
+TOOLS         = ["run", "txt_to_json", "goal_latex"]
+TOOLS_DISPLAY = [
+    "run",
+    "txt_to_json  (convert input.txt → input.json)",
+    "goal_latex   (export filtered LaTeX proof from derived statements)",
+]
 console = Console()
 
 # ANSI helpers (used inside raw-terminal mode where Rich can't write)
@@ -66,26 +74,49 @@ def _pick(prompt: str, options: list[str]) -> str:
     return options[idx]
 
 
-if __name__ == "__main__":
-    console.print(Rule("[bold cyan]∴ ProofBFS[/bold cyan]"))
-
-    path_str = console.input("[bold]Input JSON path:[/bold] ").strip()
-    path = Path(path_str)
+def _require_path(prompt: str) -> Path:
+    path = Path(console.input(f"[bold]{prompt}:[/bold] ").strip())
     if not path.exists():
         print(f"[red]Error: {path} not found.[/red]")
         sys.exit(1)
+    return path
 
-    print()
-    proposer_model = _pick("Proposer model:", MODELS)
-    checker_model  = _pick("Checker model: ", MODELS)
-    open_html      = _pick("Open HTML view:", ["yes", "no"]) == "yes"
-    prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
+
+def _optional_name(prompt: str, default: str) -> str | None:
+    val = console.input(f"[bold]{prompt}[/bold] [dim](Enter for {default})[/dim]: ").strip()
+    return val or None
+
+
+if __name__ == "__main__":
+    console.print(Rule("[bold cyan]∴ ProofBFS[/bold cyan]"))
     print()
 
-    run(
-        path,
-        proposer_model=proposer_model,
-        checker_model=checker_model,
-        open_html=open_html,
-        prompt_each_round=prompt_rounds,
-    )
+    tool = TOOLS[TOOLS_DISPLAY.index(_pick("Tool:", TOOLS_DISPLAY))]
+    print()
+
+    if tool == "txt_to_json":
+        convert(_require_path("Input .txt path"))
+
+    elif tool == "goal_latex":
+        generate_proof(_require_path("Statements JSON path"))
+
+    elif tool == "run":
+        path           = _require_path("Input JSON path")
+        proposer_model = _pick("Proposer model:", MODELS)
+        checker_model  = _pick("Checker model: ", MODELS)
+        prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
+        derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.json")
+        log_name       = _optional_name("Output log filename:",       path.stem + "_log.txt")
+        full_log_name  = _optional_name("Output full log filename:",  path.stem + "_full_log.txt")
+        latex_name     = _optional_name("Output LaTeX filename:",     path.stem + "_statements.tex")
+        print()
+        run(
+            path,
+            proposer_model=proposer_model,
+            checker_model=checker_model,
+            prompt_each_round=prompt_rounds,
+            derived_name=derived_name,
+            log_name=log_name,
+            full_log_name=full_log_name,
+            latex_name=latex_name,
+        )
