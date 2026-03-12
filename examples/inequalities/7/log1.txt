@@ -1,0 +1,1232 @@
+
+=== Run 2026-03-12 01:04:26 ===
+
+--- Round 1 ---
+
+[Thinking]
+I need to analyze the problem. We have positive real numbers a, b, c > 0 such that a + b + c = abc. The ultimate goal is to prove that sum_{cyc} 1/(1+a^2) ≤ 3/2.
+
+I need to derive one new interesting mathematical statement possibly using the established statements.
+
+First, let's understand the condition a + b + c = abc. This is symmetric. For positive reals, this condition is equivalent to something like: if we set x = 1/a, y = 1/b, z = 1/c, then 1/x + 1/y + 1/z = 1/(xyz)??? Wait: a + b + c = abc => dividing both sides by abc: 1/(bc) + 1/(ac) + 1/(ab) = 1. Let x = 1/a, y = 1/b, z = 1/c. Then x, y, z > 0. The condition becomes: yz + xz + xy = 1. Indeed: 1/(bc) = (1/b)(1/c) = yz, etc. So we have xy + yz + zx = 1.
+
+Thus the condition is symmetric and we can work with x, y, z > 0 such that xy + yz + zx = 1.
+
+Now the expression S = sum 1/(1+a^2) = sum 1/(1 + (1/x)^2) = sum 1/(1 + 1/x^2) = sum x^2/(x^2 + 1). Since a = 1/x, etc.
+
+Alternatively, maybe we can find bounds.
+
+Goal: S = sum_{cyc} 1/(1+a^2) ≤ 3/2.
+
+We need to derive a new statement. Maybe we can derive an inequality linking sum of a, b, c to sum of squares, or something.
+
+Let's explore using Python to test some random examples to see if the inequality holds. Use sympy or random sampling.
+
+I'll use run_python to test.
+
+[Python] import random, math
+
+def test_random(num_trials=10000):
+    for _ in range(num_trials):
+        # generate random positive a, b, c satisfying a+b+c = abc
+        # We can generate random x, y, z >0 with xy+yz+zx=1, then a=1/x etc.
+        # Generate random x, y in (0,1) and compute z from xy + yz + zx = 1 => z(x+y) = 1 - xy => z = (1 - xy)/(x+y)
+        x = random.random() * 0.9 + 0.1  # between 0.1 and 1
+        y = random.random() * 0.9 + 0.1
+        # ensure denominator not zero and z positive
+        denominator = x + y
+        numerator = 1 - x*y
+        if numerator <= 0:
+            continue
+        z = numerator / denominator
+        if z <= 0:
+            continue
+        # compute a, b, c
+        a = 1/x
+        b = 1/y
+        c = 1/z
+        # compute sum
+        S = 1/(1+a**2) + 1/(1+b**2) + 1/(1+c**2)
+        if S > 1.5 + 1e-12:
+            print("Counterexample found:", a, b, c, S)
+            return
+    print("No counterexample found in", num_trials, "trials")
+
+test_random()
+→ No counterexample found in 10000 trials
+
+[Thinking]
+Seems inequality likely holds. Now I need to derive a new statement. Perhaps we can derive an inequality relating a, b, c individually. For example, we might prove that at least one of a, b, c is ≥ something, or that sum of squares is ≥ something.
+
+Given condition a+b+c = abc, we can maybe derive that abc ≥ 3√3? Let's test.
+
+Compute lower bound for product abc. Since a+b+c ≥ 3 (abc)^{1/3} by AM-GM, but we have a+b+c = abc, so abc ≥ 3 (abc)^{1/3}. Let t = (abc)^{1/3} > 0. Then t^3 ≥ 3 t => t^3 - 3t ≥ 0 => t(t^2 - 3) ≥ 0 => t ≥ √3 (since t>0). So abc ≥ (√3)^3 = 3√3 ≈ 5.196.
+
+Thus abc ≥ 3√3. That's a statement.
+
+But maybe that's too trivial. Let's prove it.
+
+Statement: For positive real numbers a, b, c satisfying a + b + c = abc, we have abc ≥ 3√3.
+
+Proof: By AM-GM, a+b+c ≥ 3 (abc)^{1/3}. Since a+b+c = abc, we have abc ≥ 3 (abc)^{1/3}. Let t = (abc)^{1/3} > 0. Then t^3 ≥ 3t => t^2 ≥ 3 => t ≥ √3 (since t>0). Thus abc = t^3 ≥ (√3)^3 = 3√3.
+
+That's a valid statement.
+
+But maybe we can derive something about the sum of squares. Let's compute using condition.
+
+We have a+b+c = abc. Could we find a lower bound for a^2+b^2+c^2? Let's test with random sampling. Use python.
+
+[Python] import random, math
+
+def test_bounds(num_trials=10000):
+    min_sum_sq = float('inf')
+    max_sum_sq = 0
+    min_abc = float('inf')
+    max_abc = 0
+    for _ in range(num_trials):
+        x = random.random() * 0.9 + 0.1
+        y = random.random() * 0.9 + 0.1
+        denom = x + y
+        numer = 1 - x*y
+        if numer <= 0:
+            continue
+        z = numer / denom
+        if z <= 0:
+            continue
+        a = 1/x
+        b = 1/y
+        c = 1/z
+        sum_sq = a**2 + b**2 + c**2
+        prod = a*b*c
+        if sum_sq < min_sum_sq:
+            min_sum_sq = sum_sq
+        if sum_sq > max_sum_sq:
+            max_sum_sq = sum_sq
+        if prod < min_abc:
+            min_abc = prod
+        if prod > max_abc:
+            max_abc = prod
+    print("Min sum of squares:", min_sum_sq)
+    print("Max sum of squares:", max_sum_sq)
+    print("Min abc:", min_abc)
+    print("Max abc:", max_abc)
+
+test_bounds()
+→ Min sum of squares: 9.000252223798752
+Max sum of squares: 13983.09790063629
+Min abc: 5.196196117030899
+Max abc: 120.25860564105736
+
+[Thinking]
+Interesting: min sum of squares seems close to 9. Actually, maybe the minimum of a^2+b^2+c^2 given condition is 9? Let's test more systematically. Maybe we can prove that a^2+b^2+c^2 ≥ 9.
+
+Given abc ≥ 3√3, but sum of squares might have lower bound.
+
+We can attempt to prove using Cauchy-Schwarz or other inequalities.
+
+We have condition: a+b+c = abc. Let’s try to find relation between sum of squares and sum.
+
+Consider using substitution a = tan A, b = tan B, c = tan C for acute angles? Because tan A tan B tan C = tan A + tan B + tan C if A+B+C = π? Indeed, identity: if A+B+C = π, then tan A + tan B + tan C = tan A tan B tan C. That's for angles in triangle (maybe not all acute). For positive a, b, c, we can set a = tan A, etc., where A, B, C ∈ (0, π/2) and A+B+C = π. That's a known substitution.
+
+Thus condition a+b+c = abc is equivalent to tan A + tan B + tan C = tan A tan B tan C, which holds when A+B+C = π (for angles where tangents defined). So we can let a = tan A, b = tan B, c = tan C, with A, B, C ∈ (0, π/2) and A+B+C = π.
+
+Then 1/(1+a^2) = 1/(1+tan^2 A) = cos^2 A. Similarly for others. So the sum S = cos^2 A + cos^2 B + cos^2 C.
+
+Goal: cos^2 A + cos^2 B + cos^2 C ≤ 3/2.
+
+But we know identity: cos^2 A + cos^2 B + cos^2 C = 1 - sin^2 A + ... Actually maybe easier: since A+B+C = π, we have cos^2 A + cos^2 B + cos^2 C = 3/2 + (1/2)(cos 2A + cos 2B + cos 2C). Because cos^2 θ = (1+cos 2θ)/2. So sum = 3/2 + (1/2)(cos 2A + cos 2B + cos 2C). So inequality reduces to cos 2A + cos 2B + cos 2C ≤ 0.
+
+Now, we need to prove that for angles in (0, π/2) summing to π, cos 2A + cos 2B + cos 2C ≤ 0. This might be known. But we can derive a new statement maybe about product of cosines or something.
+
+Alternatively, we can derive a statement about the product abc and sum of squares.
+
+Given substitution a = tan A, etc., we have a^2 = tan^2 A. Maybe we can derive lower bound for sum of squares: a^2+b^2+c^2 ≥ 9.
+
+Let's test with random sampling to see if minimum approaches 9. Use more precise search. Use sympy to maybe find minimum via Lagrange multipliers.
+
+But for now, derive a new statement.
+
+One interesting statement: Under condition a+b+c = abc, we have (a^2+1)(b^2+1)(c^2+1) ≥ 8.
+
+Let's test numerically.
+
+[Python] import random, math
+
+def test_product(num_trials=10000):
+    min_prod = float('inf')
+    for _ in range(num_trials):
+        x = random.random() * 0.9 + 0.1
+        y = random.random() * 0.9 + 0.1
+        denom = x + y
+        numer = 1 - x*y
+        if numer <= 0:
+            continue
+        z = numer / denom
+        if z <= 0:
+            continue
+        a = 1/x
+        b = 1/y
+        c = 1/z
+        prod = (a**2 + 1)*(b**2 + 1)*(c**2 + 1)
+        if prod < min_prod:
+            min_prod = prod
+    print("Minimum product (a^2+1)(b^2+1)(c^2+1):", min_prod)
+    return min_prod
+
+test_product()
+→ Minimum product (a^2+1)(b^2+1)(c^2+1): 64.00096994674196
+
+[Thinking]
+Minimum seems around 64, maybe 64 exactly? Let's test more systematically. Might be 64.
+
+Given a = tan A, then a^2+1 = tan^2 A + 1 = sec^2 A = 1/cos^2 A. So product = 1/(cos^2 A cos^2 B cos^2 C). So product ≥ 64 is equivalent to cos^2 A cos^2 B cos^2 C ≤ 1/64, or cos A cos B cos C ≤ 1/8. That's a known inequality for triangle angles: cos A cos B cos C ≤ 1/8, with equality when A=B=C=π/3. Indeed, for triangle angles, maximum product of cosines is 1/8. So product (a^2+1)(b^2+1)(c^2+1) ≥ 64, equality when a=b=c=√3? Wait a = tan π/3 = √3, then a^2+1 = 3+1=4, product = 4^3 = 64. So yes.
+
+Thus statement: Under condition a+b+c = abc, we have (a^2+1)(b^2+1)(c^2+1) ≥ 64.
+
+Proof using substitution a = tan A etc. and known inequality cos A cos B cos C ≤ 1/8.
+
+But maybe that's already known. Another statement: The sum of reciprocals 1/a + 1/b + 1/c ≤ √3? Let's test.
+
+Compute 1/a + 1/b + 1/c = x+y+z where x=1/a etc., with xy+yz+zx=1. Need bound on x+y+z. By Cauchy, (x+y+z)^2 ≥ 3(xy+yz+zx) = 3, so x+y+z ≥ √3. Actually that's lower bound. Upper bound? There might be no upper bound because x,y,z can be arbitrarily large? But they must satisfy xy+yz+zx=1, so if one variable is huge, others must be small. Let's test.
+
+But maybe we can derive something like a^2+b^2+c^2 ≥ 9. Let's try to prove.
+
+Given a = tan A, then a^2 = tan^2 A = sin^2 A / cos^2 A = (1 - cos^2 A)/cos^2 A = 1/cos^2 A - 1. So a^2+b^2+c^2 = sum (1/cos^2 A) - 3.
+
+We need lower bound for sum of 1/cos^2 A. Since cos A ≤ 1, but we need lower bound. For triangle angles, maybe sum of sec^2 A has minimum when triangle is equilateral? Let's test numerically. Use python to compute minimum of sum sec^2 A. Use random sampling.
+
+[Python] import random, math
+
+def test_sec_sq(num_trials=100000):
+    min_sum = float('inf')
+    max_sum = 0
+    for _ in range(num_trials):
+        # generate random angles A,B,C >0 summing to pi
+        # generate random A, B in (0, pi)
+        A = random.random() * math.pi
+        B = random.random() * (math.pi - A)
+        C = math.pi - A - B
+        if A <= 0 or B <= 0 or C <= 0:
+            continue
+        sum_sec = 1/(math.cos(A)**2) + 1/(math.cos(B)**2) + 1/(math.cos(C)**2)
+        if sum_sec < min_sum:
+            min_sum = sum_sec
+            angles = (A, B, C)
+        if sum_sec > max_sum:
+            max_sum = sum_sec
+    print("Minimum sum sec^2:", min_sum, "angles:", angles)
+    print("Maximum sum sec^2:", max_sum)
+
+test_sec_sq()
+→ Minimum sum sec^2: 3.0000000000836673 angles: (3.1415856381389218, 5.726083173945982e-06, 1.2893676973933866e-06)
+Maximum sum sec^2: 5516562947.228493
+
+[Thinking]
+Interesting: minimum sum sec^2 approaches 3? That's when angles approach π, 0, 0. But those are degenerate triangles, not allowed if we require a, b, c > 0? In the substitution a = tan A, if A → π/2, then tan A → ∞, not allowed? Actually a positive finite, so angles must be in (0, π/2). So we restrict to acute triangle where all angles < π/2. Let's restrict to angles in (0, π/2). Then sum sec^2 minimum might be at equilateral? Let's test.
+
+[Python] import random, math
+
+def test_sec_sq_acute(num_trials=100000):
+    min_sum = float('inf')
+    max_sum = 0
+    for _ in range(num_trials):
+        # generate random acute angles summing to pi
+        # generate A, B in (0, pi/2)
+        A = random.random() * math.pi/2
+        B = random.random() * (math.pi/2)
+        # ensure C = pi - A - B > 0 and < pi/2
+        C = math.pi - A - B
+        if C <= 0 or C >= math.pi/2:
+            continue
+        sum_sec = 1/(math.cos(A)**2) + 1/(math.cos(B)**2) + 1/(math.cos(C)**2)
+        if sum_sec < min_sum:
+            min_sum = sum_sec
+            angles = (A, B, C)
+        if sum_sec > max_sum:
+            max_sum = sum_sec
+    print("Minimum sum sec^2 (acute):", min_sum, "angles:", angles)
+    print("Maximum sum sec^2 (acute):", max_sum)
+    # equilateral case
+    eq = 3/(math.cos(math.pi/3)**2)
+    print("Equilateral sum sec^2:", eq)
+
+test_sec_sq_acute()
+→ Minimum sum sec^2 (acute): 12.000336613145755 angles: (1.0459487207981608, 1.0495613147904335, 1.0460826180011988)
+Maximum sum sec^2 (acute): 9573269880.687618
+Equilateral sum sec^2: 11.999999999999995
+
+[Thinking]
+Minimum seems around 12, which is 3/(cos^2(π/3)) = 3/(0.25) = 12. So sum sec^2 ≥ 12, equality at equilateral. Therefore a^2+b^2+c^2 = sum sec^2 - 3 ≥ 12 - 3 = 9. So a^2+b^2+c^2 ≥ 9.
+
+Thus we have a new statement: Under condition a+b+c = abc, we have a^2 + b^2 + c^2 ≥ 9, with equality when a = b = c = √3.
+
+Proof: Using substitution a = tan A, etc., with A+B+C = π, and using inequality sum sec^2 A ≥ 12 (by Jensen or by known inequality). Alternatively, we can prove directly using Cauchy-Schwarz or other methods.
+
+But maybe we can prove a^2+b^2+c^2 ≥ 9 without trigonometric substitution.
+
+Let's attempt: Given a+b+c = abc. Let’s denote s = a+b+c = abc.
+
+By AM-GM, we have s ≥ 3 (abc)^{1/3} = 3 s^{1/3} => s ≥ 3√3 as earlier.
+
+Now we need to lower bound sum of squares.
+
+We can use inequality (a^2+b^2+c^2)(1+1+1) ≥ (a+b+c)^2 = s^2. So a^2+b^2+c^2 ≥ s^2/3.
+
+Thus a^2+b^2+c^2 ≥ (s^2)/3. Since s ≥ 3√3, s^2 ≥ 27, so a^2+b^2+c^2 ≥ 9. Indeed, s^2/3 ≥ 27/3 = 9.
+
+Thus we have a simple proof using Cauchy-Schwarz and the lower bound on s.
+
+Wait, check: Cauchy-Schwarz: (a^2+b^2+c^2)(1^2+1^2+1^2) ≥ (a+b+c)^2. So indeed sum squares ≥ (a+b+c)^2 / 3.
+
+Since we have lower bound for a+b+c = s ≥ 3√3, we get sum squares ≥ (3√3)^2 / 3 = 27/3 = 9.
+
+Thus statement proven.
+
+But note: s ≥ 3√3 is derived using AM-GM. That's valid.
+
+Thus we have a chain: condition => s = abc ≥ 3√3 => sum squares ≥ 9.
+
+Thus statement: a^2 + b^2 + c^2 ≥ 9.
+
+That's a new interesting statement.
+
+We can present it.
+
+Now we need to format:
+
+statement:
+<statement>
+proof:
+<proof>
+
+Make sure to use latex.
+
+Thus:
+
+statement:
+$a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+
+proof:
+Since $a, b, c > 0$ and $a + b + c = abc$, let $s = a + b + c = abc$. By AM–GM,
+\[
+s = a + b + c \ge 3\sqrt[3]{abc} = 3\sqrt[3]{s},
+\]
+hence $s^3 \ge 27 s$, i.e., $s^2 \ge 27$. Thus $s \ge 3\sqrt{3}$ (as $s>0$). By the Cauchy–Schwarz inequality,
+\[
+(a^2+b^2+c^2)(1^2+1^2+1^2) \ge (a+b+c)^2 = s^2.
+\]
+Therefore
+\[
+a^2+b^2+c^2 \ge \frac{s^2}{3} \ge \frac{(3\sqrt{3})^2}{3} = 9.
+\]
+Equality holds when $a=b=c$ (from AM–GM and Cauchy–Schwarz), which together with $a+b+c=abc$ gives $a=b=c=\sqrt{3}$.
+
+That's a complete proof.
+
+Thus I will output that.
+
+statement:
+$a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+proof:
+Since $a, b, c > 0$ and $a + b + c = abc$, let $s = a + b + c = abc$. By AM–GM,
+\[
+s = a + b + c \ge 3\sqrt{abc} = 3\sqrt{s},
+\]
+hence $s^3 \ge 27 s$, i.e., $s^2 \ge 27$. Thus $s \ge 3\sqrt{3}$ (as $s>0$). By the Cauchy–Schwarz inequality,
+\[
+(a^2+b^2+c^2)(1^2+1^2+1^2) \ge (a+b+c)^2 = s^2.
+\]
+Therefore
+\[
+a^2+b^2+c^2 \ge \frac{s^2}{3} \ge \frac{(3\sqrt{3})^2}{3} = 9.
+\]
+Equality holds when $a=b=c$ (from AM–GM and Cauchy–Schwarz), which together with $a+b+c=abc$ gives $a=b=c=\sqrt{3}$.
+
+[Thinking]
+I need to check this proof carefully. The statement: $a, b, c > 0$, $a + b + c = abc$, then $a^2 + b^2 + c^2 \ge 9$, with equality iff $a = b = c = \sqrt{3}$.
+
+The proof uses AM-GM and Cauchy-Schwarz. Let's go step by step.
+
+Given $a, b, c > 0$ and $a + b + c = abc$. Let $s = a + b + c = abc$.
+
+First, by AM-GM: $a + b + c \ge 3\sqrt[3]{abc}$. Since $abc = s$, we have $s \ge 3\sqrt[3]{s}$. This implies $s \ge 3\sqrt[3]{s}$. Since $s > 0$, we can cube both sides? Actually, we can raise both sides to the third power: $s^3 \ge 27 s$, which gives $s^3 - 27 s \ge 0$, i.e., $s(s^2 - 27) \ge 0$. Since $s > 0$, we have $s^2 - 27 \ge 0$, so $s^2 \ge 27$, thus $s \ge 3\sqrt{3}$ (since $s>0$). That seems correct.
+
+Now, Cauchy-Schwarz: $(a^2 + b^2 + c^2)(1^2 + 1^2 + 1^2) \ge (a+b+c)^2 = s^2$. Indeed, by Cauchy-Schwarz, $( \sum a_i b_i )^2 \le (\sum a_i^2)(\sum b_i^2)$. Here take $a_i = a, b, c$ and $b_i = 1,1,1$. So $(a+b+c)^2 \le (a^2+b^2+c^2)(3)$. So $a^2+b^2+c^2 \ge s^2/3$.
+
+Combine with $s \ge 3\sqrt{3}$, so $s^2 \ge 27$, so $a^2+b^2+c^2 \ge 27/3 = 9$. That seems correct.
+
+Now equality conditions: AM-GM equality when $a = b = c$. Cauchy-Schwarz equality when $a:b:c = 1:1:1$, i.e., $a = b = c$. So equality in both inequalities requires $a = b = c$. Then $a+b+c = abc$ becomes $3a = a^3$, so $a^3 - 3a = 0$, i.e., $a(a^2 - 3) = 0$. Since $a > 0$, $a = \sqrt{3}$. So equality iff $a = b = c = \sqrt{3}$.
+
+Thus the proof seems valid.
+
+But I need to verify that the statement is precisely stated. The statement says $a, b, c > 0$, $a + b + c = abc$, then $a^2 + b^2 + c^2 \ge 9$, with equality iff $a = b = c = \sqrt{3}$. That matches.
+
+I should check with a numerical example to ensure there's no hidden flaw. Let's test with some random positive numbers satisfying $a+b+c = abc$. I can use Python to generate some triples. Let's see if the inequality holds. I'll run Python.
+
+[Python] import random
+import numpy as np
+
+def random_triple():
+    # generate random a,b >0, solve for c from a+b+c = abc
+    # => c = (a+b)/(ab - 1) must be positive. So need ab > 1.
+    while True:
+        a = random.uniform(0.1, 5)
+        b = random.uniform(0.1, 5)
+        if a*b > 1:
+            c = (a+b)/(a*b - 1)
+            if c > 0:
+                return a, b, c
+
+def check_inequality(num_trials=1000):
+    for _ in range(num_trials):
+        a, b, c = random_triple()
+        lhs = a**2 + b**2 + c**2
+        if lhs < 9 - 1e-9:
+            return False, (a, b, c, lhs)
+    return True, None
+
+ok, counter = check_inequality(2000)
+print("All passed:", ok)
+if not ok:
+    print("Counterexample:", counter)
+# Also test near equality
+import math
+a = b = c = math.sqrt(3)
+print("Equality case: a=b=c=sqrt(3)")
+print("a+b+c =", a+b+c)
+print("abc =", a*b*c)
+print("a^2+b^2+c^2 =", a**2 + b**2 + c**2)
+# random test near equality
+print("\nTesting small perturbations:")
+for _ in range(5):
+    a = math.sqrt(3) + random.uniform(-0.2, 0.2)
+    b = math.sqrt(3) + random.uniform(-0.2, 0.2)
+    # solve for c from a+b+c = abc
+    # c = (a+b)/(a*b - 1)
+    c = (a+b)/(a*b - 1)
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}, sum={a+b+c:.3f}, product={a*b*c:.3f}, sum of squares={a**2+b**2+c**2:.3f}")
+    # verify condition holds within tolerance
+    if abs((a+b+c) - (a*b*c)) > 1e-6:
+        print("Warning: condition not satisfied")
+
+→ All passed: True
+Equality case: a=b=c=sqrt(3)
+a+b+c = 5.196152422706632
+abc = 5.196152422706631
+a^2+b^2+c^2 = 8.999999999999998
+
+Testing small perturbations:
+a=1.823, b=1.818, c=1.573, sum=5.214, product=5.214, sum of squares=9.104
+a=1.927, b=1.912, c=1.430, sum=5.269, product=5.269, sum of squares=9.415
+a=1.914, b=1.784, c=1.532, sum=5.229, product=5.229, sum of squares=9.191
+a=1.553, b=1.746, c=1.927, sum=5.226, product=5.226, sum of squares=9.175
+a=1.821, b=1.714, c=1.666, sum=5.202, product=5.202, sum of squares=9.031
+
+[Thinking]
+All tests pass. So the inequality holds.
+
+Now I need to check the proof for any logical gaps. The proof uses AM-GM to derive $s \ge 3\sqrt[3]{s}$, then deduces $s^2 \ge 27$. Let's verify algebra: $s \ge 3\sqrt[3]{s}$ implies $s^3 \ge 27 s$, i.e., $s^3 - 27 s \ge 0$, $s(s^2 - 27) \ge 0$. Since $s > 0$, we have $s^2 \ge 27$. That's correct.
+
+But wait: AM-GM gives $a + b + c \ge 3\sqrt[3]{abc}$. Since $abc = s$, we have $s \ge 3\sqrt[3]{s}$. However, this inequality is not always true for all positive s? Actually, it is always true by AM-GM, given that $abc = s$ and $a,b,c$ positive. So it's fine.
+
+But we need to ensure that the bound $s \ge 3\sqrt{3}$ is correct: $s^2 \ge 27$ implies $s \ge 3\sqrt{3}$ because $s>0$. Yes.
+
+Now Cauchy-Schwarz: $(a^2+b^2+c^2)(1+1+1) \ge (a+b+c)^2$. That's standard.
+
+Thus $a^2+b^2+c^2 \ge s^2/3 \ge 27/3 = 9$.
+
+Equality: AM-GM equality when $a=b=c$. Cauchy-Schwarz equality when $a:b:c = 1:1:1$, which also gives $a=b=c$. So indeed equality iff $a=b=c$. Then $a+b+c=abc$ gives $3a = a^3$, so $a^2 = 3$, $a = \sqrt{3}$.
+
+Thus the proof is valid.
+
+Now I need to produce the response. According to instructions, I should respond with exactly one of: APPROVED: <brief justification>, statement: ..., proof: ....
+
+I'll restate the statement cleanly and proof cleanly, improving clarity if possible.
+
+I need to use LaTeX for mathematical expressions. Do not add markdown formatting. So I'll output plain text with LaTeX math.
+
+I'll write:
+
+APPROVED: The proof correctly uses AM–GM to bound $s = a+b+c = abc$ from below, then applies Cauchy–Schwarz to relate $a^2+b^2+c^2$ to $s^2$, yielding the desired inequality; equality conditions are verified.
+
+statement:
+$a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+
+proof:
+Let $s = a+b+c = abc$. By AM–GM,
+\[
+s = a+b+c \ge 3\sqrt[3]{abc} = 3\sqrt[3]{s},
+\]
+so $s^3 \ge 27 s$, i.e., $s^2 \ge 27$. Hence $s \ge 3\sqrt{3}$ (since $s>0$). By Cauchy–Schwarz,
+\[
+(a^2+b^2+c^2)(1^2+1^2+1^2) \ge (a+b+c)^2 = s^2,
+\]
+thus
+\[
+a^2+b^2+c^2 \ge \frac{s^2}{3} \ge \frac{(3\sqrt{3})^2}{3} = 9.
+\]
+Equality in AM–GM requires $a=b=c$; equality in Cauchy–Schwarz also requires $a=b=c$. Substituting $a=b=c$ into $a+b+c=abc$ gives $3a = a^3$, whence $a = \sqrt{3}$. Therefore equality holds iff $a=b=c=\sqrt{3}$.
+
+That's the clean proof.
+
+Now I need to output exactly that. No extra commentary.
+
+Let's produce the final answer.
+
+APPROVED: The proof correctly uses AM–GM to bound $s = a+b+c = abc$ from below, then applies Cauchy–Schwarz to relate $a^2+b^2+c^2$ to $s^2$, yielding the desired inequality; equality conditions are verified.
+
+statement:
+$a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+
+proof:
+Let $s = a+b+c = abc$. By AM–GM,
+\[
+s = a+b+c \ge 3\sqrt{abc} = 3\sqrt{s},
+\]
+so $s^3 \ge 27 s$, i.e., $s^2 \ge 27$. Hence $s \ge 3\sqrt{3}$ (since $s>0$). By Cauchy–Schwarz,
+\[
+(a^2+b^2+c^2)(1^2+1^2+1^2) \ge (a+b+c)^2 = s^2,
+\]
+thus
+\[
+a^2+b^2+c^2 \ge \frac{s^2}{3} \ge \frac{(3\sqrt{3})^2}{3} = 9.
+\]
+Equality in AM–GM requires $a=b=c$; equality in Cauchy–Schwarz also requires $a=b=c$. Substituting $a=b=c$ into $a+b+c=abc$ gives $3a = a^3$, whence $a = \sqrt{3}$. Therefore equality holds iff $a=b=c=\sqrt{3}$.
+
+[Thinking]
+I need to check if the goal is stated in any of the established statements. The established statements are:
+
+1. $a, b, c > 0$.
+2. $a + b + c = abc$.
+3. $a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+
+The goal is: Prove that $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$.
+
+I need to check if this inequality appears in any of the statements. The established statements do not mention anything about $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$. They only give conditions on a,b,c and an inequality about $a^2 + b^2 + c^2 \ge 9$. The goal is a different inequality. So the goal is not stated in any of the established statements. Therefore, I should output NOT YET.
+
+But wait: Could the third statement imply the goal? The third statement says $a^2 + b^2 + c^2 \ge 9$. That might be used to prove the goal, but the goal itself is not stated. The instruction is clear: check whether the goal is stated in any of the established statements. The goal is not explicitly stated. So answer is NOT YET.
+
+Thus output: NOT YET.
+
+NOT YET
+
+--- Round 2 ---
+
+[Thinking]
+I need to derive a new interesting mathematical statement related to the established facts and the ultimate goal. Let's analyze the goal: we want to prove that sum of reciprocals of (1+a²) ≤ 3/2. We have a+b+c = abc and a,b,c > 0.
+
+We can try to connect this to the inequality we already proved: a²+b²+c² ≥ 9.
+
+One approach: consider the function f(x) = 1/(1+x²). It's decreasing for x>0? Actually f'(x) = -2x/(1+x²)² < 0 for x>0, so it's decreasing. So larger x gives smaller f(x). Since we have a lower bound on sum of squares, perhaps we can bound the sum of f(a).
+
+Alternatively, we can try to prove something like: a² ≥ 3 for at least one variable, or similar.
+
+Let me think: from a+b+c = abc, we can write 1/(ab) + 1/(bc) + 1/(ca) = 1. That's interesting: divide both sides by abc (since positive): 1/(bc) + 1/(ca) + 1/(ab) = 1.
+
+So we have 1/ab + 1/bc + 1/ca = 1.
+
+Maybe we can relate a², b², c² to ab, bc, ca.
+
+Another idea: by Cauchy-Schwarz, (a²+b²+c²)(1/(1+a²)+1/(1+b²)+1/(1+c²)) ≥ something. Not straightforward.
+
+Let's derive a new statement. Could be something like: a/(1+a²) + b/(1+b²) + c/(1+c²) ≤ 3/2? Or maybe something about product.
+
+Or perhaps: a²b² + b²c² + c²a² ≥ 9? Let's test with a=b=c=√3: then each square is 3, product 9, sum of pairwise products = 9+9+9 = 27? Wait: a²b² = (ab)² = (3)² = 9, similarly each is 9, sum = 27. So not 9.
+
+Maybe: (1+a²)(1+b²)(1+c²) ≥ 64? Let's test with a=b=c=√3: (1+3)³ = 4³ = 64. Yes! That's interesting. Since a²+b²+c² ≥ 9, and perhaps by some inequality we can bound the product.
+
+Actually, we can try to prove: (1+a²)(1+b²)(1+c²) ≥ 64, with equality at a=b=c=√3.
+
+Let's verify with random numbers satisfying condition. I'll use Python to test.
+
+We need to generate random positive a,b,c such that a+b+c = abc. We can fix two variables and solve for third. Let's test.
+
+[Python] import numpy as np
+import random
+import math
+
+# Generate random a,b > 0, compute c from a+b+c = abc => c = (a+b)/(ab-1) if ab>1
+# Ensure positivity
+
+def generate_triplet():
+    while True:
+        a = random.uniform(0.1, 5)
+        b = random.uniform(0.1, 5)
+        if a*b > 1:
+            c = (a + b) / (a*b - 1)
+            if c > 0:
+                return a, b, c
+
+# Test inequality (1+a^2)(1+b^2)(1+c^2) >= 64
+samples = []
+for _ in range(10):
+    a,b,c = generate_triplet()
+    prod = (1+a**2)*(1+b**2)*(1+c**2)
+    samples.append((a,b,c,prod))
+
+for a,b,c,prod in samples:
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}, prod={prod:.3f}, diff={prod-64:.3f}")
+→ a=0.680, b=3.791, c=2.831, prod=202.738, diff=138.738
+a=2.815, b=2.848, c=0.807, prod=134.285, diff=70.285
+a=3.671, b=3.388, c=0.617, prod=249.393, diff=185.393
+a=4.219, b=2.119, c=0.798, prod=169.006, diff=105.006
+a=1.813, b=3.384, c=1.012, prod=108.039, diff=44.039
+a=3.646, b=2.318, c=0.800, prod=149.513, diff=85.513
+a=0.641, b=1.751, c=19.647, prod=2219.596, diff=2155.596
+a=4.689, b=0.817, c=1.946, prod=183.434, diff=119.434
+a=3.602, b=2.760, c=0.712, prod=181.392, diff=117.392
+a=1.585, b=3.130, c=1.190, prod=91.649, diff=27.649
+
+[Thinking]
+All products are >64. So seems plausible that (1+a²)(1+b²)(1+c²) ≥ 64. Equality when a=b=c=√3 gives 4³=64. So that could be a new statement.
+
+But we need to prove it. Possibly using the known inequality a²+b²+c² ≥ 9 and some other inequality linking product to sum of squares.
+
+Alternatively, we can use the condition 1/ab + 1/bc + 1/ca = 1. Let's denote x = a², y = b², z = c². Then we want to show (1+x)(1+y)(1+z) ≥ 64 given that 1/√(xy) + 1/√(yz) + 1/√(zx) = 1? Wait: from 1/(ab)+...=1, we have 1/√(xy)+1/√(yz)+1/√(zx)=1. That's messy.
+
+Maybe a simpler statement: ab + bc + ca ≥ 9? Let's test with a=b=c=√3: ab = 3, sum = 9. So equality. Let's test with random values. Use Python.
+
+[Python] import random
+
+def generate_triplet():
+    while True:
+        a = random.uniform(0.1, 5)
+        b = random.uniform(0.1, 5)
+        if a*b > 1:
+            c = (a + b) / (a*b - 1)
+            if c > 0:
+                return a, b, c
+
+samples = []
+for _ in range(10):
+    a,b,c = generate_triplet()
+    sum_ab = a*b + b*c + c*a
+    samples.append((a,b,c,sum_ab))
+
+for a,b,c,sum_ab in samples:
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}, sum_ab={sum_ab:.3f}, diff={sum_ab-9:.3f}")
+→ a=0.826, b=1.646, c=6.866, sum_ab=18.335, diff=9.335
+a=3.988, b=4.233, c=0.518, sum_ab=21.137, diff=12.137
+a=2.392, b=4.353, c=0.717, sum_ab=15.246, diff=6.246
+a=4.566, b=4.899, c=0.443, sum_ab=26.559, diff=17.559
+a=4.010, b=4.073, c=0.527, sum_ab=20.594, diff=11.594
+a=2.015, b=3.828, c=0.870, sum_ab=12.797, diff=3.797
+a=1.276, b=2.327, c=1.829, sum_ab=9.561, diff=0.561
+a=0.921, b=1.297, c=11.397, sum_ab=26.472, diff=17.472
+a=4.004, b=2.879, c=0.654, sum_ab=16.027, diff=7.027
+a=2.757, b=1.576, c=1.296, sum_ab=9.957, diff=0.957
+
+[Thinking]
+All sums are ≥ 9? The second last is 16.027 > 9, but some are close to 9. The one with a=1.276, b=2.327, c=1.829 gives sum_ab=9.561 > 9. So seems plausible that ab+bc+ca ≥ 9. Let's test near equality: try a=b=c=√3 ≈ 1.732. Compute sum_ab = 3*3 = 9. So equality.
+
+But is it always true? Let's try a very skewed example: let a and b be very small, then c huge. Let's try a=0.1, b=0.2, then ab=0.02, need ab>1? Actually condition a+b+c=abc, if a and b small, ab <1, then c = (a+b)/(ab-1) negative. So a,b must be such that ab>1. So all pairwise products must be >1? Not necessarily, but at least one product >1 to have positive denominator. However, we can have a,b >1 maybe.
+
+Let's try a=0.5, b=2, ab=1, denominator zero, so not allowed. So ab>1 required. So all pairwise products >1? Not necessarily, but at least ab>1 for the chosen a,b. Actually if we fix a,b such that ab>1, then c positive. Could bc or ac be less than 1? Possibly.
+
+But maybe we can prove ab+bc+ca ≥ 9. This is a known inequality? Let's try to prove using known a²+b²+c² ≥ 9. By AM-GM, (a²+b²+c²)(1+1+1) ≥ (a+b+c)²? Actually Cauchy gives (a²+b²+c²)(b²+c²+a²) ≥ (ab+bc+ca)²? Wait: (a²+b²+c²)(b²+c²+a²) = (a²+b²+c²)² ≥ (ab+bc+ca)² by Cauchy-Schwarz: (a²+b²+c²)(b²+c²+a²) ≥ (ab+bc+ca)². Indeed, by Cauchy-Schwarz: (a²+b²+c²)(b²+c²+a²) ≥ (ab+bc+ca)². Since the sequences are (a,b,c) and (b,c,a). So (a²+b²+c²)² ≥ (ab+bc+ca)², thus a²+b²+c² ≥ ab+bc+ca (since all positive). Then using a²+b²+c² ≥ 9, we get ab+bc+ca ≥ 9? Wait, we have a²+b²+c² ≥ ab+bc+ca. So if a²+b²+c² ≥ 9, then ab+bc+ca ≤ a²+b²+c², but not necessarily ≥ 9. Actually ab+bc+ca could be less than 9. But we need to prove ab+bc+ca ≥ 9. So need opposite inequality.
+
+Thus ab+bc+ca ≥ 9 might not hold. Let's test with a=3, b=3, c small? Let's compute a=3, b=3, then c = (6)/(9-1)=6/8=0.75. Then ab=9, bc=2.25, ca=2.25, sum=13.5 >9. But maybe there are cases where sum <9? Let's search using random. Use Python to try many random combos and see minimum.
+
+[Python] import random
+import math
+
+def generate_random():
+    while True:
+        a = random.uniform(0.1, 10)
+        b = random.uniform(0.1, 10)
+        if a*b > 1:
+            c = (a + b) / (a*b - 1)
+            if c > 0:
+                return a,b,c
+
+min_sum = float('inf')
+min_triplet = None
+for _ in range(10000):
+    a,b,c = generate_random()
+    s = a*b + b*c + c*a
+    if s < min_sum:
+        min_sum = s
+        min_triplet = (a,b,c)
+print("Minimum sum found:", min_sum)
+print("Triplet:", min_triplet)
+→ Minimum sum found: 9.006856263976196
+Triplet: (1.7966389985156377, 1.6805821181496945, 1.7219085843014879)
+
+[Thinking]
+Minimum sum ~9.006, close to 9. So likely ab+bc+ca ≥ 9 holds. Let's try more systematic search near equality. Maybe the minimum is indeed 9 at a=b=c=√3. That seems plausible.
+
+Thus we could state: ab+bc+ca ≥ 9, with equality iff a=b=c=√3.
+
+But we need to provide a proof. How to prove? Using the condition a+b+c = abc and some inequalities.
+
+We can try to express ab+bc+ca in terms of a+b+c and abc? Actually we have (a+b+c)² = a²+b²+c² + 2(ab+bc+ca). Also abc = a+b+c.
+
+So (abc)² = (a+b+c)² = a²+b²+c² + 2(ab+bc+ca).
+
+Thus ab+bc+ca = ((abc)² - (a²+b²+c²))/2.
+
+Since we know a²+b²+c² ≥ 9, and abc = s ≥ 3√3 (as earlier), we have (abc)² ≥ 27. So ab+bc+ca ≥ (27 - (a²+b²+c²))/2. But we need lower bound, not upper. Since a²+b²+c² is at least 9, the expression (27 - (a²+b²+c²))/2 is at most (27-9)/2 = 9. Actually we get ab+bc+ca ≥ (27 - (a²+b²+c²))/2. Since a²+b²+c² can be larger than 9, the right side can be less than 9. For example, if a²+b²+c² = 27, then RHS = 0. But we know ab+bc+ca cannot be that low. So this inequality is not useful for lower bound.
+
+Thus we need a different approach.
+
+Maybe we can prove directly using the condition 1/ab + 1/bc + 1/ca = 1. Let p = ab, q = bc, r = ca. Then we have 1/p + 1/q + 1/r = 1. And we want to prove p+q+r ≥ 9. That's a known inequality: for positive p,q,r with sum of reciprocals = 1, the sum p+q+r ≥ 9, with equality when p=q=r=3. Indeed, by AM-HM: (p+q+r)/3 ≥ 3/(1/p+1/q+1/r) = 3/1 = 3, so p+q+r ≥ 9. Equality when p=q=r=3.
+
+Thus ab+bc+ca ≥ 9, equality when ab = bc = ca = 3, which implies a=b=c=√3.
+
+Great! So we can state that.
+
+Now, we need to derive one new interesting mathematical statement. Could be this one. But we must ensure it's new relative to previously approved statements. The previously approved statement is a²+b²+c² ≥ 9. This is about ab+bc+ca ≥ 9. It's different.
+
+But maybe we can derive something else more relevant to the ultimate goal. The goal involves sum of 1/(1+a²). Maybe we can prove something like: (1+a²)(1+b²) ≥ (1+ab)²? Not sure.
+
+Alternatively, we can prove that at least one of a,b,c ≥ √3? Actually from a²+b²+c² ≥ 9, not necessarily each ≥ √3. But maybe we can prove that at least one of a,b,c ≥ √3? Let's test: if all are less than √3, then squares each <3, sum <9, contradiction. So indeed at least one variable ≥ √3. Similarly, at least one variable ≤ √3? Not necessarily; all could be >√3. For example a=2,b=2,c=... compute c = (4)/(4-1)=4/3≈1.333 <√3. So maybe at least one ≤ √3. Let's test: suppose all >√3, then a²+b²+c² > 9, possible? But need to satisfy a+b+c=abc. Could be possible. Let's test with a=2,b=2,c as above 1.333 <√3. So maybe always at least one ≤ √3. Let's test random large a,b. Use Python.
+
+[Python] import random
+import math
+
+def generate_random():
+    while True:
+        a = random.uniform(0.1, 10)
+        b = random.uniform(0.1, 10)
+        if a*b > 1:
+            c = (a + b) / (a*b - 1)
+            if c > 0:
+                return a,b,c
+
+def check_all_above_sqrt3():
+    count = 0
+    for _ in range(1000):
+        a,b,c = generate_random()
+        if a > math.sqrt(3) and b > math.sqrt(3) and c > math.sqrt(3):
+            count += 1
+            print("Found:", a,b,c)
+    print("Total:", count)
+check_all_above_sqrt3()
+→ Total: 0
+
+[Thinking]
+Seems no triplet with all three >√3. Maybe it's impossible. Could be a statement: at least one of a,b,c ≤ √3 and at least one ≥ √3. Since from a²+b²+c² ≥ 9, if all three >√3, then sum of squares >9, but maybe still possible? Wait, sum >9 is allowed. But maybe the condition a+b+c=abc forces some balancing.
+
+Let's try to construct a case where a,b are large, c small but still >√3? √3≈1.732. Let's try a=4,b=4, then c = (8)/(16-1)=8/15≈0.533 <1. So fails.
+
+Try a=2,b=2.5, ab=5>1, c = (4.5)/(5-1)=4.5/4=1.125 <√3. So seems c often less than √3.
+
+Maybe we can prove that not all three can be >√3. Suppose a,b,c > √3. Then abc > (√3)^3 = 3√3 ≈5.196. But a+b+c > 3√3 as well. However, we need equality a+b+c=abc. Could it be possible that abc > a+b+c? Actually for numbers >1, product can be larger than sum. For example, a=b=c=2, product=8, sum=6, product>sum. So maybe there exist triplets with all >√3. Let's try systematic search: we can solve for c given a,b. For given a,b >√3, compute c = (a+b)/(ab-1). Need c > √3. So condition (a+b)/(ab-1) > √3. Let's explore with Python.
+
+[Python] import random
+import math
+
+def find_all_above():
+    found = []
+    for _ in range(2000):
+        a = random.uniform(math.sqrt(3)+0.01, 5)
+        b = random.uniform(math.sqrt(3)+0.01, 5)
+        if a*b > 1:
+            c = (a+b)/(a*b-1)
+            if c > math.sqrt(3):
+                found.append((a,b,c))
+                if len(found) >= 5:
+                    break
+    return found
+
+res = find_all_above()
+print("Found:", len(res))
+for a,b,c in res:
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}")
+→ Found: 0
+
+[Thinking]
+Seems none. Let's try a broader range. Maybe a,b very close to √3 from above, then c might be large? Let's try a=1.74, b=1.74, just above √3≈1.732. Compute c = (3.48)/(1.74*1.74 -1) = 3.48/(3.0276-1)=3.48/2.0276≈1.716 <1.74. So c < a,b. Not all >√3.
+
+Thus perhaps it's impossible. Might be a known result: under a+b+c=abc, the three numbers cannot all be greater than √3 nor all less than √3. So exactly one or two >√3.
+
+But maybe we can prove: at least one of a,b,c ≥ √3 and at least one ≤ √3. That's a consequence of continuity and the fact that at equality a=b=c=√3. Might be true.
+
+But that's not very strong.
+
+Let's think about the ultimate goal: sum of 1/(1+a²) ≤ 3/2. We can try to prove something like: 1/(1+a²) ≤ (3 - a²)/4? Not sure.
+
+Maybe we can prove: (1+a²)(1+b²) ≥ (1+ab)². Let's test: (1+a²)(1+b²) - (1+ab)² = 1 + a² + b² + a²b² - (1 + 2ab + a²b²) = a² + b² - 2ab = (a-b)² ≥ 0. Indeed! So (1+a²)(1+b²) ≥ (1+ab)². This is a known identity: (1+a²)(1+b²) = (1+ab)² + (a-b)².
+
+Thus we have (1+a²)(1+b²) ≥ (1+ab)². Similarly for other pairs.
+
+Maybe we can use this to bound the product (1+a²)(1+b²)(1+c²). Since we have ab+bc+ca ≥ 9, maybe we can derive lower bound for product.
+
+But we already conjectured product ≥ 64. Let's try to prove that using the above identity.
+
+We have (1+a²)(1+b²)(1+c²) ≥ (1+ab)² (1+c²) maybe not straightforward.
+
+Alternatively, we can prove: 1/(1+a²) + 1/(1+b²) + 1/(1+c²) ≤ 3/2 using some inequality like Chebyshev or rearrangement.
+
+Given the time, I'll propose the statement about ab+bc+ca ≥ 9 with proof using AM-HM. That's neat.
+
+Thus new statement: ab+bc+ca ≥ 9, with equality iff a=b=c=√3.
+
+Proof: From a+b+c=abc, dividing by abc yields 1/(ab)+1/(bc)+1/(ca)=1. Let p=ab, q=bc, r=ca. Then 1/p+1/q+1/r=1. By AM-HM, (p+q+r)/3 ≥ 3/(1/p+1/q+1/r) = 3, so p+q+r ≥ 9. Equality when p=q=r=3, i.e., ab=bc=ca=3, which implies a=b=c=√3.
+
+Thus statement.
+
+Now format as required.
+
+statement:
+$ab + bc + ca \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+proof:
+From $a + b + c = abc$ and $a,b,c > 0$, divide both sides by $abc$ to obtain
+\[
+\frac{1}{ab} + \frac{1}{bc} + \frac{1}{ca} = 1.
+\]
+Set $p = ab$, $q = bc$, $r = ca$. Then $p,q,r > 0$ and
+\[
+\frac{1}{p} + \frac{1}{q} + \frac{1}{r} = 1.
+\]
+By the AM–HM inequality,
+\[
+\frac{p + q + r}{3} \ge \frac{3}{\frac{1}{p} + \frac{1}{q} + \frac{1}{r}} = \frac{3}{1} = 3,
+\]
+hence $p + q + r \ge 9$. Equality in AM–HM holds iff $p = q = r$, which together with $\frac{1}{p}+\frac{1}{q}+\frac{1}{r}=1$ gives $p = q = r = 3$. Thus $ab = bc = ca = 3$, which implies $a = b = c = \sqrt{3}$. Conversely, if $a=b=c=\sqrt{3}$, then $ab+bc+ca = 9$.
+
+[Thinking]
+I need to check this statement and proof. The statement: $ab + bc + ca \ge 9$, equality iff $a = b = c = \sqrt{3}$. Given $a,b,c>0$ and $a+b+c=abc$.
+
+Proof: Divide both sides by $abc$: $1/(ab) + 1/(bc) + 1/(ca) = 1$. Set $p=ab, q=bc, r=ca$. Then $p,q,r>0$ and $1/p + 1/q + 1/r = 1$. Apply AM-HM: $(p+q+r)/3 \ge 3/(1/p+1/q+1/r) = 3$. So $p+q+r \ge 9$. Equality AM-HM holds iff $p=q=r$, and with $1/p+1/q+1/r=1$, we get $p=q=r=3$. Then $ab=bc=ca=3$ implies $a=b=c=\sqrt{3}$ (since $ab=bc$ implies $a=c$, similarly). Conversely, if $a=b=c=\sqrt{3}$, then $ab+bc+ca=3+3+3=9$.
+
+I need to verify the logic: Does $ab=bc=ca=3$ indeed imply $a=b=c=\sqrt{3}$? Let's check: $ab=3$, $bc=3$, $ca=3$. Multiply all three: $(abc)^2 = 27$, so $abc = \sqrt{27} = 3\sqrt{3}$. Also $a+b+c = abc = 3\sqrt{3}$. But we also have $ab=3$, etc. We can solve: $a = 3/b$, $c = 3/b$, then $a=c$. Similarly $b = 3/a$, $c=3/a$, etc. Actually, from $ab=3$ and $bc=3$, we get $a = 3/b$, $c = 3/b$, so $a=c$. Then $ca = a^2 = 3$, so $a = \sqrt{3}$ (positive). Then $b = 3/a = \sqrt{3}$, $c = \sqrt{3}$. So yes, equality condition is correct.
+
+Check the AM-HM inequality: For positive numbers $p,q,r$, $(p+q+r)/3 \ge 3/(1/p+1/q+1/r)$. Equality iff $p=q=r$. That's correct.
+
+But we must ensure the step $p=ab, q=bc, r=ca$ is valid: $p,q,r$ are positive. However, note that $p,q,r$ are not independent; they must satisfy certain relations because they are products of three variables. In particular, $pqr = (ab)(bc)(ca) = (abc)^2$. But the condition $1/p+1/q+1/r=1$ is given. Does that impose any restriction? We need to ensure that there exist positive $p,q,r$ satisfying $1/p+1/q+1/r=1$ that can be expressed as $p=ab, q=bc, r=ca$ for some positive $a,b,c$ satisfying $a+b+c=abc$. Actually, the proof does not need to consider existence; it just deduces that if $a,b,c$ satisfy the given conditions, then $p,q,r$ satisfy that equation. The inequality holds for any positive $p,q,r$ satisfying that equation. So the deduction $p+q+r \ge 9$ is valid. Then equality condition: $p=q=r=3$ leads to $a=b=c=\sqrt{3}$ as argued. So the proof seems valid.
+
+But let me double-check the inequality: $ab+bc+ca \ge 9$. Could there be a counterexample? Let's try some numbers. I'll use Python to test random triplets satisfying $a+b+c=abc$. Use sympy or numeric solving. Let's run some tests.
+
+[Python] import random
+import math
+
+def random_positive_solution():
+    # Generate random b and c, then solve for a from a+b+c = abc => a(bc-1) = b+c => a = (b+c)/(bc-1) if bc>1
+    # Ensure positivity
+    while True:
+        b = random.uniform(0.1, 5.0)
+        c = random.uniform(0.1, 5.0)
+        if b*c > 1:
+            a = (b + c) / (b * c - 1)
+            if a > 0:
+                return a, b, c
+
+def test(num=1000):
+    min_sum = float('inf')
+    min_triplet = None
+    for _ in range(num):
+        a, b, c = random_positive_solution()
+        s = a*b + b*c + c*a
+        if s < min_sum:
+            min_sum = s
+            min_triplet = (a, b, c)
+    return min_sum, min_triplet
+
+min_val, triplet = test(5000)
+print("Minimum ab+bc+ca found:", min_val)
+print("Triplet (a,b,c):", triplet)
+print("Check condition a+b+c == abc?", sum(triplet), triplet[0]*triplet[1]*triplet[2])
+print("Equality case: sqrt(3)=", math.sqrt(3))
+print("ab+bc+ca at equality:", 3*3)
+# Also compute a^2+b^2+c^2
+print("a^2+b^2+c^2:", sum(x**2 for x in triplet))
+print("Check if a^2+b^2+c^2 >=9?", sum(x**2 for x in triplet) >= 9)
+
+→ Minimum ab+bc+ca found: 9.002110002339826
+Triplet (a,b,c): (1.7698902027384114, 1.710499588062397, 1.716679423503702)
+Check condition a+b+c == abc? 5.19706921430451 5.19706921430451
+Equality case: sqrt(3)= 1.7320508075688772
+ab+bc+ca at equality: 9
+a^2+b^2+c^2: 9.005308413592047
+Check if a^2+b^2+c^2 >=9? True
+
+[Thinking]
+The minimum found is around 9.002, close to 9. The triplet is near sqrt(3). That's consistent. Let's do more thorough search maybe using optimization. Could there be a case where ab+bc+ca is less than 9? Let's try to see if we can find a minimum numerically. Use sympy to solve constrained minimization? Might be heavy. But the inequality seems plausible.
+
+But there is a subtle point: The AM-HM inequality gives $(p+q+r)/3 \ge 3/(1/p+1/q+1/r)$. Since $1/p+1/q+1/r=1$, we get $p+q+r \ge 9$. That's correct. However, we need to ensure that $p,q,r$ are positive numbers. They are, because $a,b,c>0$. So the proof appears correct.
+
+But wait: The AM-HM inequality is actually a special case of AM-GM or power means. It holds for positive numbers. So the proof is valid.
+
+Check the equality condition: AM-HM equality holds when $p=q=r$. Then $1/p+1/q+1/r = 3/p = 1$ so $p=3$. So $p=q=r=3$. That gives $ab=3$, $bc=3$, $ca=3$. Then $ab=bc$ implies $a=c$, $bc=ca$ implies $b=a$, so $a=b=c$. Then $ab=3$ gives $a^2=3$, so $a=\sqrt{3}$. So equality condition is correct.
+
+Thus the statement and proof seem correct. However, I should verify that the statement is indeed a consequence of the earlier established statements. The earlier statement says $a^2+b^2+c^2 \ge 9$. Now this statement says $ab+bc+ca \ge 9$. Both hold under same condition. They are different inequalities. The proof uses a different approach.
+
+I should also check if there is any hidden assumption: Dividing by $abc$ is allowed since $abc>0$. The step $p=ab$, etc., is fine.
+
+Thus I approve.
+
+But before finalizing, let me check if there is any possibility that $p+q+r$ could be less than 9 due to some hidden constraint linking $p,q,r$ because they are not independent. However, the inequality holds for any positive $p,q,r$ satisfying $1/p+1/q+1/r=1$, regardless of whether they come from some $a,b,c$. So the lower bound $9$ is universal for that equation. So the proof is valid.
+
+Thus I output APPROVED.
+
+APPROVED: The proof correctly transforms the condition into $\frac{1}{p}+\frac{1}{q}+\frac{1}{r}=1$ with $p=ab$, $q=bc$, $r=ca$, then applies the AM–HM inequality to obtain $p+q+r\ge9$; equality conditions are verified.
+
+statement:
+$a,b,c>0$, $a+b+c=abc$ implies $ab+bc+ca\ge9$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+proof:
+From $a+b+c=abc$, divide by $abc$ (positive) to get $\frac{1}{ab}+\frac{1}{bc}+\frac{1}{ca}=1$. Set $p=ab$, $q=bc$, $r=ca$. Then $p,q,r>0$ and $\frac{1}{p}+\frac{1}{q}+\frac{1}{r}=1$. By the AM–HM inequality,
+\[
+\frac{p+q+r}{3}\ge\frac{3}{\frac{1}{p}+\frac{1}{q}+\frac{1}{r}}=\frac{3}{1}=3,
+\]
+hence $p+q+r\ge9$, i.e., $ab+bc+ca\ge9$. Equality in AM–HM occurs iff $p=q=r$. Combined with $\frac{1}{p}+\frac{1}{q}+\frac{1}{r}=1$, this gives $p=q=r=3$, so $ab=bc=ca=3$. Then $ab=bc$ implies $a=c$, and $bc=ca$ implies $b=a$; thus $a=b=c$. From $ab=3$ we obtain $a=\sqrt{3}$. Conversely, if $a=b=c=\sqrt{3}$, then $ab+bc+ca=3+3+3=9$.
+
+[Thinking]
+I need to check if any of the established statements directly prove or disprove the goal. The goal is to prove that ∑ 1/(1+a²) ≤ 3/2 under the conditions a,b,c > 0 and a+b+c = abc.
+
+Looking at the established statements:
+1. a,b,c > 0, a+b+c = abc implies a²+b²+c² ≥ 9 with equality at a=b=c=√3
+2. a,b,c > 0, a+b+c = abc implies ab+bc+ca ≥ 9 with equality at a=b=c=√3
+
+The goal is an inequality involving sums of fractions 1/(1+a²). None of the established statements directly mention this expression. However, I need to check if any of these statements logically imply the goal. But as a goal checker, I should only check if the goal is stated in any of the established statements - not try to prove it myself.
+
+The goal is not explicitly stated in any of the established statements. None of the statements say anything about ∑ 1/(1+a²) ≤ 3/2. So the answer should be NOT YET.
+
+But wait: the established statements include "a,b,c > 0, a+b+c = abc implies a²+b²+c² ≥ 9". Could this be used to prove the goal? Possibly, but that would require additional reasoning. The goal checker's job is only to check if the goal is stated in any of the established statements, not to see if it can be derived.
+
+Actually, let me re-examine. The instructions say: "check whether the goal is stated in any of the established statements." The goal is "Prove that ∑ 1/(1+a²) ≤ 3/2." This statement is not present in any of the established statements. So the answer should be NOT YET.
+
+However, I should also check if the converse or something disproving it is stated. None of the statements say anything about ∑ 1/(1+a²) being > 3/2 or anything like that. So no disproval either.
+
+Thus, answer: NOT YET.
+
+NOT YET
+
+--- Round 3 ---
+
+[Thinking]
+We have a constraint $a+b+c = abc$ with $a,b,c>0$. We want to eventually prove $\sum \frac{1}{1+a^2} \le \frac{3}{2}$. Let's think about possible substitutions. There's a known transformation: let $a = \tan A$, $b = \tan B$, $c = \tan C$ where $A,B,C \in (0,\frac{\pi}{2})$. Then $a+b+c = abc$ becomes $\tan A + \tan B + \tan C = \tan A \tan B \tan C$. This is the identity for $A+B+C = \pi$ (or $\pi$ multiples). Since all positive and in $(0,\frac{\pi}{2})$, we have $A+B+C = \pi$. Then $\frac{1}{1+a^2} = \frac{1}{1+\tan^2 A} = \cos^2 A$. So the goal becomes $\cos^2 A + \cos^2 B + \cos^2 C \le \frac{3}{2}$. This is known: for $A+B+C=\pi$, $\cos^2 A + \cos^2 B + \cos^2 C \ge ?$ Actually we want upper bound. Let's compute: $\cos^2 A + \cos^2 B + \cos^2 C = \frac{3}{2} + \frac{1}{2}(\cos 2A + \cos 2B + \cos 2C)$. Using identity for sum of cosines with $A+B+C=\pi$, we can find $\cos 2A + \cos 2B + \cos 2C \ge -\frac{3}{2}$? Actually we need an upper bound for $\cos^2$ sum: $\cos 2A + \cos 2B + \cos 2C \le 1.5$? Not sure.
+
+Maybe we can derive a statement about the sum of squares of reciprocals, or something else. Let's consider deriving a statement about $\sum \frac{1}{a^2+1}$ maybe lower bound? Actually we want to prove upper bound $\frac{3}{2}$. Could we find an inequality linking $\sum \frac{1}{1+a^2}$ with $a^2+b^2+c^2$ or $ab+bc+ca$?
+
+We have $\frac{1}{1+a^2} = 1 - \frac{a^2}{1+a^2}$. So $\sum \frac{1}{1+a^2} = 3 - \sum \frac{a^2}{1+a^2}$. So we need $\sum \frac{a^2}{1+a^2} \ge \frac{3}{2}$, i.e., $\sum \frac{1}{1+1/a^2} \ge \frac{3}{2}$? Not helpful.
+
+Alternatively, using Cauchy-Schwarz: $\sum \frac{1}{1+a^2} \le \frac{(1+1+1)^2}{\sum (1+a^2)} = \frac{9}{3 + (a^2+b^2+c^2)} = \frac{9}{3+S_2}$. Since we have $S_2 \ge 9$, then $\frac{9}{3+S_2} \le \frac{9}{12} = \frac{3}{4} < \frac{3}{2}$. That's a much stronger upper bound, but is it true? Wait, check: Cauchy-Schwarz: $\sum \frac{1}{1+a^2} \le \frac{(\sum 1)^2}{\sum (1+a^2)} = \frac{9}{3 + (a^2+b^2+c^2)}$. Since $a^2+b^2+c^2 \ge 9$, denominator $\ge 12$, so $\sum \frac{1}{1+a^2} \le \frac{9}{12} = 0.75$. But the ultimate goal is $\le 1.5$, which is obviously true if $\le 0.75$. However, we must check if the Cauchy-Schwarz inequality is applied correctly. Let's test with an example. Use Python to verify. Let's pick a random triple satisfying $a+b+c=abc$, maybe $a=1$, $b=2$, solve for c: $1+2+c = 1*2*c = 2c => 3+c = 2c => c=3$. So triple (1,2,3). Compute sum of $\frac{1}{1+a^2}$: $\frac{1}{1+1}+\frac{1}{1+4}+\frac{1}{1+9} = 0.5 + 0.2 + 0.1 = 0.8$. The Cauchy-Schwarz bound: $\frac{9}{3+1+4+9} = \frac{9}{17} \approx 0.529$. Actually 0.8 > 0.529, so the inequality $\sum \frac{1}{1+a^2} \le \frac{9}{3+S_2}$ is false. I applied Cauchy-Schwarz in the wrong direction: It's actually $\sum \frac{1}{1+a^2} \ge \frac{9}{\sum (1+a^2)}$ (since Cauchy-Schwarz gives $\left(\sum x_i y_i\right)^2 \le (\sum x_i^2)(\sum y_i^2)$). For $x_i = 1/\sqrt{1+a_i^2}$, $y_i = \sqrt{1+a_i^2}$, then $\sum x_i y_i = \sum 1 = 3$, so $3^2 \le (\sum \frac{1}{1+a_i^2})(\sum (1+a_i^2))$. Thus $\sum \frac{1}{1+a_i^2} \ge \frac{9}{\sum (1+a_i^2)}$. That's a lower bound, not upper. So my earlier bound is wrong.
+
+Thus we need a different approach.
+
+Maybe derive something about product $(1+a^2)(1+b^2)(1+c^2)$.
+
+Given $a+b+c = abc$. Let's compute $(1+a^2)(1+b^2)(1+c^2)$. Expand: $1 + (a^2+b^2+c^2) + (a^2b^2+b^2c^2+c^2a^2) + a^2b^2c^2$.
+
+We know $abc = s = a+b+c$. Also $a^2b^2+b^2c^2+c^2a^2 = (ab+bc+ca)^2 - 2abc(a+b+c) = (ab+bc+ca)^2 - 2s^2$. So $(1+a^2)(1+b^2)(1+c^2) = 1 + S_2 + ( (ab+bc+ca)^2 - 2s^2 ) + s^2 = 1 + S_2 + (ab+bc+ca)^2 - s^2$.
+
+We have $S_2 \ge 9$, $ab+bc+ca \ge 9$, $s \ge 3\sqrt{3}$. Could find lower bound for product.
+
+But we want to bound sum of reciprocals. Using AM-HM: $\sum \frac{1}{1+a^2} \ge \frac{9}{\sum (1+a^2)}$ as above. That yields a lower bound. For upper bound, maybe use convexity: $f(x)=\frac{1}{1+x^2}$ is convex? Let's check second derivative: $f''(x) = \frac{6x^2 - 2}{(1+x^2)^3}$. For $x>0$, $f''(x) > 0$ when $6x^2 > 2$, i.e., $x > 1/\sqrt{3} \approx 0.577$. So not convex everywhere. Could use Jensen with restriction that $a,b,c$ are angles.
+
+Given the trigonometric substitution, we can derive statements about angles. Let's derive a statement about $\cos^2 A + \cos^2 B + \cos^2 C$. For $A+B+C=\pi$, we have $\cos^2 A + \cos^2 B + \cos^2 C = 1 + 2\cos A \cos B \cos C$. Indeed, there is identity: $\cos^2 A + \cos^2 B + \cos^2 C + 2\cos A \cos B \cos C = 1$? Let's check. Actually known identity: $\cos^2 A + \cos^2 B + \cos^2 C = 1 - 2\cos A \cos B \cos C$? Let's test with $A=B=C=\pi/3$, then $\cos^2 = 1/4$, sum = 3/4 = 0.75. RHS $1 - 2*(1/2)^3 = 1 - 2*(1/8) = 1 - 0.25 = 0.75$. Yes, $\cos^2 A + \cos^2 B + \cos^2 C = 1 - 2\cos A \cos B \cos C$. Since $A,B,C \in (0,\pi/2)$, $\cos$ positive, so $1 - 2\cos A \cos B \cos C < 1$. Actually $0 < \cos A \cos B \cos C \le 1/8$? For $A+B+C=\pi$, maximum product of cosines when $A=B=C=\pi/3$, product = $1/8$. So $\cos A \cos B \cos C \le 1/8$, so $1 - 2\cos A \cos B \cos C \ge 1 - 2*(1/8) = 3/4$. So $\cos^2 A + \cos^2 B + \cos^2 C \ge 3/4$. Upper bound? Since $\cos A \cos B \cos C > 0$, we have $\cos^2$ sum < 1. So $\sum \frac{1}{1+a^2} < 1$. But wait, our earlier example (1,2,3) gave sum 0.8 < 1. That's consistent. But the ultimate goal is $\le 3/2 = 1.5$, which is obviously true because each term is $\le 1$, sum $\le 3$. But they want to prove $\le 3/2$, which is a stronger bound. Actually $3/2 = 1.5$, so it's still larger than 1. But maybe we can get a sharper bound: $\sum \frac{1}{1+a^2} \le \frac{3}{2}$. That's not trivial because sum could be >1.5? Let's test with $a=b=c=\sqrt{3}$, then each term $\frac{1}{1+3} = 1/4$, sum = 3/4 = 0.75. So far below 1.5. Need to find maximum possible sum under constraint. Could the sum exceed 1.5? Let's search numerically. Use Python to sample random triples satisfying $a+b+c=abc$. Let's do that.
+
+[Python] import random
+import math
+
+def random_triple():
+    # generate random a,b>0, solve for c: a+b+c = abc => c = (a+b)/(ab-1) provided ab>1
+    while True:
+        a = random.uniform(0.1, 5.0)
+        b = random.uniform(0.1, 5.0)
+        if a*b > 1:
+            c = (a+b)/(a*b-1)
+            if c > 0:
+                return a,b,c
+
+def compute_sum(a,b,c):
+    return 1/(1+a**2) + 1/(1+b**2) + 1/(1+c**2)
+
+max_sum = 0
+max_triple = None
+for _ in range(100000):
+    a,b,c = random_triple()
+    s = compute_sum(a,b,c)
+    if s > max_sum:
+        max_sum = s
+        max_triple = (a,b,c)
+        
+print("Maximum sum found:", max_sum)
+print("Triple:", max_triple)
+print("Check constraint:", max_triple[0] + max_triple[1] + max_triple[2], "=", max_triple[0]*max_triple[1]*max_triple[2])
+print("Sum of squares:", max_triple[0]**2 + max_triple[1]**2 + max_triple[2]**2)
+print("ab+bc+ca:", max_triple[0]*max_triple[1] + max_triple[1]*max_triple[2] + max_triple[2]*max_triple[0])
+→ Maximum sum found: 0.9999946274346107
+Triple: (1.3986493807574991, 0.714984051458306, 176124.03067491943)
+Check constraint: 176126.14430835165 = 176126.14430835165
+Sum of squares: 31019674183.64738
+ab+bc+ca: 372262.6394631125
+
+[Thinking]
+The sum is about 0.9999946, less than 1. So it appears the sum is always less than 1. Indeed, using the trigonometric substitution, $\sum \cos^2 A = 1 - 2\cos A \cos B \cos C$. Since $\cos A \cos B \cos C > 0$, we have $\sum \cos^2 A < 1$. So the ultimate goal $\le \frac{3}{2}$ is trivial. But maybe the problem expects a proof using algebraic inequalities without trigonometry. However, we can derive a statement about the sum of reciprocals.
+
+We can derive an upper bound: $\sum \frac{1}{1+a^2} \le 1$. Actually we need to prove $\sum \frac{1}{1+a^2} \le 1$ under the constraint. That's a stronger statement than $\le \frac{3}{2}$. Let's try to prove that.
+
+Using substitution $a = \tan A$, etc., we have $\sum \frac{1}{1+a^2} = \sum \cos^2 A = 1 - 2\cos A \cos B \cos C$. Since $\cos A, \cos B, \cos C > 0$, we get $\sum \cos^2 A < 1$. So indeed $\sum \frac{1}{1+a^2} < 1$. But we need an algebraic proof.
+
+Alternatively, we can use known inequality: $(1+a^2)(1+b^2) \ge (1+ab)^2$, by Cauchy-Schwarz. Then $\frac{1}{1+a^2} + \frac{1}{1+b^2} \le \frac{2}{1+ab}$? Let's check: $\frac{1}{1+a^2} + \frac{1}{1+b^2} \le \frac{2}{1+ab}$ is equivalent to $(1+b^2)+(1+a^2) \le 2\frac{(1+a^2)(1+b^2)}{1+ab}$ i.e., $(2+a^2+b^2)(1+ab) \le 2(1+a^2)(1+b^2)$. Expand: $(2+a^2+b^2)(1+ab) = 2+2ab + a^2 + a^3b + b^2 + ab^3$. $2(1+a^2)(1+b^2) = 2(1 + a^2 + b^2 + a^2b^2) = 2 + 2a^2 + 2b^2 + 2a^2b^2$. Not obviously true.
+
+Maybe we can derive a statement about $\sum \frac{a^2}{1+a^2}$. Since $\sum \frac{1}{1+a^2} = 3 - \sum \frac{a^2}{1+a^2}$, proving $\sum \frac{1}{1+a^2} \le \frac{3}{2}$ is equivalent to $\sum \frac{a^2}{1+a^2} \ge \frac{3}{2}$. Could we prove that?
+
+Given $a+b+c = abc$, maybe we can use inequality $\sum \frac{a^2}{1+a^2} \ge \frac{(a+b+c)^2}{3 + (a^2+b^2+c^2)}$ by Cauchy-Schwarz? Let's consider $\sum \frac{a^2}{1+a^2} = \sum \frac{a^2}{1+a^2} \ge \frac{(\sum a)^2}{\sum (1+a^2)} = \frac{s^2}{3+S_2}$. Since $s^2 \ge 27$ (from earlier $s \ge 3\sqrt{3}$) and $S_2 \ge 9$, we have $\frac{s^2}{3+S_2} \ge \frac{27}{12} = 2.25$. That's greater than 1.5. But this is a lower bound for $\sum \frac{a^2}{1+a^2}$, so $\sum \frac{a^2}{1+a^2} \ge 2.25$, which implies $\sum \frac{1}{1+a^2} \le 0.75$. That's even stronger. However, we need to verify the Cauchy-Schwarz application: $\left(\sum \frac{a}{\sqrt{1+a^2}} \cdot \sqrt{1+a^2}\right)^2 \le (\sum \frac{a^2}{1+a^2})(\sum (1+a^2))$. But $\sum \frac{a}{\sqrt{1+a^2}} \cdot \sqrt{1+a^2} = \sum a = s$. So $s^2 \le (\sum \frac{a^2}{1+a^2})(3+S_2)$. Thus $\sum \frac{a^2}{1+a^2} \ge \frac{s^2}{3+S_2}$. That's correct. So we have $\sum \frac{a^2}{1+a^2} \ge \frac{s^2}{3+S_2}$. Since $s^2 \ge 27$ and $S_2 \ge 9$, we get $\ge \frac{27}{12} = 2.25$. So $\sum \frac{1}{1+a^2} \le 3 - 2.25 = 0.75$. This gives an upper bound of 0.75, which is stronger than 1.5. However, we need to check that the bound $\frac{s^2}{3+S_2} \ge 2.25$ holds for all feasible triples. Let's test with the extreme example earlier where sum ~1: (1.3986, 0.7150, 176124). Compute $s^2/(3+S_2)$ numerically.
+
+[Python] import math
+a,b,c = 1.3986493807574991, 0.714984051458306, 176124.03067491943
+s = a+b+c
+S2 = a**2 + b**2 + c**2
+bound = s**2 / (3 + S2)
+print("s =", s)
+print("s^2 =", s**2)
+print("S2 =", S2)
+print("bound =", bound)
+print("sum a^2/(1+a^2) =", a**2/(1+a**2) + b**2/(1+b**2) + c**2/(1+c**2))
+print("sum 1/(1+a^2) =", 1/(1+a**2) + 1/(1+b**2) + 1/(1+c**2))
+→ s = 176126.14430835165
+s^2 = 31020418708.92631
+S2 = 31019674183.64738
+bound = 1.0000240016150541
+sum a^2/(1+a^2) = 2.0000053725653895
+sum 1/(1+a^2) = 0.9999946274346107
+
+[Thinking]
+Interesting: bound is about 1.000024, while actual sum of $a^2/(1+a^2)$ is about 2.0. So the inequality $\sum \frac{a^2}{1+a^2} \ge \frac{s^2}{3+S_2}$ gives a lower bound of about 1, not 2.25. Wait, I earlier assumed $s^2 \ge 27$ and $S_2 \ge 9$, but in this example $s^2$ huge, $S_2$ huge, but the ratio $s^2/(3+S_2) \approx 1$. So the bound is not necessarily $\ge 2.25$; that was based on simultaneous lower bounds for $s^2$ and upper bound for denominator? Actually we need a lower bound for the fraction $s^2/(3+S_2)$. Since both numerator and denominator increase, we can't simply use individual bounds. So the earlier conclusion that $\sum \frac{a^2}{1+a^2} \ge 2.25$ is false in general.
+
+Thus we need a more careful approach.
+
+Maybe we can derive a statement about the product $(1+a^2)(1+b^2)(1+c^2)$. Let's compute an expression for $\sum \frac{1}{1+a^2}$ in terms of symmetric sums. There is known identity: $\sum \frac{1}{1+a^2} = \frac{ (1+a^2)(1+b^2)+(1+b^2)(1+c^2)+(1+c^2)(1+a^2) }{ (1+a^2)(1+b^2)(1+c^2) }$. Possibly we can bound numerator and denominator.
+
+Given the time, let's derive a new statement about the sum of $\frac{1}{\sqrt{1+a^2}}$ or something.
+
+We can derive the inequality: $\sum \frac{1}{\sqrt{1+a^2}} \le \sqrt{3}$. Let's test with example. For $a=b=c=\sqrt{3}$, each term $\frac{1}{\sqrt{1+3}} = 1/2$, sum = 1.5, $\sqrt{3} \approx 1.732$, holds. For extreme example earlier: compute.
+
+[Python] a,b,c = 1.3986493807574991, 0.714984051458306, 176124.03067491943
+sum_inv = 1/(1+a**2)**0.5 + 1/(1+b**2)**0.5 + 1/(1+c**2)**0.5
+print("sum 1/sqrt(1+a^2) =", sum_inv)
+print("sqrt(3) =", 3**0.5)
+→ sum 1/sqrt(1+a^2) = 1.3950800481901893
+sqrt(3) = 1.7320508075688772
+
+[Thinking]
+So holds. Might be true. Let's try to prove using Cauchy-Schwarz: $\sum \frac{1}{\sqrt{1+a^2}} \le \sqrt{3} \sqrt{\sum \frac{1}{1+a^2}}$. Since $\sum \frac{1}{1+a^2} < 1$, we get $\sum \frac{1}{\sqrt{1+a^2}} < \sqrt{3}$. But that's not a direct proof.
+
+Alternatively, we can use the trigonometric substitution: $\frac{1}{\sqrt{1+a^2}} = \cos A$. So $\sum \cos A \le \frac{3}{2}$? Wait, for $A+B+C=\pi$, $\sum \cos A \le \frac{3}{2}$? Actually for acute angles, $\sum \cos A \le \frac{3}{2}$ with equality when $A=B=C=\pi/3$. Indeed, by Jensen, $\cos$ is concave on $[0,\pi/2]$, so $\sum \cos A \le 3 \cos(\frac{A+B+C}{3}) = 3 \cos(\pi/3) = 3*(1/2) = 1.5$. So $\sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$. But we already computed sum ~1.395, less than 1.5. So that's true. So we can derive statement: $\sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+But note that $\frac{1}{\sqrt{1+a^2}} = \cos(\arctan a) = \frac{1}{\sqrt{1+a^2}}$. Yes.
+
+Thus we can derive a new statement: $\frac{1}{\sqrt{1+a^2}} + \frac{1}{\sqrt{1+b^2}} + \frac{1}{\sqrt{1+c^2}} \le \frac{3}{2}$, with equality when $a=b=c=\sqrt{3}$.
+
+Proof using trigonometric substitution and concavity of cosine.
+
+Let's present that.
+
+But we need to ensure this statement hasn't been derived earlier. The established statements are about $a^2+b^2+c^2$ and $ab+bc+ca$. So this is new.
+
+We'll give proof.
+
+Thus statement: For $a,b,c>0$ satisfying $a+b+c=abc$, we have $\frac{1}{\sqrt{1+a^2}} + \frac{1}{\sqrt{1+b^2}} + \frac{1}{\sqrt{1+c^2}} \le \frac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+Proof: Let $A = \arctan a$, $B = \arctan b$, $C = \arctan c$. Since $a,b,c>0$, $A,B,C \in (0,\frac{\pi}{2})$. The condition $a+b+c=abc$ transforms to $\tan A + \tan B + \tan C = \tan A \tan B \tan C$, which implies $A+B+C = \pi$. Then $\frac{1}{\sqrt{1+a^2}} = \cos A$. The function $\cos x$ is concave on $[0,\frac{\pi}{2}]$ because its second derivative $-\cos x \le 0$ on that interval. By Jensen's inequality, $\frac{\cos A + \cos B + \cos C}{3} \le \cos\left(\frac{A+B+C}{3}\right) = \cos\frac{\pi}{3} = \frac{1}{2}$. Hence $\cos A + \cos B + \cos C \le \frac{3}{2}$. Equality holds when $A=B=C=\frac{\pi}{3}$, i.e., $a=b=c=\tan\frac{\pi}{3} = \sqrt{3}$.
+
+Thus statement derived.
+
+Let's output.
+
+statement:
+$\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+proof:
+Let $A=\arctan a,\;B=\arctan b,\;C=\arctan c$. Because $a,b,c>0$, we have $A,B,C\in(0,\frac{\pi}{2})$. The condition $a+b+c=abc$ translates to
+\[
+\tan A+\tan B+\tan C=\tan A\tan B\tan C,
+\]
+which is equivalent to $A+B+C=\pi$. Now
+\[
+\frac{1}{\sqrt{1+a^{2}}}=\cos A,\qquad 
+\frac{1}{\sqrt{1+b^{2}}}=\cos B,\qquad 
+\frac{1}{\sqrt{1+c^{2}}}=\cos C.
+\]
+The function $\cos x$ is concave on $$ because its second derivative $-\cos x\le0$ there. By Jensen's inequality,
+\[
+\frac{\cos A+\cos B+\cos C}{3}\le\cos\!\left(\frac{A+B+C}{3}\right)=\cos\frac{\pi}{3}=\frac12.
+\]
+Hence $\cos A+\cos B+\cos C\le\frac32$, i.e.
+\[
+\frac{1}{\sqrt{1+a^{2}}}+\frac{1}{\sqrt{1+b^{2}}}+\frac{1}{\sqrt{1+c^{2}}}\le\frac{3}{2}.
+\]
+Equality in Jensen holds when $A=B=C$, which together with $A+B+C=\pi$ gives $A=B=C=\frac{\pi}{3}$. Consequently $a=b=c=\tan\frac{\pi}{3}=\sqrt{3}$.
+
+[Thinking]
+I need to check the proof carefully. The statement involves a trigonometric substitution and claims that $a+b+c=abc$ is equivalent to $A+B+C=\pi$ where $A=\arctan a$, etc. Let's verify that transformation.
+
+We have $\tan A = a$, $\tan B = b$, $\tan C = c$. The identity: $\tan(A+B+C) = \frac{\tan A + \tan B + \tan C - \tan A \tan B \tan C}{1 - (\tan A \tan B + \tan B \tan C + \tan C \tan A)}$. The condition $a+b+c = abc$ is $\tan A + \tan B + \tan C = \tan A \tan B \tan C$. This implies that the numerator of $\tan(A+B+C)$ is zero, so $\tan(A+B+C) = 0$, meaning $A+B+C = k\pi$ for integer $k$. Since each $A,B,C \in (0, \pi/2)$, the sum is in $(0, 3\pi/2)$. So possible $k$ are 0 or 1. $k=0$ would give sum 0, impossible. So $k=1$, thus $A+B+C = \pi$. That seems correct.
+
+Next, $\frac{1}{\sqrt{1+a^2}} = \frac{1}{\sqrt{1+\tan^2 A}} = \frac{1}{\sec A} = \cos A$. Good.
+
+Now, Jensen's inequality: $\cos x$ is concave on $[0, \pi/2]$ because second derivative $-\cos x \le 0$ on that interval? Actually second derivative of $\cos x$ is $-\cos x$. On $[0, \pi/2]$, $\cos x \ge 0$, so $-\cos x \le 0$, indeed concave. However, we need to ensure that $A,B,C$ are in $[0, \pi/2]$, which they are. Jensen's inequality for concave function: $f(\frac{x+y+z}{3}) \ge \frac{f(x)+f(y)+f(z)}{3}$. Wait, careful: For concave function, Jensen gives $f(\frac{\sum x_i}{n}) \ge \frac{\sum f(x_i)}{n}$. The proof states $\frac{\cos A+\cos B+\cos C}{3} \le \cos(\frac{A+B+C}{3})$. That's the reverse: convex function inequality. But $\cos$ is concave on $[0, \pi/2]$, so the inequality should be $\frac{\cos A+\cos B+\cos C}{3} \le \cos(\frac{A+B+C}{3})$? Let's check: For concave function, the function lies below the chord, meaning the average of function values is less than or equal to function of average? Actually, Jensen's inequality for concave function: $f(\lambda x + (1-\lambda) y) \ge \lambda f(x) + (1-\lambda) f(y)$. So for equal weights, $f(\frac{x+y}{2}) \ge \frac{f(x)+f(y)}{2}$. So indeed, for concave function, the function of average is greater than or equal to average of function values. So the inequality direction is $\cos(\frac{A+B+C}{3}) \ge \frac{\cos A+\cos B+\cos C}{3}$. But the proof writes $\frac{\cos A+\cos B+\cos C}{3} \le \cos(\frac{A+B+C}{3})$. That's the same inequality, just rearranged. Yes: $\frac{\cos A+\cos B+\cos C}{3} \le \cos(\frac{A+B+C}{3})$. That's correct for concave function. Good.
+
+Now, equality condition: Jensen equality holds when $A=B=C$. Since $A+B+C=\pi$, each equals $\pi/3$. Then $a = \tan(\pi/3) = \sqrt{3}$. So equality condition matches.
+
+Thus the proof appears valid. However, I should verify the transformation and maybe test with some numeric examples to ensure no subtlety. Let's test with random positive numbers satisfying $a+b+c=abc$. We can generate some and compute the expression to see if it's indeed ≤ 1.5. Use Python.
+
+[Python] import random
+import math
+
+def generate_random_abc():
+    # Generate random a,b > 0, then solve for c from a+b+c = abc
+    # c = (a+b)/(ab - 1) provided ab > 1
+    while True:
+        a = random.uniform(0.1, 5)
+        b = random.uniform(0.1, 5)
+        if a*b > 1:
+            c = (a+b)/(a*b - 1)
+            if c > 0:
+                return a, b, c
+
+def test_inequality(num_trials=10000):
+    max_val = 0
+    max_triple = None
+    for _ in range(num_trials):
+        a, b, c = generate_random_abc()
+        val = 1/math.sqrt(1+a**2) + 1/math.sqrt(1+b**2) + 1/math.sqrt(1+c**2)
+        if val > max_val:
+            max_val = val
+            max_triple = (a, b, c)
+        # Check inequality
+        if val > 1.5 + 1e-12:
+            print("Violation:", a, b, c, val)
+            return False
+    print("All satisfied, maximum value:", max_val, "at", max_triple)
+    return True
+
+test_inequality(10000)
+→ All satisfied, maximum value: 1.4999826670734806 at (1.744806801149717, 1.7466048002217396, 1.7052171799409808)
+
+[Thinking]
+The test passes. The maximum seems close to 1.5 but not exactly, likely because the random generation doesn't hit the equality case exactly. Let's also test the equality condition: a=b=c=sqrt(3). Compute value.
+
+[Python] import math
+a = b = c = math.sqrt(3)
+val = 1/math.sqrt(1+a**2) + 1/math.sqrt(1+b**2) + 1/math.sqrt(1+c**2)
+print("Value at a=b=c=sqrt(3):", val)
+print("Expected: 1.5")
+print("Difference:", val - 1.5)
+→ Value at a=b=c=sqrt(3): 1.5000000000000004
+Expected: 1.5
+Difference: 4.440892098500626e-16
+
+[Thinking]
+Works. Also test that the condition $A+B+C=\pi$ holds for random triples. Let's verify a few.
+
+[Python] import random
+import math
+
+def check_angle_sum(a, b, c):
+    A = math.atan(a)
+    B = math.atan(b)
+    C = math.atan(c)
+    return A+B+C, math.pi
+
+for _ in range(5):
+    a, b, c = generate_random_abc()
+    angle_sum = math.atan(a) + math.atan(b) + math.atan(c)
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}, sum={angle_sum:.6f}, pi={math.pi:.6f}, diff={angle_sum - math.pi:.6f}")
+→ Traceback (most recent call last):
+  File "<string>", line 11, in <module>
+NameError: name 'generate_random_abc' is not defined
+
+[Thinking]
+Forgot to redefine the function. Let's redo.
+
+[Python] import random
+import math
+
+def generate_random_abc():
+    while True:
+        a = random.uniform(0.1, 5)
+        b = random.uniform(0.1, 5)
+        if a*b > 1:
+            c = (a+b)/(a*b - 1)
+            if c > 0:
+                return a, b, c
+
+def check_angle_sum(a, b, c):
+    A = math.atan(a)
+    B = math.atan(b)
+    C = math.atan(c)
+    return A+B+C, math.pi
+
+for _ in range(5):
+    a, b, c = generate_random_abc()
+    angle_sum = math.atan(a) + math.atan(b) + math.atan(c)
+    print(f"a={a:.3f}, b={b:.3f}, c={c:.3f}, sum={angle_sum:.6f}, pi={math.pi:.6f}, diff={angle_sum - math.pi:.6f}")
+→ a=4.847, b=0.599, c=2.860, sum=3.141593, pi=3.141593, diff=0.000000
+a=3.673, b=4.932, c=0.503, sum=3.141593, pi=3.141593, diff=0.000000
+a=0.549, b=3.739, c=4.069, sum=3.141593, pi=3.141593, diff=0.000000
+a=1.116, b=1.258, c=5.885, sum=3.141593, pi=3.141593, diff=0.000000
+a=4.861, b=2.611, c=0.639, sum=3.141593, pi=3.141593, diff=0.000000
+
+[Thinking]
+Great, the transformation holds.
+
+Now check the proof's logic: The condition $a+b+c=abc$ is transformed to $A+B+C=\pi$. The substitution is valid. Then using concavity of cosine on $[0, \pi/2]$ and Jensen yields inequality. Equality condition is correct.
+
+Thus the proof is valid. However, I should verify the domain: $A,B,C \in (0, \pi/2)$ because $a>0$. Indeed $\arctan a \in (0, \pi/2)$. So Jensen applies.
+
+Thus I approve.
+
+But note: The proof uses the fact that $\cos x$ is concave on $[0, \pi/2]$. Its second derivative is $-\cos x$, which is $\le 0$ on $[0, \pi/2]$, indeed concave. Good.
+
+Thus I will output APPROVED.
+
+APPROVED: The proof correctly uses the substitution $A=\arctan a$, $B=\arctan b$, $C=\arctan c$ to transform the condition $a+b+c=abc$ into $A+B+C=\pi$, then exploits the concavity of $\cos x$ on $$ and Jensen's inequality to obtain the bound; equality conditions are verified.
+
+statement:
+$a,b,c>0$, $a+b+c=abc$ implies $\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+proof:
+Set $A=\arctan a$, $B=\arctan b$, $C=\arctan c$; then $A,B,C\in(0,\frac{\pi}{2})$. The condition $a+b+c=abc$ becomes $\tan A+\tan B+\tan C=\tan A\tan B\tan C$, which is equivalent to $A+B+C=\pi$. Moreover,
+\[
+\frac{1}{\sqrt{1+a^{2}}}=\cos A,\qquad
+\frac{1}{\sqrt{1+b^{2}}}=\cos B,\qquad
+\frac{1}{\sqrt{1+c^{2}}}=\cos C.
+\]
+The function $\cos x$ is concave on $$ because its second derivative $-\cos x\le0$ there. By Jensen's inequality for concave functions,
+\[
+\frac{\cos A+\cos B+\cos C}{3}\le\cos\!\left(\frac{A+B+C}{3}\right)=\cos\frac{\pi}{3}=\frac12.
+\]
+Hence $\cos A+\cos B+\cos C\le\frac32$, i.e.
+\[
+\frac{1}{\sqrt{1+a^{2}}}+\frac{1}{\sqrt{1+b^{2}}}+\frac{1}{\sqrt{1+c^{2}}}\le\frac{3}{2}.
+\]
+Equality in Jensen holds when $A=B=C$. Together with $A+B+C=\pi$ this gives $A=B=C=\frac{\pi}{3}$, so $a=b=c=\tan\frac{\pi}{3}=\sqrt{3}$. Conversely, if $a=b=c=\sqrt{3}$, the left‑hand side equals $\frac{3}{\sqrt{1+3}}=\frac{3}{2}$.
+
+[Thinking]
+I need to check if the goal "Prove that $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$" is stated in any of the established statements.
+
+The established statements are:
+1. $a, b, c > 0$.
+2. $a + b + c = abc$.
+3. $a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \ge 9$, with equality if and only if $a = b = c = \sqrt{3}$.
+4. $a,b,c>0$, $a+b+c=abc$ implies $ab+bc+ca\ge9$, with equality if and only if $a=b=c=\sqrt{3}$.
+5. $a,b,c>0$, $a+b+c=abc$ implies $\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+The goal is about $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$.
+
+Statement 5 is about $\frac{1}{\sqrt{1+a^2}} + \frac{1}{\sqrt{1+b^2}} + \frac{1}{\sqrt{1+c^2}} \le \frac{3}{2}$.
+
+These are different expressions. The goal has $\frac{1}{1+a^2}$ (which is the square of $\frac{1}{\sqrt{1+a^2}}$). So the goal sum is smaller than or equal to the sum in statement 5, because for any $x>0$, $\frac{1}{1+x^2} \le \frac{1}{\sqrt{1+x^2}}$? Let's check: For $x>0$, $\sqrt{1+x^2} \ge 1$, so $\frac{1}{\sqrt{1+x^2}} \le 1$. Meanwhile $\frac{1}{1+x^2} \le 1$. Which is larger? Compare $\frac{1}{\sqrt{1+x^2}}$ and $\frac{1}{1+x^2}$. Since $\sqrt{1+x^2} \le 1+x^2$? Actually, $(1+x^2)^2 = 1+2x^2+x^4$, while $(\sqrt{1+x^2})^2 = 1+x^2$. So $1+x^2 \le 1+2x^2+x^4$ for $x>0$, indeed $1+x^2 \le 1+2x^2+x^4$ simplifies to $0 \le x^2+x^4$, true. So $\sqrt{1+x^2} \le 1+x^2$, thus $\frac{1}{\sqrt{1+x^2}} \ge \frac{1}{1+x^2}$. So the sum in statement 5 is larger than or equal to the sum in the goal. So statement 5 gives an upper bound of $\frac{3}{2}$ for a larger sum. That doesn't directly prove the goal; we need to show the smaller sum is also $\le \frac{3}{2}$. That might be true but not directly from statement 5.
+
+Wait, if $\frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$ for each term? No, it's the sum that is $\le \frac{3}{2}$. Since each term $\frac{1}{\sqrt{1+x^2}} \ge \frac{1}{1+x^2}$, the sum of $\frac{1}{1+x^2}$ could be larger or smaller? Actually, if each term is smaller, the sum is smaller. So if $\sum \frac{1}{\sqrt{1+x^2}} \le \frac{3}{2}$, then $\sum \frac{1}{1+x^2} \le \sum \frac{1}{\sqrt{1+x^2}} \le \frac{3}{2}$. Wait, careful: Since $\frac{1}{\sqrt{1+x^2}} \ge \frac{1}{1+x^2}$, the sum of $\frac{1}{\sqrt{1+x^2}}$ is greater than or equal to the sum of $\frac{1}{1+x^2}$. So if we know the larger sum is $\le \frac{3}{2}$, then the smaller sum is also $\le \frac{3}{2}$. Indeed, if $A \ge B$ and $A \le C$, then $B \le C$. So from statement 5, we have $\sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$. And since $\frac{1}{\sqrt{1+a^2}} \ge \frac{1}{1+a^2}$ for each $a>0$, we have $\sum \frac{1}{\sqrt{1+a^2}} \ge \sum \frac{1}{1+a^2}$. Thus $\sum \frac{1}{1+a^2} \le \sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$. So the goal is proven by statement 5.
+
+But wait, is it true that $\frac{1}{\sqrt{1+x^2}} \ge \frac{1}{1+x^2}$ for all $x>0$? Let's verify: $\sqrt{1+x^2} \le 1+x^2$ because squaring both sides: $1+x^2 \le (1+x^2)^2 = 1+2x^2+x^4$, which holds for $x>0$. So indeed $\sqrt{1+x^2} \le 1+x^2$, thus reciprocal flips inequality: $\frac{1}{\sqrt{1+x^2}} \ge \frac{1}{1+x^2}$. Yes.
+
+Therefore, statement 5 directly implies the goal. So the goal is proven by statement 5.
+
+Thus I should output: PROVEN: <which statement proves the goal>
+
+I need to specify which statement proves the goal. That is statement 5: "$a,b,c>0$, $a+b+c=abc$ implies $\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$."
+
+But maybe I should double-check: The goal is to prove $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$. Using statement 5, we have $\sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$. Since $\frac{1}{\sqrt{1+a^2}} \ge \frac{1}{1+a^2}$, we get $\sum \frac{1}{1+a^2} \le \sum \frac{1}{\sqrt{1+a^2}} \le \frac{3}{2}$. So indeed proven.
+
+Thus answer: PROVEN: $a,b,c>0$, $a+b+c=abc$ implies $\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+
+I'll output exactly as required.
+
+PROVEN: $a,b,c>0$, $a+b+c=abc$ implies $\dfrac{1}{\sqrt{1+a^{2}}}+\dfrac{1}{\sqrt{1+b^{2}}}+\dfrac{1}{\sqrt{1+c^{2}}}\le\dfrac{3}{2}$, with equality if and only if $a=b=c=\sqrt{3}$.
+

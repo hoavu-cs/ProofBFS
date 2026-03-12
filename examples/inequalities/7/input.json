@@ -1,0 +1,20 @@
+[
+  {
+    "type": "Assumption",
+    "statement": "$a, b, c > 0$.",
+    "proof": null,
+    "comment": "Assumption"
+  },
+  {
+    "type": "Assumption",
+    "statement": "$a + b + c = abc$.",
+    "proof": null,
+    "comment": "Assumption"
+  },
+  {
+    "type": "Goal",
+    "statement": "Prove that $\\frac{1}{1+a^2} + \\frac{1}{1+b^2} + \\frac{1}{1+c^2} \\le \\frac{3}{2}$.",
+    "proof": null,
+    "comment": "Goal"
+  }
+]
