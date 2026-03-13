@@ -6,6 +6,11 @@ VENV_PYTHON = str(Path(__file__).parent.parent / "venv" / "bin" / "python")
 TIMEOUT = 20
 
 
+def set_timeout(seconds: int) -> None:
+    global TIMEOUT
+    TIMEOUT = seconds
+
+
 def _bwrap_cmd(python_args: list[str]) -> list[str]:
     """Wrap a command in a bubblewrap sandbox: no network, no PIDs, read-only FS."""
     venv_dir = str(Path(__file__).parent.parent / "venv")
