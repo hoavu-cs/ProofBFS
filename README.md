@@ -46,35 +46,26 @@ All providers use an OpenAI-compatible client. To add another model, create a ne
 
 ## Input format
 
-Seed files are plain `.txt` files with one entry per line in the format `type: statement`. Lines starting with `#` are treated as comments and attached to the next entry.
+Seed files are plain `.txt` files with entries separated by `###` on its own line.
 
-Valid types: `definition`, `fact`, `assumption`, `goal`.
-
-Example (`examples/inequalities/7/input.txt`):
-
+Each entry has the format:
 ```
-# Assumption
-Assumption: $a, b, c > 0$.
-
-# Assumption
-Assumption: $a + b + c = abc$.
-
-# Goal
-Goal: Prove that $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$.
+Type: statement
+Proof: proof text     (optional)
+Comment: comment text (optional)
 ```
 
-Use LaTeX for all mathematical notation. Every entry other than `goal` is treated as given and assumed true.
+Valid types: `Definition`, `Fact`, `Assumption`, `Goal`. Use LaTeX for all mathematical notation. Every entry other than `Goal` is treated as given and assumed true.
 
-Each entry's statement can span multiple lines — continuation lines are joined with a space. An empty line ends the current entry; the next non-empty line begins a new one.
+Example (`examples/inequalities/3/input.txt`):
 
-To convert a `.txt` seed file to the `.json` format used internally, use the `txt_to_json` tool in `main.py`. The resulting `input.json`:
-
-```json
-[
-  { "type": "Assumption", "statement": "$a, b, c > 0$." },
-  { "type": "Assumption", "statement": "$a + b + c = abc$." },
-  { "type": "Goal", "statement": "Prove that $\\frac{1}{1+a^2} + \\frac{1}{1+b^2} + \\frac{1}{1+c^2} \\le \\frac{3}{2}$." }
-]
+```
+Definition: Let $a, b, c$ be positive real numbers such that $a + b + c \le 2$.
+###
+Fact: AM-GM inequality: for positive reals $x, y$, $x + y \ge 2\sqrt{xy}$.
+Comment: useful inequality
+###
+Goal: Prove that $\sqrt{a^2 + \frac{1}{b^2}} + \sqrt{b^2 + \frac{1}{c^2}} + \sqrt{c^2 + \frac{1}{a^2}} \ge \frac{\sqrt{97}}{2}$.
 ```
 
 ## Running
@@ -88,13 +79,12 @@ An interactive menu lets you select a tool:
 | Tool | Description |
 |------|-------------|
 | `run` | Run the proof loop |
-| `txt_to_json` | Convert a `.txt` seed file to `.json` |
 | `goal_latex` | Export a filtered LaTeX proof from derived statements |
 | `statements_latex` | Export all statements and proofs to a `.tex` file |
 
 ### `run` options
 
-1. Enter input JSON path.
+1. Enter input `.txt` path.
 2. Choose proposer and checker models.
 3. Choose whether to be prompted for a hint each round.
 4. Optionally specify output filenames (press Enter to accept defaults).
@@ -107,25 +97,22 @@ All outputs are written next to the input file. During `run`, you are prompted f
 
 | File | Default name | Description |
 |------|--------------|-------------|
-| Statements JSON | `{stem}_statements.json` | Seed + all derived statements (`comment: "Derived"` for new facts) |
+| Statements | `{stem}_statements.txt` | Seed + all derived statements (`Comment: Derived` for new facts) |
 | Full log | `{stem}_full_log.txt` | Extended log including reasoning/tool traces |
 | LaTeX | `{stem}_statements.tex` | All statements and proofs, updated after every round |
 
-After a run, derived statements are appended to `{stem}_statements.json`. Example entry from `examples/inequalities/7/statements1.json`:
+After a run, derived statements are appended to `{stem}_statements.txt` as new `###`-separated blocks. Example:
 
-```json
-{
-  "type": "fact",
-  "statement": "$a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \\ge 9$, with equality iff $a = b = c = \\sqrt{3}$.",
-  "proof": "By AM–GM, $a+b+c \\ge 3\\sqrt[3]{abc}$, so $s^2 \\ge 27$. By Cauchy–Schwarz, $a^2+b^2+c^2 \\ge s^2/3 \\ge 9$.",
-  "comment": "Derived"
-}
+```
+Fact: $a,b,c > 0$, $a+b+c = abc$ implies $a^2 + b^2 + c^2 \ge 9$, with equality iff $a = b = c = \sqrt{3}$.
+Proof: By AM–GM, $a+b+c \ge 3\sqrt[3]{abc}$, so $s^2 \ge 27$. By Cauchy–Schwarz, $a^2+b^2+c^2 \ge s^2/3 \ge 9$.
+Comment: Derived
 ```
 
 Notes:
 
-- The original input JSON is never modified.
-- To continue from previous progress, run again using the newly generated JSON. This new JSON contains all original and derived facts.
+- The original input `.txt` is never modified.
+- To continue from previous progress, run again using the generated `{stem}_statements.txt` as input. It contains all original and derived facts.
 
 ## Generate filtered LaTeX proof
 
