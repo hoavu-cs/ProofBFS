@@ -65,6 +65,8 @@ Goal: Prove that $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{
 
 Use LaTeX for all mathematical notation. Every entry other than `goal` is treated as given and assumed true.
 
+Each entry's statement can span multiple lines — continuation lines are joined with a space. An empty line ends the current entry; the next non-empty line begins a new one.
+
 To convert a `.txt` seed file to the `.json` format used internally, use the `txt_to_json` tool in `main.py`. The resulting `input.json`:
 
 ```json

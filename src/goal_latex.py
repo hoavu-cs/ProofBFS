@@ -6,6 +6,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from .txt_io import parse_txt
+
 load_dotenv()
 
 _client = OpenAI(
@@ -57,23 +59,19 @@ def _filter_statements(goal: str, derived: list[dict]) -> list[dict]:
 
 
 def generate_proof(statements_path: Path) -> None:
-    """Read a *_statements.json file and write a LaTeX proof to *_final_proof.tex."""
-    data = json.loads(statements_path.read_text(encoding="utf-8"))
+    """Read a *_statements.txt file and write a LaTeX proof to *_final_proof.tex."""
+    entries, goal = parse_txt(statements_path)
 
-    goal = None
     definitions: list[dict] = []
     given_facts: list[dict] = []
     derived: list[dict] = []
 
-    for entry in data:
+    for entry in entries:
         t = entry.get("type", "fact").lower()
-        is_derived = entry.get("comment") == "Derived"
-        if t == "goal":
-            goal = entry
+        if entry.get("comment") == "Derived":
+            derived.append(entry)
         elif t == "definition":
             definitions.append(entry)
-        elif is_derived:
-            derived.append(entry)
         else:
             given_facts.append(entry)
 
@@ -131,7 +129,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         path = Path(sys.argv[1])
     else:
-        raw = input("Please enter the generated _statements.json file's path: ").strip()
+        raw = input("Statements TXT path: ").strip()
         if not raw:
             print("Path cannot be empty.")
             sys.exit(1)

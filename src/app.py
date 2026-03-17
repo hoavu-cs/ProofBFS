@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from .tools import PYTHON_TOOL, run_python
 from .statements_latex import generate_statements
+from .txt_io import parse_txt
 
 load_dotenv()
 
@@ -203,35 +204,37 @@ def parse_statement_proof(text: str) -> Fact | None:
     return Fact(statement=statement, type="fact", proof=proof)
 
 
+
 def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], str | None]:
     if not input_path.exists():
         print(f"[red]Error: {input_path} not found.[/red]")
         sys.exit(1)
-    goal = None
+    entries, goal_entry = parse_txt(input_path)
+    goal = goal_entry["statement"] if goal_entry else None
     facts: list[Fact] = []
     seen: set[str] = set()
-    for entry in json.loads(input_path.read_text()):
-        if entry["type"].lower() == "goal":
-            goal = entry["statement"]
-        else:
-            facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
-            seen.add(entry["statement"])
+    for entry in entries:
+        facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
+        seen.add(entry["statement"])
     if derived_path.exists():
-        for entry in json.loads(derived_path.read_text()):
-            if entry["type"].lower() != "goal" and entry["statement"] not in seen:
+        derived_entries, _ = parse_txt(derived_path)
+        for entry in derived_entries:
+            if entry["statement"] not in seen:
                 facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
                 seen.add(entry["statement"])
     return facts, goal
 
 
 def save_facts(derived_path: Path, new_facts: list[Fact]) -> None:
-    data: list[dict] = json.loads(derived_path.read_text()) if derived_path.exists() else []
+    existing = derived_path.read_text(encoding="utf-8").rstrip() if derived_path.exists() else ""
     for fact in new_facts:
-        entry = {"type": fact.type, "statement": fact.statement, "proof": fact.proof}
+        block = f"{fact.type.capitalize()}: {fact.statement}"
+        if fact.proof:
+            block += f"\nProof: {fact.proof}"
         if fact.comment:
-            entry["comment"] = fact.comment
-        data.append(entry)
-    derived_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            block += f"\nComment: {fact.comment}"
+        existing += f"\n###\n{block}"
+    derived_path.write_text(existing + "\n", encoding="utf-8")
 
 
 
@@ -269,7 +272,7 @@ def run(
     c_client = _client(checker_model)
 
     base = json_path.parent
-    derived_path   = base / (derived_name  or (json_path.stem + "_statements.json"))
+    derived_path   = base / (derived_name  or (json_path.stem + "_statements.txt"))
     full_log_path  = base / (full_log_name or (json_path.stem + "_full_log.txt"))
     statement_tex  = base / (latex_name or (json_path.stem + "_statements.tex"))
     if not derived_path.exists():

@@ -1,27 +1,23 @@
-"""Export all statements and proofs from a *_statements.json file to a LaTeX document."""
+"""Export all statements and proofs from a *_statements.txt file to a LaTeX document."""
 
-import json
-import re
 from pathlib import Path
+
+from .txt_io import parse_txt
 
 
 def generate_statements(statements_path: Path, out_name: str | None = None) -> None:
-    data = json.loads(statements_path.read_text(encoding="utf-8"))
+    entries, goal = parse_txt(statements_path)
 
-    goal: dict | None = None
     definitions: list[dict] = []
     given_facts: list[dict] = []
     derived: list[dict] = []
 
-    for entry in data:
+    for entry in entries:
         t = entry.get("type", "fact").lower()
-        is_derived = entry.get("comment") == "Derived"
-        if t == "goal":
-            goal = entry
+        if entry.get("comment") == "Derived":
+            derived.append(entry)
         elif t == "definition":
             definitions.append(entry)
-        elif is_derived:
-            derived.append(entry)
         else:
             given_facts.append(entry)
 
@@ -79,7 +75,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         path = Path(sys.argv[1])
     else:
-        raw = input("Statements JSON path: ").strip()
+        raw = input("Statements TXT path: ").strip()
         if not raw:
             print("Path cannot be empty.")
             sys.exit(1)
