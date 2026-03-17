@@ -1,8 +1,0 @@
-# Assumption
-Assumption: $a, b, c > 0$.
-
-# Assumption
-Assumption: $a + b + c = abc$.
-
-# Goal
-Goal: Prove that $\frac{1}{1+a^2} + \frac{1}{1+b^2} + \frac{1}{1+c^2} \le \frac{3}{2}$.

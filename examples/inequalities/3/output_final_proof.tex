@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{claim}{Claim}
+
+\begin{document}
+
+\begin{theorem}
+Let $a, b, c$ be positive real numbers such that $a + b + c \leq 2$. Then
+\[
+\sqrt{a^2 + \frac{1}{b^2}} + \sqrt{b^2 + \frac{1}{c^2}} + \sqrt{c^2 + \frac{1}{a^2}} \geq \frac{\sqrt{97}}{2}.
+\]
+\end{theorem}
+
+\begin{claim}
+For any positive real numbers $a, b, c$,
+\[
+\sqrt{a^2 + \frac{1}{b^2}} + \sqrt{b^2 + \frac{1}{c^2}} + \sqrt{c^2 + \frac{1}{a^2}} \geq \sqrt{(a+b+c)^2 + \left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)^2}.
+\]
+\end{claim}
+
+\begin{proof}
+Define vectors $u = (a, 1/b)$, $v = (b, 1/c)$, $w = (c, 1/a)$ in $\mathbb{R}^2$ and let $\|\cdot\|$ denote the Euclidean norm. Then
+\[
+\sqrt{a^2 + \frac{1}{b^2}} + \sqrt{b^2 + \frac{1}{c^2}} + \sqrt{c^2 + \frac{1}{a^2}} = \|u\| + \|v\| + \|w\|,
+\]
+while
+\[
+\sqrt{(a+b+c)^2 + \left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)^2} = \|u + v + w\|.
+\]
+By the triangle inequality for norms,
+\[
+\|u\| + \|v\| \geq \|u + v\| \quad \text{and} \quad \|u + v\| + \|w\| \geq \|(u + v) + w\| = \|u + v + w\|.
+\]
+Combining these two inequalities yields
+\[
+\|u\| + \|v\| + \|w\| \geq \|u + v\| + \|w\| \geq \|u + v + w\|,
+\]
+which is exactly the desired inequality.
+\end{proof}
+
+\begin{claim}
+For positive real numbers $a, b, c$ with $a + b + c \leq 2$,
+\[
+\sqrt{(a+b+c)^2 + \left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)^2} \geq \frac{\sqrt{97}}{2}.
+\]
+\end{claim}
+
+\begin{proof}
+Let $S = a + b + c > 0$. By Cauchy--Schwarz (or Titu's lemma),
+\[
+\left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)(a + b + c) \geq (1 + 1 + 1)^2 = 9,
+\]
+hence
+\[
+\frac{1}{a} + \frac{1}{b} + \frac{1}{c} \geq \frac{9}{S}.
+\]
+Since the function $x \mapsto \sqrt{S^2 + x^2}$ is increasing for $x > 0$, we get
+\[
+\sqrt{S^2 + \left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)^2} \geq \sqrt{S^2 + \left(\frac{9}{S}\right)^2} = \sqrt{S^2 + \frac{81}{S^2}}.
+\]
+Define $f(S) = \sqrt{S^2 + 81/S^2}$ for $S > 0$. Its derivative is
+\[
+f'(S) = \frac{S^4 - 81}{S^3 \sqrt{S^4 + 81}}.
+\]
+For $0 < S < 3$ we have $S^4 < 81$, so $f'(S) < 0$; thus $f$ is decreasing on $(0, 2]$. Consequently,
+\[
+f(S) \geq f(2) = \sqrt{4 + \frac{81}{4}} = \sqrt{\frac{97}{4}} = \frac{\sqrt{97}}{2}.
+\]
+Therefore
+\[
+\sqrt{S^2 + \left(\frac{1}{a} + \frac{1}{b} + \frac{1}{c}\right)^2} \geq \frac{\sqrt{97}}{2}.
+\]
+\end{proof}
+
+Combining the two claims, we obtain the inequality stated in the theorem.
+
+\end{document}

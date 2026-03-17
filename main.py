@@ -10,14 +10,12 @@ from rich.rule import Rule
 from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, ROUNDS, run
 from src.goal_latex import generate_proof
 from src.tools import TIMEOUT, set_timeout
-from src.txt_to_json import convert
 from src.statements_latex import generate_statements
 
 MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN]
-TOOLS         = ["run", "txt_to_json", "goal_latex", "statements_latex"]
+TOOLS         = ["run", "goal_latex", "statements_latex"]
 TOOLS_DISPLAY = [
     "run",
-    "txt_to_json       (convert input.txt → input.json)",
     "goal_latex        (export filtered LaTeX proof from derived statements)",
     "statements_latex  (export all statements to LaTeX)",
 ]
@@ -108,24 +106,21 @@ if __name__ == "__main__":
     tool = TOOLS[TOOLS_DISPLAY.index(_pick("Tool:", TOOLS_DISPLAY))]
     print()
 
-    if tool == "txt_to_json":
-        convert(_require_path("Input .txt path"))
-
-    elif tool == "goal_latex":
-        generate_proof(_require_path("Statements JSON path"))
+    if tool == "goal_latex":
+        generate_proof(_require_path("Statements TXT path"))
 
     elif tool == "statements_latex":
-        generate_statements(_require_path("Statements JSON path"))
+        generate_statements(_require_path("Statements TXT path"))
 
     elif tool == "run":
-        path           = _require_path("Input JSON path")
+        path           = _require_path("Input .txt path")
         proposer_model = _pick("Proposer model:", MODELS)
         checker_model  = _pick("Checker model: ", MODELS)
         prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
         rounds         = _ask_int("Number of rounds", ROUNDS)
         py_timeout     = _ask_int("Python script timeout (seconds)", TIMEOUT)
         set_timeout(py_timeout)
-        derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.json")
+        derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.txt")
         full_log_name  = _optional_name("Output full log filename:",  path.stem + "_full_log.txt")
         latex_name     = _optional_name("Output LaTeX filename:",     path.stem + "_statements.tex")
         print()

@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{claim}{Claim}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\begin{document}
+
+\begin{theorem}
+Prove $\sqrt{(a^2 + 1/b^2)} + \sqrt{(b^2 + 1/c^2)} + \sqrt{(c^2 + 1/a^2)} >= \sqrt{97}/2$.
+\end{theorem}
+
+\section*{Definitions}
+\begin{definition}
+Let a, b, c be positive real numbers such that a + b + c <= 2
+\end{definition}
+
+\section*{Given}
+\begin{assumption}  % useful inequality
+AM-GM inequality: for positive reals $x, y$, $x + y >= 2*\sqrt(x*y)$, equivalently $\sqrt(x*y) <= (x+y)/2$.
+\end{assumption}
+
+\begin{assumption}  % useful inequality
+Cauchy-Schwarz in the form: $(\sum_i u_i * v_i)^2 <= (\sum_i u_i^2)(\sum_i v_i^2)$.
+\end{assumption}
+
+\section*{Derived Statements}
+\begin{claim}  % Step 1
+For any positive real numbers $a,b,c$,
+\end{claim}
+\begin{proof}
+Define the vectors $u=(a,1/b)$, $v=(b,1/c)$, $w=(c,1/a)$ in $\mathbb{R}^2$ and let $\|\cdot\|$ denote the Euclidean norm. Then \[ \sqrt{a^2+\frac1{b^2}}+\sqrt{b^2+\frac1{c^2}}+\sqrt{c^2+\frac1{a^2}} = \|u\|+\|v\|+\|w\|, \] while \[ \sqrt{(a+b+c)^2+\bigl(\frac1a+\frac1b+\frac1c\bigr)^2} = \|u+v+w\|. \] By the triangle inequality for norms, \[ \|u\|+\|v\|\ge \|u+v\|\quad\text{and}\quad \|u+v\|+\|w\|\ge \|(u+v)+w\| = \|u+v+w\|. \] Combining these two inequalities yields \[ \|u\|+\|v\|+\|w\| \ge \|u+v\|+\|w\| \ge \|u+v+w\|, \] which is exactly the desired inequality. (The triangle inequality itself follows from the Cauchy–Schwarz inequality.)
+\end{proof}
+
+\begin{claim}  % Step 2
+For positive real numbers $a,b,c$ with $a+b+c\le 2$,
+\end{claim}
+\begin{proof}
+Let $S=a+b+c\;(>0)$. By Cauchy–Schwarz (or Titu's lemma), \[ \Bigl(\frac1a+\frac1b+\frac1c\Bigr)(a+b+c)\ge (1+1+1)^2=9, \] hence \[ \frac1a+\frac1b+\frac1c\ge\frac{9}{S}. \] Since the function $x\mapsto\sqrt{S^2+x^2}$ is increasing for $x>0$, we get \[ \sqrt{S^2+\Bigl(\frac1a+\frac1b+\frac1c\Bigr)^2} \ge\sqrt{S^2+\Bigl(\frac{9}{S}\Bigr)^2} =\sqrt{S^2+\frac{81}{S^2}}. \] Define $f(S)=\sqrt{S^2+81/S^2}$ for $S>0$. Its derivative is \[ f'(S)=\frac{S^4-81}{S^3\sqrt{S^4+81}}. \] For $0<S<3$ we have $S^4<81$, so $f'(S)<0$; thus $f$ is decreasing on $(0,2]$. Consequently, \[ f(S)\ge f(2)=\sqrt{4+\frac{81}{4}}=\sqrt{\frac{97}{4}}=\frac{\sqrt{97}}2. \] Therefore \[ \sqrt{S^2+\Bigl(\frac1a+\frac1b+\frac1c\Bigr)^2}\ge\frac{\sqrt{97}}2, \] which is exactly the required inequality.
+\end{proof}
+
+\begin{claim}  % Step 3
+For positive real numbers $a,b,c$ with $a+b+c\le 2$,
+\end{claim}
+\begin{proof}
+Apply Cauchy–Schwarz to the vectors $(\sqrt a,\sqrt b,\sqrt c)$ and $(1/\sqrt a,1/\sqrt b,1/\sqrt c)$: \[ \bigl(\sqrt a\cdot\frac1{\sqrt a}+\sqrt b\cdot\frac1{\sqrt b}+\sqrt c\cdot\frac1{\sqrt c}\bigr)^2 \le (a+b+c)\Bigl(\frac1a+\frac1b+\frac1c\Bigr). \] The left‑hand side equals $3^2=9$, therefore \[ (a+b+c)\Bigl(\frac1a+\frac1b+\frac1c\Bigr)\ge9, \quad\text{so}\quad \frac1a+\frac1b+\frac1c\ge\frac{9}{a+b+c}. \] Since $a+b+c\le2$, the right‑hand side satisfies $\frac{9}{a+b+c}\ge\frac{9}{2}$, which yields \[ \frac1a+\frac1b+\frac1c\ge\frac92. \]
+\end{proof}
+
+\end{document}

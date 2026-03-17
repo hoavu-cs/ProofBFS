@@ -1,0 +1,9 @@
+Definition: Let $a, b, c$ be positive real numbers such that $a + b + c \le 2$.
+###
+Fact: AM-GM inequality: for positive reals $x, y$, $x + y \ge 2\sqrt{xy}$, equivalently $\sqrt{xy} \le \frac{x+y}{2}$.
+Comment: useful inequality
+###
+Fact: Cauchy-Schwarz: $\left(\sum_i u_i v_i\right)^2 \le \left(\sum_i u_i^2\right)\left(\sum_i v_i^2\right)$.
+Comment: useful inequality
+###
+Goal: Prove that $\sqrt{a^2 + \frac{1}{b^2}} + \sqrt{b^2 + \frac{1}{c^2}} + \sqrt{c^2 + \frac{1}{a^2}} \ge \frac{\sqrt{97}}{2}$.
