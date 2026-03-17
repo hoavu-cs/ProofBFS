@@ -55,7 +55,7 @@ Proof: proof text     (optional)
 Comment: comment text (optional)
 ```
 
-Valid types: `Definition`, `Fact`, `Assumption`, `Goal`. Use LaTeX for all mathematical notation. Every entry other than `Goal` is treated as given and assumed true.
+Valid types: `Definition`, `Fact`, `Assumption`, `Goal`. Use LaTeX for all mathematical notation. **Every entry other than `Goal` is treated as given and assumed true**.
 
 Example (`examples/inequalities/3/input.txt`):
 
@@ -122,7 +122,7 @@ Use the `goal_latex` tool in `main.py`, or run directly:
 python -m src.goal_latex
 ```
 
-Enter a `{stem}_statements.json` path. The script uses an LLM to filter derived statements to those relevant to the proof chain and writes:
+Enter a `{stem}_statements.txt` path. The script uses an LLM to filter derived statements to those relevant to the proof chain and writes:
 
 - `{stem}_final_proof.tex`
 
@@ -150,7 +150,7 @@ If `bwrap` is not found, execution falls back to running directly in the venv (n
 
 - `src/app.py`: core loop, prompts, model calls, parsing, logging, save/load helpers.
 - `src/tools.py`: `run_python()` and tool schema.
+- `src/txt_io.py`: shared parser for the `###`-separated `.txt` format.
 - `src/goal_latex.py`: filters proof chain and exports LaTeX.
 - `src/statements_latex.py`: exports all statements and proofs to a `.tex` file.
-- `src/txt_to_json.py`: converts `.txt` seed files to `.json`.
 - `main.py`: interactive CLI entrypoint.
