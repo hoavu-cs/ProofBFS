@@ -66,7 +66,7 @@ You are a mathematical reasoning agent. Given a set of established statements:
 9. If you need to verify a numerical computation or check an example, use the run_python tool. 
 Available packages: numpy, scipy, sympy, mpmath, z3-solver. Make sure you **import any packages you use** in the code you run and **print the result out clearly**. 
 10. Use latex for mathematical expressions.
-11. Do not add markdown formatting."""
+11. Do not add markdown formatting. Do not use unicode characters and stick to plain text and latex for mathematical expressions."""
 
 GOAL_CHECK_SYSTEM = """\
 1. You are a goal checker. 
@@ -99,9 +99,7 @@ Available packages: numpy, scipy, sympy, mpmath, z3-solver. Make sure you **impo
 7. Do not add markdown formatting."""
 
 
-"""-----------------------------------------------------------------------------------------------
-Agent interaction functions
------------------------------------------------------------------------------------------------"""
+# Agent interaction functions
 _full_log: list[str] = []
 
 
@@ -188,9 +186,7 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
 
 
-"""-----------------------------------------------------------------------------------------------
-Helper functions for parsing and managing statements, proofs, and logs.
------------------------------------------------------------------------------------------------"""
+# Helper functions for parsing and managing statements, proofs, and logs
 
 def parse_statement_proof(text: str) -> Fact | None:
     """Extract the last statement/proof block from a formatted LLM response."""
@@ -202,7 +198,6 @@ def parse_statement_proof(text: str) -> Fact | None:
     statement = text[s_start + len("statement:"):p_start].strip()
     proof = text[p_start + len("proof:"):].strip() or None
     return Fact(statement=statement, type="fact", proof=proof)
-
 
 
 def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], str | None]:
@@ -247,9 +242,7 @@ def print_facts(facts: list[Fact]) -> None:
     print()
 
 
-"""-----------------------------------------------------------------------------------------------
-Main loop of the proof assistant.
------------------------------------------------------------------------------------------------"""
+# Main loop of the proof assistant.
 
 def run(
     json_path: Path,
