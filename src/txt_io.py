@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 
-def parse_txt(txt_path: Path) -> tuple[list[dict], dict | None]:
+def parse_txt(txt_path: Path) -> tuple[list[dict], dict | None, list[str]]:
     """Parse a ###-separated text file.
 
     Block format (within each ### section):
@@ -12,15 +12,23 @@ def parse_txt(txt_path: Path) -> tuple[list[dict], dict | None]:
         Proof: proof text        (optional, may be multi-line)
         Comment: comment text    (optional)
 
-    Returns (entries, goal) where goal is the Goal block dict (or None) and
-    entries contains everything else.
+    Recognised special types:
+        Goal:   the proof target (returned separately)
+        Prompt: a hint or direction for the proof search (returned separately)
+
+    Returns (entries, goal, prompts) where goal is the Goal block dict (or
+    None), prompts is a list of prompt strings, and entries contains
+    everything else.
     """
     entries = []
     goal: dict | None = None
-    for block in re.split(r"#{3,}", txt_path.read_text()):
+    prompts: list[str] = []
+    blocks = re.split(r"#{3,}", txt_path.read_text()) # split on "###"
+    for block in blocks:
         block = block.strip()
         if not block:
             continue
+        
         lines = block.splitlines()
         kind, _, stmt = lines[0].partition(":")
         entry: dict = {
@@ -29,10 +37,12 @@ def parse_txt(txt_path: Path) -> tuple[list[dict], dict | None]:
             "proof": None,
             "comment": None,
         }
+
         proof_lines: list[str] = []
         stmt_lines: list[str] = [stmt.strip()]
         in_proof = False
         in_statement = True
+
         for line in lines[1:]:
             s = line.strip()
             low = s.lower()
@@ -48,13 +58,20 @@ def parse_txt(txt_path: Path) -> tuple[list[dict], dict | None]:
                 proof_lines.append(s)
             elif in_statement:
                 stmt_lines.append(line)  # preserve indentation for LaTeX
+
         entry["statement"] = "\n".join(stmt_lines).strip()
+
         if proof_lines:
             entry["proof"] = " ".join(l for l in proof_lines if l) or None
+
         if not (entry["type"] and entry["statement"]):
             continue
+
         if entry["type"].lower() == "goal":
             goal = entry
+        elif entry["type"].lower() == "prompt":
+            prompts.append(entry["statement"])
         else:
             entries.append(entry)
-    return entries, goal
+
+    return entries, goal, prompts
