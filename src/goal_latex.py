@@ -60,7 +60,7 @@ def _filter_statements(goal: str, derived: list[dict]) -> list[dict]:
 
 def generate_proof(statements_path: Path) -> None:
     """Read a *_statements.txt file and write a LaTeX proof to *_final_proof.tex."""
-    entries, goal = parse_txt(statements_path)
+    entries, goal, _ = parse_txt(statements_path)
 
     definitions: list[dict] = []
     given_facts: list[dict] = []
