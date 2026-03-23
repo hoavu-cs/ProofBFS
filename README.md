@@ -16,9 +16,6 @@ A few things to keep in mind
 * Be realistic: this approach won't solve a deep theorem on its own. Current AI likely isn't at that level yet.
 * Use it as a helper for proving technical lemmas, and double-check everything carefully.
 
-
-[See a demo on YouTube](https://youtu.be/tmGZD796wOs)
-
 ## Setup
 
 ```bash
