@@ -7,12 +7,12 @@ from rich import print
 from rich.console import Console
 from rich.rule import Rule
 
-from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, ROUNDS, run
+from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, OPENROUTER_R1_0528, ROUNDS, run
 from src.goal_latex import generate_proof
 from src.tools import TIMEOUT, set_timeout
 from src.statements_latex import generate_statements
 
-MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN]
+MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN, OPENROUTER_R1_0528]
 TOOLS         = ["run", "goal_latex", "statements_latex"]
 TOOLS_DISPLAY = [
     "run",
@@ -118,6 +118,7 @@ if __name__ == "__main__":
         checker_model  = _pick("Checker model: ", MODELS)
         prompt_rounds  = _pick("Prompt each round for hint:", ["yes", "no"]) == "yes"
         rounds         = _ask_int("Number of rounds", ROUNDS)
+        temperature    = float(console.input(f"[bold]Temperature:[/bold] [dim](Enter for 1.0)[/dim]: ").strip() or "1.0")
         py_timeout     = _ask_int("Python script timeout (seconds)", TIMEOUT)
         set_timeout(py_timeout)
         derived_name   = _optional_name("Output statements filename:", path.stem + "_statements.txt")
@@ -130,6 +131,7 @@ if __name__ == "__main__":
             checker_model=checker_model,
             prompt_each_round=prompt_rounds,
             rounds=rounds,
+            temperature=temperature,
             derived_name=derived_name,
             full_log_name=full_log_name,
             latex_name=latex_name,

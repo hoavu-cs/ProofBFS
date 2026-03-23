@@ -1,12 +1,10 @@
 """Export all statements and proofs from a *_statements.txt file to a LaTeX document."""
 
 from pathlib import Path
-
 from .txt_io import parse_txt
 
-
 def generate_statements(statements_path: Path, out_name: str | None = None) -> None:
-    entries, goal = parse_txt(statements_path)
+    entries, goal, _ = parse_txt(statements_path)
 
     definitions: list[dict] = []
     given_facts: list[dict] = []

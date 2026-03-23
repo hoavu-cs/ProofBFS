@@ -32,8 +32,19 @@ gemini_client = OpenAI(
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
 )
 
+client = OpenAI(
+    base_url="https://api.deepseek.com",
+    api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
+)
+
+openrouter_client = OpenAI(
+    api_key=os.environ.get("OPENROUTER_API_KEY", ""),
+    base_url="https://openrouter.ai/api/v1",
+)
+
 DEEPSEEK_CHAT = "deepseek-chat"
 DEEPSEEK_REASONER = "deepseek-reasoner"
+OPENROUTER_R1_0528 = "deepseek/deepseek-r1-0528"
 OLLAMA_QWEN = "qwen3.5:35b"
 GEMINI_FLASH = "gemini-2.5-flash"
 GEMINI_PRO = "gemini-2.5-pro"
@@ -53,7 +64,7 @@ You are a mathematical reasoning agent. Given a set of established statements:
 
 1. First check if the ultimate goal can be derived from the established statements. If it is possible, derive the statement and the proof. 
 2. If not, check if you can disprove the goal using the established statements. If it is possible, provide a proof to disprove the goal (i.e., a counterexample or a logical contradiction).
-3. Otherwise, derive **one** new **interesting** mathematical statement or theorem, possibly using the established statements or definitions as premises or inspiration.
+3. Otherwise, derive **one** new **interesting** mathematical (or algorithmic) statement or theorem, possibly using the established statements or definitions as premises or inspiration.
 4. **Do not** think for too long or make big leaps in reasoning. 
 5. Also provide a concise proof.
 6. Format your response exactly as:
@@ -111,12 +122,13 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
     in_think_tag = False  # for models that embed <think> in content
     for chunk in client.chat.completions.create(**kwargs, stream=True):
         delta = chunk.choices[0].delta
-        if getattr(delta, "reasoning_content", None):
+        rc = getattr(delta, "reasoning_content", None) or getattr(delta, "reasoning", None)
+        if rc:
             if not reasoning_started:
                 reasoning_started = True
-            sys.stdout.write(delta.reasoning_content)
+            sys.stdout.write(rc)
             sys.stdout.flush()
-            reasoning += delta.reasoning_content
+            reasoning += rc
         if getattr(delta, "content", None):
             text = delta.content
             content += text
@@ -149,21 +161,23 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
     return reasoning, content, tool_calls_map
 
 
-def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: list | None = None) -> str:
+def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: list | None = None, temperature: float = 1.0) -> str:
     if model in (DEEPSEEK_CHAT, DEEPSEEK_REASONER):
         messages = [{"role": "user", "content": system}, {"role": "assistant", "content": "Understood."}, *history]
     else:
         messages = [{"role": "system", "content": system}, *history]
 
-    kwargs = {"model": model, "messages": messages, "temperature": 1}
+    kwargs = {"model": model, "messages": messages, "temperature": temperature}
     if tools:
         kwargs["tools"] = tools
+    # if model in (OPENROUTER_R1, OPENROUTER_R1_0528):
+    #     kwargs["extra_body"] = {"provider": {"order": ["Together"], "quantizations": ["fp8"]}}
 
     reasoning, content, tool_calls_map = _stream(client, kwargs)
 
     while tools and tool_calls_map:
         assistant_msg: dict = {"role": "assistant", "content": content}
-        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN):
+        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN, OPENROUTER_R1_0528):
             assistant_msg["reasoning_content"] = reasoning
         assistant_msg["tool_calls"] = [
             {"id": tc["id"], "type": "function", "function": {"name": tc["name"], "arguments": tc["arguments"]}}
@@ -188,23 +202,34 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
 # Helper functions for parsing and managing statements, proofs, and logs
 
-def parse_statement_proof(text: str) -> Fact | None:
-    """Extract the last statement/proof block from a formatted LLM response."""
-    lower = text.lower()
-    s_start = lower.rfind("statement:")
-    p_start = lower.rfind("proof:")
+def parse_statement_proof(text: str, client: OpenAI, model: str, temperature: float = 1.0) -> Fact | None:
+    """Use an LLM to extract the statement and proof from a checker response."""
+    prompt = (
+        "Extract the mathematical statement and its proof from the following text. "
+        "Reply with exactly two lines:\n"
+        "STATEMENT: <the statement>\n"
+        "PROOF: <the proof>\n"
+        "If no clear statement or proof can be found, reply with: NONE\n\n"
+        f"{text}"
+    )
+    result = chat("You are a precise extractor of mathematical content.", [{"role": "user", "content": prompt}], client, model, temperature=temperature)
+    if result.strip().upper() == "NONE":
+        return None
+    lower = result.lower()
+    s_start = lower.find("statement:")
+    p_start = lower.find("proof:")
     if s_start == -1 or p_start == -1 or p_start < s_start:
         return None
-    statement = text[s_start + len("statement:"):p_start].strip()
-    proof = text[p_start + len("proof:"):].strip() or None
+    statement = result[s_start + len("statement:"):p_start].strip()
+    proof = result[p_start + len("proof:"):].strip() or None
     return Fact(statement=statement, type="fact", proof=proof)
 
 
-def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], str | None]:
+def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], str | None, list[str]]:
     if not input_path.exists():
         print(f"[red]Error: {input_path} not found.[/red]")
         sys.exit(1)
-    entries, goal_entry = parse_txt(input_path)
+    entries, goal_entry, prompts = parse_txt(input_path)
     goal = goal_entry["statement"] if goal_entry else None
     facts: list[Fact] = []
     seen: set[str] = set()
@@ -212,12 +237,12 @@ def load_statements(input_path: Path, derived_path: Path) -> tuple[list[Fact], s
         facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
         seen.add(entry["statement"])
     if derived_path.exists():
-        derived_entries, _ = parse_txt(derived_path)
+        derived_entries, _, _ = parse_txt(derived_path)
         for entry in derived_entries:
             if entry["statement"] not in seen:
                 facts.append(Fact(statement=entry["statement"], type=entry["type"], proof=entry.get("proof"), comment=entry.get("comment")))
                 seen.add(entry["statement"])
-    return facts, goal
+    return facts, goal, prompts
 
 
 def save_facts(derived_path: Path, new_facts: list[Fact]) -> None:
@@ -253,12 +278,15 @@ def run(
     full_log_name: str | None = None,
     latex_name: str | None = None,
     rounds: int = ROUNDS,
+    temperature: float = 1.0,
 ) -> None:
     def _client(model: str) -> OpenAI:
         if model == OLLAMA_QWEN:
             return ollama_client
         if model in (GEMINI_FLASH, GEMINI_PRO):
             return gemini_client
+        if model == OPENROUTER_R1_0528:
+            return openrouter_client
         return deepseek_client
 
     p_client = _client(proposer_model)
@@ -270,7 +298,7 @@ def run(
     statement_tex  = base / (latex_name or (json_path.stem + "_statements.tex"))
     if not derived_path.exists():
         derived_path.write_text(json_path.read_text(), encoding="utf-8")
-    facts, goal = load_statements(json_path, derived_path)
+    facts, goal, prompts = load_statements(json_path, derived_path)
 
     timestamp = f"\n=== Run {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n\n"
     with open(full_log_path, "a", encoding="utf-8") as f:
@@ -291,7 +319,7 @@ def run(
     new_facts: list[Fact] = []
     def check_goal() -> str:
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
-        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], c_client, checker_model, tools=[PYTHON_TOOL])
+        result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], c_client, checker_model, tools=[PYTHON_TOOL], temperature=temperature)
         log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n")
         upper = result.upper()
         if upper.startswith("PROVEN"):
@@ -302,13 +330,13 @@ def run(
 
     def run_checker(prompt: str) -> str:
         check_history.append({"role": "user", "content": prompt})
-        verdict = chat(CHECKER_AGENT_SYSTEM, check_history, c_client, checker_model, tools=[PYTHON_TOOL])
+        verdict = chat(CHECKER_AGENT_SYSTEM, check_history, c_client, checker_model, tools=[PYTHON_TOOL], temperature=temperature)
         check_history.append({"role": "assistant", "content": verdict})
         log_print(f"[bold blue][Checker]  {verdict}[/bold blue]\n")
         return verdict
 
     def handle_approved(verdict: str, approval_msg: str) -> str:
-        fact = parse_statement_proof(verdict)
+        fact = parse_statement_proof(verdict, c_client, checker_model, temperature)
         if fact:
             fact.comment = "Derived"
             facts.append(fact)
@@ -326,9 +354,10 @@ def run(
 
         context = "Established statements:\n" + "\n".join(f"- {f.statement}" for f in facts)
         goal_hint = f"\n\n Ultimate goal to work towards: {goal}" if goal else ""
+        prompts_str = ("\n\nInstructions and hints (**follow these**):\n" + "\n".join(f"- {p}" for p in prompts)) if prompts else ""
         hint_str = f"\n\n Request from user (**take this seriously**): {user_hint}" if user_hint else ""
-        stmt_history.append({"role": "user", "content": context + goal_hint + hint_str + "\n\nDerive one new mathematical statement."})
-        claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
+        stmt_history.append({"role": "user", "content": context + goal_hint + prompts_str + hint_str + "\n\nDerive one new mathematical (or algorithmic) statement."})
+        claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL], temperature=temperature)
         stmt_history.append({"role": "assistant", "content": claim})
         log_print(f"[bold green][Proposer] {claim}[/bold green]\n")
 
@@ -338,7 +367,7 @@ def run(
             goal_outcome = handle_approved(verdict, "Your statement was approved.")
         else:
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
-            claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL])
+            claim = chat(STATEMENT_AGENT_SYSTEM, stmt_history, p_client, proposer_model, tools=[PYTHON_TOOL], temperature=temperature)
             stmt_history.append({"role": "assistant", "content": claim})
             log_print(f"[bold yellow][Proposer] (revised) {claim}[/bold yellow]\n")
 
