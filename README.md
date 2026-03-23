@@ -52,7 +52,7 @@ Proof: proof text     (optional)
 Comment: comment text (optional)
 ```
 
-Valid types: `Definition`, `Fact`, `Assumption`, `Goal`. Use LaTeX for all mathematical notation. **Every entry other than `Goal` is treated as given and assumed true**.
+Valid types: `Definition`, `Fact`, `Assumption`, `Goal`. Use LaTeX for all mathematical notation. **Every entry other than `Goal` is treated as given and assumed true**. You can also include `Prompt` entries to include additional instructions or guidance for the proposer/checker (not treated as facts).
 
 Example (`examples/inequalities/3/input.txt`):
 
