@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 from .txt_io import parse_txt
 from .app import (
     DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN,
-    GPT_4O, CLAUDE_SONNET, CLAUDE_OPUS, OR_CLAUDE_SONNET,
-    deepseek_client, gemini_client, ollama_client, openai_client, anthropic_client, openrouter_client,
+    GPT_4O, OR_GPT5,
+    deepseek_client, gemini_client, ollama_client, openai_client, openrouter_client,
     _stream,
 )
 
@@ -69,9 +69,7 @@ def _client(model: str) -> OpenAI:
         return gemini_client
     if model in (GPT_4O,):
         return openai_client
-    if model in (CLAUDE_SONNET, CLAUDE_OPUS):
-        return anthropic_client
-    if model == OR_CLAUDE_SONNET:
+    if model == OR_GPT5:
         return openrouter_client
     return deepseek_client
 
@@ -141,7 +139,7 @@ def simplify(
     goal_check_prompt = f"Goal: {goal['statement']}\n\nStatements:\n{all_statements}\n\nHas the goal been proven?"
     verdict = _chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": goal_check_prompt}], v_client, verifier_model, temperature=0)
     print(f"[bold magenta][Goal check] {verdict}[/bold magenta]\n")
-    if not verdict.upper().startswith("PROVEN"):
+    if "PROVEN" not in verdict.upper():
         print("[red]Goal has not been proven in this file. Exiting.[/red]")
         sys.exit(0)
 
@@ -173,7 +171,7 @@ def simplify(
         result = _chat(VERIFIER_SYSTEM, [{"role": "user", "content": verify_prompt}], v_client, verifier_model, temperature=temperature)
         print(f"[bold blue][Verifier] {result}[/bold blue]\n")
 
-        if result.upper().startswith("APPROVED"):
+        if "APPROVED" in result.upper():
             best_proof = proposed
             print(f"[bold green]Proof accepted in round {round_num}.[/bold green]\n")
         else:

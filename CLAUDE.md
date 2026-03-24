@@ -13,7 +13,6 @@ Requires a `.env` file with API keys for the providers you use:
 DEEPSEEK_API_KEY=your_key_here
 GEMINI_API_KEY=your_key_here
 OPENAI_API_KEY=your_key_here
-ANTHROPIC_API_KEY=your_key_here
 OPENROUTER_API_KEY=your_key_here
 ```
 

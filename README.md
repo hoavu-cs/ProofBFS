@@ -28,11 +28,10 @@ Add API keys for the providers you use to a `.env` file:
 DEEPSEEK_API_KEY=your_key_here
 GEMINI_API_KEY=your_key_here
 OPENAI_API_KEY=your_key_here
-ANTHROPIC_API_KEY=your_key_here
 OPENROUTER_API_KEY=your_key_here
 ```
 
-Some providers and models (configured in `src/app.py`). DEEPSEEK_REASONER (no quantization) was tested more extensively due to its visible chain-of-thought, strong reasoning, and lower cost with no rate limit. 
+Some providers and models (configured in `src/app.py`). DEEPSEEK_REASONER (no quantization) was tested more extensively due to its visible chain-of-thought, strong reasoning, and lower cost with no rate limit. GPT5.4 also works well. Claude models have rate limit issue for this task.
 
 | Constant | Model | Provider | Reasoning | Notes |
 |----------|-------|----------|-----------|-------|
@@ -42,9 +41,7 @@ Some providers and models (configured in `src/app.py`). DEEPSEEK_REASONER (no qu
 | `GEMINI_FLASH` | `gemini-2.5-flash` | Google Gemini | yes | Faster/cheaper Gemini with reasoning |
 | `OLLAMA_QWEN` | `qwen3.5:35b` | Ollama (local) | yes | Runs locally; reasoning output wrapped in `<think>` tags |
 | `GPT_4O` | `gpt-4o` | OpenAI | no | No visible reasoning |
-| `CLAUDE_SONNET` | `claude-sonnet-4-5` | Anthropic (direct) | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
-| `CLAUDE_OPUS` | `claude-opus-4-5` | Anthropic (direct) | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
-| `OR_CLAUDE_SONNET` | `anthropic/claude-sonnet-4-6` | OpenRouter | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
+| `OR_GPT5` | `openai/gpt-5.4` | OpenRouter | no | Capped at 16000 output tokens |
 
 All providers use an OpenAI-compatible client. OpenRouter (`openrouter_client`) is a unified gateway — any model ID from the OpenRouter catalogue works with it. To add another model, create a new constant in `src/app.py` and add it to `MODELS` in `main.py`.
 

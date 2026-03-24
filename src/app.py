@@ -36,12 +36,6 @@ openai_client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY", ""),
 )
 
-anthropic_client = OpenAI(
-    api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
-    base_url="https://api.anthropic.com/v1/",
-    default_headers={"anthropic-version": "2023-06-01"},
-)
-
 openrouter_client = OpenAI(
     api_key=os.environ.get("OPENROUTER_API_KEY", ""),
     base_url="https://openrouter.ai/api/v1",
@@ -53,9 +47,7 @@ OLLAMA_QWEN = "qwen3.5:35b"
 GEMINI_FLASH = "gemini-2.5-flash"
 GEMINI_PRO = "gemini-2.5-pro"
 GPT_4O = "gpt-4o"
-CLAUDE_SONNET = "claude-sonnet-4-5"
-CLAUDE_OPUS = "claude-opus-4-5"
-OR_CLAUDE_SONNET = "anthropic/claude-sonnet-4.6"
+OR_GPT5 = "openai/gpt-5.4"
 ROUNDS = 25
 
 
@@ -178,8 +170,8 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
     kwargs = {"model": model, "messages": messages, "temperature": temperature}
     if tools:
         kwargs["tools"] = tools
-    if model in (CLAUDE_SONNET, CLAUDE_OPUS, OR_CLAUDE_SONNET):
-        kwargs["extra_body"] = {"thinking": {"type": "enabled", "budget_tokens": 8000}}
+    if model == OR_GPT5:
+        kwargs["max_tokens"] = 16000
 
     reasoning, content, tool_calls_map = _stream(client, kwargs)
 
@@ -284,9 +276,7 @@ def run(
             return gemini_client
         if model in (GPT_4O,):
             return openai_client
-        if model in (CLAUDE_SONNET, CLAUDE_OPUS):
-            return anthropic_client
-        if model == OR_CLAUDE_SONNET:
+        if model == OR_GPT5:
             return openrouter_client
         return deepseek_client
 
@@ -323,9 +313,9 @@ def run(
         result = chat(GOAL_CHECK_SYSTEM, [{"role": "user", "content": f"{context}\n\nGoal: {goal}\n\nHas the goal been proven or disproven?"}], c_client, checker_model, tools=[PYTHON_TOOL], temperature=temperature)
         log_print(f"[bold magenta][Goal check] {result}[/bold magenta]\n")
         upper = result.upper()
-        if upper.startswith("PROVEN"):
+        if "PROVEN" in upper and "DISPROVEN" not in upper:
             return "PROVEN"
-        if upper.startswith("DISPROVEN"):
+        if "DISPROVEN" in upper:
             return "DISPROVEN"
         return "NOT YET"
 
@@ -364,7 +354,7 @@ def run(
 
         verdict = run_checker(f"{context}\n\nReview this new statement and its proof:\n\n{claim}")
 
-        if verdict.upper().startswith("APPROVED"):
+        if "APPROVED" in verdict.upper():
             goal_outcome = handle_approved(verdict, "Your statement was approved.")
         else:
             stmt_history.append({"role": "user", "content": f"Checker feedback: {verdict}\n\nRevise your statement."})
@@ -374,7 +364,7 @@ def run(
 
             verdict = run_checker(f"{context}\n\nReview this revised statement and its proof:\n\n{claim}")
 
-            if verdict.upper().startswith("APPROVED"):
+            if "APPROVED" in verdict.upper():
                 goal_outcome = handle_approved(verdict, "Your revised statement was approved.")
             else:
                 stmt_history.append({"role": "user", "content": f"Your revised statement was also rejected: {verdict}. Keep this in mind for the next round."})
