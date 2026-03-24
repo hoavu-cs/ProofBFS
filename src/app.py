@@ -202,26 +202,15 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
 # Helper functions for parsing and managing statements, proofs, and logs
 
-def parse_statement_proof(text: str, client: OpenAI, model: str, temperature: float = 1.0) -> Fact | None:
-    """Use an LLM to extract the statement and proof from a checker response."""
-    prompt = (
-        "Extract the mathematical statement and its proof from the following text. "
-        "Reply with exactly two lines:\n"
-        "STATEMENT: <the statement>\n"
-        "PROOF: <the proof>\n"
-        "If no clear statement or proof can be found, reply with: NONE\n\n"
-        f"{text}"
-    )
-    result = chat("You are a precise extractor of mathematical content.", [{"role": "user", "content": prompt}], client, model, temperature=temperature)
-    if result.strip().upper() == "NONE":
-        return None
-    lower = result.lower()
-    s_start = lower.find("statement:")
-    p_start = lower.find("proof:")
+def parse_statement_proof(text: str) -> Fact | None:
+    """Extract the last statement/proof block from a formatted LLM response."""
+    lower = text.lower()
+    s_start = lower.rfind("statement:")
+    p_start = lower.rfind("proof:")
     if s_start == -1 or p_start == -1 or p_start < s_start:
         return None
-    statement = result[s_start + len("statement:"):p_start].strip()
-    proof = result[p_start + len("proof:"):].strip() or None
+    statement = text[s_start + len("statement:"):p_start].strip()
+    proof = text[p_start + len("proof:"):].strip() or None
     return Fact(statement=statement, type="fact", proof=proof)
 
 
@@ -336,7 +325,7 @@ def run(
         return verdict
 
     def handle_approved(verdict: str, approval_msg: str) -> str:
-        fact = parse_statement_proof(verdict, c_client, checker_model, temperature)
+        fact = parse_statement_proof(verdict)
         if fact:
             fact.comment = "Derived"
             facts.append(fact)
