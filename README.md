@@ -32,7 +32,7 @@ ANTHROPIC_API_KEY=your_key_here
 OPENROUTER_API_KEY=your_key_here
 ```
 
-Tested providers and models (configured in `src/app.py`):
+Some providers and models (configured in `src/app.py`). DEEPSEEK_REASONER was tested more extensively due to its visible chain-of-thought, strong reasoning, and lower cost. 
 
 | Constant | Model | Provider | Reasoning | Notes |
 |----------|-------|----------|-----------|-------|
