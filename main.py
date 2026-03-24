@@ -7,15 +7,21 @@ from rich import print
 from rich.console import Console
 from rich.rule import Rule
 
-from src.app import DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN, OPENROUTER_R1_0528, ROUNDS, run
+from src.app import (
+    DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN,
+    GPT_4O, CLAUDE_SONNET, CLAUDE_OPUS, OR_CLAUDE_SONNET,
+    ROUNDS, run,
+)
 from src.goal_latex import generate_proof
 from src.tools import TIMEOUT, set_timeout
 from src.statements_latex import generate_statements
+from src.simplifier import simplify, SIMPLIFY_ROUNDS
 
-MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN, OPENROUTER_R1_0528]
-TOOLS         = ["run", "goal_latex", "statements_latex"]
+MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN, GPT_4O, CLAUDE_SONNET, CLAUDE_OPUS, OR_CLAUDE_SONNET]
+TOOLS         = ["run", "simplify", "goal_latex", "statements_latex"]
 TOOLS_DISPLAY = [
     "run",
+    "simplify          (simplify a completed proof)",
     "goal_latex        (export filtered LaTeX proof from derived statements)",
     "statements_latex  (export all statements to LaTeX)",
 ]
@@ -106,7 +112,25 @@ if __name__ == "__main__":
     tool = TOOLS[TOOLS_DISPLAY.index(_pick("Tool:", TOOLS_DISPLAY))]
     print()
 
-    if tool == "goal_latex":
+    if tool == "simplify":
+        path            = _require_path("Statements TXT path")
+        proposer_model  = _pick("Proposer model:", MODELS)
+        verifier_model  = _pick("Verifier model:", MODELS)
+        rounds          = _ask_int("Number of rounds", SIMPLIFY_ROUNDS)
+        temperature     = float(console.input(f"[bold]Temperature:[/bold] [dim](Enter for 1.0)[/dim]: ").strip() or "1.0")
+        default_out     = path.stem.removesuffix("_statements") + "_simplified.txt"
+        out_name        = _optional_name("Output filename:", default_out) or default_out
+        print()
+        simplify(
+            path,
+            path.parent / out_name,
+            proposer_model=proposer_model,
+            verifier_model=verifier_model,
+            rounds=rounds,
+            temperature=temperature,
+        )
+
+    elif tool == "goal_latex":
         generate_proof(_require_path("Statements TXT path"))
 
     elif tool == "statements_latex":

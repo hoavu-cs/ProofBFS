@@ -22,19 +22,24 @@ deepseek_client = OpenAI(
     base_url="https://api.deepseek.com",
 )
 
-ollama_client = OpenAI(
-    api_key="ollama",
-    base_url="http://localhost:11434/v1",
-)
-
 gemini_client = OpenAI(
     api_key=os.environ.get("GEMINI_API_KEY", ""),
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
 )
 
-client = OpenAI(
-    base_url="https://api.deepseek.com",
-    api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
+ollama_client = OpenAI(
+    api_key="ollama",
+    base_url="http://localhost:11434/v1",
+)
+
+openai_client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY", ""),
+)
+
+anthropic_client = OpenAI(
+    api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
+    base_url="https://api.anthropic.com/v1/",
+    default_headers={"anthropic-version": "2023-06-01"},
 )
 
 openrouter_client = OpenAI(
@@ -44,10 +49,13 @@ openrouter_client = OpenAI(
 
 DEEPSEEK_CHAT = "deepseek-chat"
 DEEPSEEK_REASONER = "deepseek-reasoner"
-OPENROUTER_R1_0528 = "deepseek/deepseek-r1-0528"
 OLLAMA_QWEN = "qwen3.5:35b"
 GEMINI_FLASH = "gemini-2.5-flash"
 GEMINI_PRO = "gemini-2.5-pro"
+GPT_4O = "gpt-4o"
+CLAUDE_SONNET = "claude-sonnet-4-5"
+CLAUDE_OPUS = "claude-opus-4-5"
+OR_CLAUDE_SONNET = "anthropic/claude-sonnet-4.6"
 ROUNDS = 25
 
 
@@ -170,14 +178,14 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
     kwargs = {"model": model, "messages": messages, "temperature": temperature}
     if tools:
         kwargs["tools"] = tools
-    # if model in (OPENROUTER_R1, OPENROUTER_R1_0528):
-    #     kwargs["extra_body"] = {"provider": {"order": ["Together"], "quantizations": ["fp8"]}}
+    if model in (CLAUDE_SONNET, CLAUDE_OPUS, OR_CLAUDE_SONNET):
+        kwargs["extra_body"] = {"thinking": {"type": "enabled", "budget_tokens": 8000}}
 
     reasoning, content, tool_calls_map = _stream(client, kwargs)
 
     while tools and tool_calls_map:
         assistant_msg: dict = {"role": "assistant", "content": content}
-        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN, OPENROUTER_R1_0528):
+        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN):
             assistant_msg["reasoning_content"] = reasoning
         assistant_msg["tool_calls"] = [
             {"id": tc["id"], "type": "function", "function": {"name": tc["name"], "arguments": tc["arguments"]}}
@@ -259,7 +267,7 @@ def print_facts(facts: list[Fact]) -> None:
 # Main loop of the proof assistant.
 
 def run(
-    json_path: Path,
+    input_path: Path,
     proposer_model: str = DEEPSEEK_REASONER,
     checker_model: str = DEEPSEEK_REASONER,
     prompt_each_round: bool = True,
@@ -274,20 +282,24 @@ def run(
             return ollama_client
         if model in (GEMINI_FLASH, GEMINI_PRO):
             return gemini_client
-        if model == OPENROUTER_R1_0528:
+        if model in (GPT_4O,):
+            return openai_client
+        if model in (CLAUDE_SONNET, CLAUDE_OPUS):
+            return anthropic_client
+        if model == OR_CLAUDE_SONNET:
             return openrouter_client
         return deepseek_client
 
     p_client = _client(proposer_model)
     c_client = _client(checker_model)
 
-    base = json_path.parent
-    derived_path   = base / (derived_name  or (json_path.stem + "_statements.txt"))
-    full_log_path  = base / (full_log_name or (json_path.stem + "_full_log.txt"))
-    statement_tex  = base / (latex_name or (json_path.stem + "_statements.tex"))
+    base = input_path.parent
+    derived_path   = base / (derived_name  or (input_path.stem + "_statements.txt"))
+    full_log_path  = base / (full_log_name or (input_path.stem + "_full_log.txt"))
+    statement_tex  = base / (latex_name or (input_path.stem + "_statements.tex"))
     if not derived_path.exists():
-        derived_path.write_text(json_path.read_text(), encoding="utf-8")
-    facts, goal, prompts = load_statements(json_path, derived_path)
+        derived_path.write_text(input_path.read_text(), encoding="utf-8")
+    facts, goal, prompts = load_statements(input_path, derived_path)
 
     timestamp = f"\n=== Run {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n\n"
     with open(full_log_path, "a", encoding="utf-8") as f:
@@ -298,7 +310,7 @@ def run(
         plain = re.sub(r"\[.*?\]", "", msg).strip()
         _full_log.append(plain)
 
-    print(f"\n[bold]=== {json_path} | Round starting ===\n[/bold]")
+    print(f"\n[bold]=== {input_path} | Round starting ===\n[/bold]")
     if goal:
         print(f"[bold yellow]Goal: {goal}[/bold yellow]\n")
     print_facts(facts)
@@ -385,6 +397,6 @@ def run(
             print("\n[bold red]=== Goal disproven! ===[/bold red]")
             break
 
-    print(f"\n[bold]Statements and log saved to {json_path.parent}[/bold]")
+    print(f"\n[bold]Statements and log saved to {input_path.parent}[/bold]")
 
 

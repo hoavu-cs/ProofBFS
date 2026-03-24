@@ -27,19 +27,26 @@ Add API keys for the providers you use to a `.env` file:
 ```
 DEEPSEEK_API_KEY=your_key_here
 GEMINI_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+ANTHROPIC_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here
 ```
 
-Supported providers and models (configured in `src/app.py`):
+Tested providers and models (configured in `src/app.py`):
 
-| Constant | Model | Provider |
-|----------|-------|----------|
-| `DEEPSEEK_REASONER` | `deepseek-reasoner` | DeepSeek |
-| `DEEPSEEK_CHAT` | `deepseek-chat` | DeepSeek |
-| `GEMINI_PRO` | `gemini-2.5-pro` | Google Gemini |
-| `GEMINI_FLASH` | `gemini-2.5-flash` | Google Gemini |
-| `OLLAMA_QWEN` | `qwen3.5:35b` | Ollama (local) |
+| Constant | Model | Provider | Reasoning | Notes |
+|----------|-------|----------|-----------|-------|
+| `DEEPSEEK_REASONER` | `deepseek-reasoner` | DeepSeek | yes | Strong reasoning model; streams chain-of-thought via `reasoning_content` |
+| `DEEPSEEK_CHAT` | `deepseek-chat` | DeepSeek | no | Fast, no visible reasoning |
+| `GEMINI_PRO` | `gemini-2.5-pro` | Google Gemini | yes | Strong reasoning; streams thinking via `reasoning_content` |
+| `GEMINI_FLASH` | `gemini-2.5-flash` | Google Gemini | yes | Faster/cheaper Gemini with reasoning |
+| `OLLAMA_QWEN` | `qwen3.5:35b` | Ollama (local) | yes | Runs locally; reasoning output wrapped in `<think>` tags |
+| `GPT_4O` | `gpt-4o` | OpenAI | no | No visible reasoning |
+| `CLAUDE_SONNET` | `claude-sonnet-4-5` | Anthropic (direct) | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
+| `CLAUDE_OPUS` | `claude-opus-4-5` | Anthropic (direct) | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
+| `OR_CLAUDE_SONNET` | `anthropic/claude-sonnet-4-6` | OpenRouter | yes | Extended thinking enabled via `extra_body`; up to 8000 thinking tokens |
 
-All providers use an OpenAI-compatible client. To add another model, create a new client and constant in `src/app.py` and add the model to `MODELS` in `main.py`.
+All providers use an OpenAI-compatible client. OpenRouter (`openrouter_client`) is a unified gateway — any model ID from the OpenRouter catalogue works with it. To add another model, create a new constant in `src/app.py` and add it to `MODELS` in `main.py`.
 
 ## Input format
 
@@ -76,6 +83,7 @@ An interactive menu lets you select a tool:
 | Tool | Description |
 |------|-------------|
 | `run` | Run the proof loop |
+| `simplify` | Simplify a completed proof using a proposer/verifier loop |
 | `goal_latex` | Export a filtered LaTeX proof from derived statements |
 | `statements_latex` | Export all statements and proofs to a `.tex` file |
 
@@ -110,6 +118,29 @@ Notes:
 
 - The original input `.txt` is never modified.
 - To continue from previous progress, run again using the generated `{stem}_statements.txt` as input. It contains all original and derived facts.
+
+## Simplify a proof
+
+Use the `simplify` tool in `main.py`, or run directly:
+
+```bash
+python -m src.simplifier
+```
+
+Enter a `{stem}_statements.txt` path (must contain a proven goal — i.e., derived statements that prove the goal). The simplifier runs a **proposer/verifier loop**:
+
+1. A **proposer** model reads the original proof and proposes a shorter, more direct proof.
+2. A **verifier** model checks correctness and judges whether it is genuinely simpler.
+3. This repeats for `SIMPLIFY_ROUNDS` (default 3) rounds, iterating on the best approved proof.
+
+On success, two output files are written next to the input:
+
+| File | Description |
+|------|-------------|
+| `{stem}_simplified.txt` | Plain-text simplified proof |
+| `{stem}_simplified.tex` | LaTeX document with definitions, given facts, and the simplified proof |
+
+If no simplified proof is approved after all rounds, the original remains unchanged.
 
 ## Generate filtered LaTeX proof
 
@@ -150,4 +181,5 @@ If `bwrap` is not found, execution falls back to running directly in the venv (n
 - `src/txt_io.py`: shared parser for the `###`-separated `.txt` format.
 - `src/goal_latex.py`: filters proof chain and exports LaTeX.
 - `src/statements_latex.py`: exports all statements and proofs to a `.tex` file.
+- `src/simplifier.py`: proposer/verifier loop that rewrites a completed proof more simply.
 - `main.py`: interactive CLI entrypoint.
