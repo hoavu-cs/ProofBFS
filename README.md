@@ -32,7 +32,7 @@ OPENROUTER_API_KEY=your_key_here
 ```
 
 Some providers and models (configured in `src/app.py`) that were tested. It's fairly easy to add new ones.
-DEEPSEEK_REASONER (no quantization) was tested more extensively due to its visible chain-of-thought, strong reasoning, and lower cost with no rate limit. GPT5.4 also works well. Claude models have rate limit issue for this task.
+DEEPSEEK_REASONER (no quantization) was tested more due to its visible chain-of-thought (to identify weaknesses), decent reasoning, lower cost with no rate limit. GPT5 also works quite well based on my testing. Claude models have rate limit issue for this task.
 
 | Constant | Model | Provider | Reasoning | Notes |
 |----------|-------|----------|-----------|-------|
