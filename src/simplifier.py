@@ -12,9 +12,9 @@ from dotenv import load_dotenv
 
 from .txt_io import parse_txt
 from .app import (
-    DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN,
+    DEEPSEEK_REASONER, GEMINI_PRO,
     GPT_4O, OR_GPT5,
-    deepseek_client, gemini_client, ollama_client, openai_client, openrouter_client,
+    deepseek_client, gemini_client, openai_client, openrouter_client,
     _stream,
 )
 
@@ -63,9 +63,7 @@ Rules:
 
 
 def _client(model: str) -> OpenAI:
-    if model == OLLAMA_QWEN:
-        return ollama_client
-    if model in (GEMINI_FLASH, GEMINI_PRO):
+    if model == GEMINI_PRO:
         return gemini_client
     if model in (GPT_4O,):
         return openai_client
@@ -75,7 +73,7 @@ def _client(model: str) -> OpenAI:
 
 
 def _chat(system: str, history: list[dict], client: OpenAI, model: str, temperature: float = 1.0) -> str:
-    if model in (DEEPSEEK_CHAT, DEEPSEEK_REASONER):
+    if model == DEEPSEEK_REASONER:
         messages = [{"role": "user", "content": system}, {"role": "assistant", "content": "Understood."}, *history]
     else:
         messages = [{"role": "system", "content": system}, *history]

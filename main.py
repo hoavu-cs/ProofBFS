@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.rule import Rule
 
 from src.app import (
-    DEEPSEEK_CHAT, DEEPSEEK_REASONER, GEMINI_FLASH, GEMINI_PRO, OLLAMA_QWEN,
+    DEEPSEEK_REASONER, GEMINI_PRO,
     GPT_4O, OR_GPT5,
     ROUNDS, run,
 )
@@ -17,7 +17,7 @@ from src.tools import TIMEOUT, set_timeout
 from src.statements_latex import generate_statements
 from src.simplifier import simplify, SIMPLIFY_ROUNDS
 
-MODELS = [DEEPSEEK_REASONER, DEEPSEEK_CHAT, GEMINI_PRO, GEMINI_FLASH, OLLAMA_QWEN, GPT_4O, OR_GPT5]
+MODELS = [DEEPSEEK_REASONER, GEMINI_PRO, GPT_4O, OR_GPT5]
 TOOLS         = ["run", "simplify", "goal_latex", "statements_latex"]
 TOOLS_DISPLAY = [
     "run",
