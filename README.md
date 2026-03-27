@@ -25,9 +25,9 @@ pip install -r requirements.txt
 Add API keys for the providers you use to a `.env` file:
 
 ```
-DEEPSEEK_API_KEY=your_key_here
 GEMINI_API_KEY=your_key_here
 OPENAI_API_KEY=your_key_here
+DEEPSEEK_API_KEY=your_key_here
 OPENROUTER_API_KEY=your_key_here
 ```
 
@@ -37,7 +37,6 @@ DEEPSEEK_REASONER (no quantization) was tested more due to its visible chain-of-
 | Constant | Model | Provider | Reasoning | Notes |
 |----------|-------|----------|-----------|-------|
 | `DEEPSEEK_REASONER` | `deepseek-reasoner` | DeepSeek | yes | Strong reasoning model; streams chain-of-thought via `reasoning_content` |
-| `DEEPSEEK_CHAT` | `deepseek-chat` | DeepSeek | no | Fast, no visible reasoning |
 | `GEMINI_PRO` | `gemini-2.5-pro` | Google Gemini | yes | Strong reasoning; streams thinking via `reasoning_content` |
 | `GEMINI_FLASH` | `gemini-2.5-flash` | Google Gemini | yes | Faster/cheaper Gemini with reasoning |
 | `OLLAMA_QWEN` | `qwen3.5:35b` | Ollama (local) | yes | Runs locally; reasoning output wrapped in `<think>` tags |
