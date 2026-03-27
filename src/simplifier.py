@@ -20,7 +20,7 @@ from .app import (
 
 load_dotenv()
 
-SIMPLIFY_ROUNDS = 3
+SIMPLIFY_ROUNDS = 1
 
 GOAL_CHECK_SYSTEM = """\
 You are a goal checker. You will be given a list of statements and a goal.
