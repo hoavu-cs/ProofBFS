@@ -10,6 +10,7 @@ from pathlib import Path
 from rich import print
 from openai import OpenAI
 from dotenv import load_dotenv
+import ollama as ollama_lib
 
 from .tools import PYTHON_TOOL, run_python
 from .statements_latex import generate_statements
@@ -41,13 +42,20 @@ openrouter_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
 )
 
-DEEPSEEK_CHAT = "deepseek-chat"
+novita_client = OpenAI(
+    api_key=os.environ.get("NOVITA_API_KEY", ""),
+    base_url="https://api.novita.ai/openai",
+)
+
 DEEPSEEK_REASONER = "deepseek-reasoner"
-OLLAMA_QWEN = "qwen3.5:35b"
-GEMINI_FLASH = "gemini-2.5-flash"
+OLLAMA_PROVER = "deepseek-prover-7b"
 GEMINI_PRO = "gemini-2.5-pro"
 GPT_4O = "gpt-4o"
 OR_GPT5 = "openai/gpt-5.4"
+NOVITA_PROVER_671B = "deepseek/deepseek-prover-v2-671b"
+
+# Models that do not support function/tool calling
+NO_TOOLS_MODELS = {OLLAMA_PROVER, NOVITA_PROVER_671B}
 ROUNDS = 25
 
 
@@ -114,8 +122,80 @@ Available packages: numpy, scipy, sympy, mpmath, z3-solver. Make sure you **impo
 _full_log: list[str] = []
 
 
+def _stream_ollama(kwargs: dict) -> tuple[str, str, dict[int, dict]]:
+    """Stream using the native ollama library, supporting think= for models with thinking capability."""
+    reasoning, content = "", ""
+    tool_calls_map: dict[int, dict] = {}
+    reasoning_started = False
+
+    model_name = kwargs["model"]
+    try:
+        info = ollama_lib.show(model_name)
+        caps = getattr(info, "capabilities", None) or []
+        supports_thinking = "thinking" in caps
+        supports_tools = "tools" in caps
+    except Exception:
+        supports_thinking = False
+        supports_tools = False
+
+    ollama_kwargs: dict = {"model": model_name, "messages": kwargs["messages"], "stream": True}
+    if supports_thinking:
+        ollama_kwargs["think"] = True
+    if kwargs.get("tools") and supports_tools:
+        ollama_kwargs["tools"] = kwargs["tools"]
+
+    in_think_tag = False
+    for chunk in ollama_lib.chat(**ollama_kwargs):
+        msg = chunk.message
+        thinking = getattr(msg, "thinking", None)
+        if thinking:
+            if not reasoning_started:
+                sys.stdout.write("[thinking]\n")
+                sys.stdout.flush()
+                reasoning_started = True
+            sys.stdout.write(thinking)
+            sys.stdout.flush()
+            reasoning += thinking
+        if msg.content:
+            text = msg.content
+            content += text
+            if not in_think_tag and "<think>" in text:
+                in_think_tag = True
+                reasoning_started = True
+            if in_think_tag:
+                sys.stdout.write(text)
+                sys.stdout.flush()
+                if "</think>" in text:
+                    in_think_tag = False
+            else:
+                sys.stdout.write(text)
+                sys.stdout.flush()
+        if getattr(msg, "tool_calls", None):
+            for tc in msg.tool_calls:
+                idx = len(tool_calls_map)
+                tool_calls_map[idx] = {
+                    "id": f"call_{idx}",
+                    "name": tc.function.name,
+                    "arguments": json.dumps(dict(tc.function.arguments), ensure_ascii=False),
+                }
+
+    if not reasoning:
+        m = re.search(r"<think>(.*?)</think>", content, re.DOTALL)
+        if m:
+            reasoning = m.group(1).strip()
+    if reasoning_started:
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+        _full_log.append(f"[Thinking]\n{reasoning}")
+
+    return reasoning, content, tool_calls_map
+
+
 def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
     """Stream one response, printing CoT in real time. Returns (reasoning, content, tool_calls_map)."""
+    if kwargs.get("model") == OLLAMA_PROVER:
+        return _stream_ollama(kwargs)
+
     reasoning, content = "", ""
     tool_calls_map: dict[int, dict] = {}
     reasoning_started = False
@@ -132,16 +212,17 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
         if getattr(delta, "content", None):
             text = delta.content
             content += text
-            # Print <think>...</think> blocks as they stream (e.g. Ollama/qwen)
-            if not reasoning_started:
-                if not in_think_tag and "<think>" in text:
-                    in_think_tag = True
-                    reasoning_started = True
-                if in_think_tag:
-                    sys.stdout.write(text)
-                    sys.stdout.flush()
-                    if "</think>" in text:
-                        in_think_tag = False
+            if not in_think_tag and "<think>" in text:
+                in_think_tag = True
+                reasoning_started = True
+            if in_think_tag:
+                sys.stdout.write(text)
+                sys.stdout.flush()
+                if "</think>" in text:
+                    in_think_tag = False
+            else:
+                sys.stdout.write(text)
+                sys.stdout.flush()
         if delta.tool_calls:
             for tc in delta.tool_calls:
                 idx = tc.index
@@ -162,13 +243,13 @@ def _stream(client: OpenAI, kwargs: dict) -> tuple[str, str, dict[int, dict]]:
 
 
 def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: list | None = None, temperature: float = 1.0) -> str:
-    if model in (DEEPSEEK_CHAT, DEEPSEEK_REASONER):
+    if model == DEEPSEEK_REASONER:
         messages = [{"role": "user", "content": system}, {"role": "assistant", "content": "Understood."}, *history]
     else:
         messages = [{"role": "system", "content": system}, *history]
 
     kwargs = {"model": model, "messages": messages, "temperature": temperature}
-    if tools:
+    if tools and model not in NO_TOOLS_MODELS:
         kwargs["tools"] = tools
     if model == OR_GPT5:
         kwargs["max_tokens"] = 16000
@@ -177,7 +258,7 @@ def chat(system: str, history: list[dict], client: OpenAI, model: str, tools: li
 
     while tools and tool_calls_map:
         assistant_msg: dict = {"role": "assistant", "content": content}
-        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_QWEN):
+        if reasoning and model in (DEEPSEEK_REASONER, OLLAMA_PROVER):
             assistant_msg["reasoning_content"] = reasoning
         assistant_msg["tool_calls"] = [
             {"id": tc["id"], "type": "function", "function": {"name": tc["name"], "arguments": tc["arguments"]}}
@@ -270,14 +351,16 @@ def run(
     temperature: float = 1.0,
 ) -> None:
     def _client(model: str) -> OpenAI:
-        if model == OLLAMA_QWEN:
+        if model == OLLAMA_PROVER:
             return ollama_client
-        if model in (GEMINI_FLASH, GEMINI_PRO):
+        if model == GEMINI_PRO:
             return gemini_client
         if model in (GPT_4O,):
             return openai_client
         if model == OR_GPT5:
             return openrouter_client
+        if model == NOVITA_PROVER_671B:
+            return novita_client
         return deepseek_client
 
     p_client = _client(proposer_model)
