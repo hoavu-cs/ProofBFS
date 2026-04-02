@@ -1,3 +1,9 @@
 openai
 python-dotenv
+rich
 ollama
+numpy
+scipy
+sympy
+mpmath
+z3-solver
